@@ -55,3 +55,16 @@ LibertyBans is licensed under the GNU AGPL v3. See the license file for more inf
    - /register
    - ...
 - define config structure (yaml/hocon?)
+- commands and messages localization
+- features:
+   - password strength requirement
+   - minecraft names validation
+   - premium account autologin
+   - forwarding skin and uuid info to backend servers
+
+### Potential TODO's
+- 2FA (e.g., required for certain permissions)
+- prefixes/suffixes for cracked/obsidian players
+- [instant authentication via client mod](https://github.com/Navio1430/LibreLoginProd/issues/39)
+- client login session management (via mc 'cookies')
+- translate uuid4's to uuid7's and forward them to backend servers as standard uuid
