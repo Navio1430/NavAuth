@@ -25,12 +25,7 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
 import org.slf4j.Logger
 
 @Singleton
-class NavAuthVelocity
-@Inject
-constructor(
-    val logger: Logger,
-    val parentInjector: Injector,
-) {
+class NavAuthVelocity @Inject constructor(val logger: Logger, val parentInjector: Injector) {
 
   lateinit var pluginInstance: Bootstrap
   lateinit var injector: Injector

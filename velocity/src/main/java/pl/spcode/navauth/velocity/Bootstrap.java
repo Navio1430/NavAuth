@@ -30,13 +30,12 @@ import org.slf4j.Logger;
     name = "NavAuth",
     version = "@version@",
     url = "https://spcode.pl/navauth",
-    description = "Minecraft login plugin built for speed, security, and seamless player authentication.",
+    description =
+        "Minecraft login plugin built for speed, security, and seamless player authentication.",
     authors = {"Navio1430"})
 public class Bootstrap {
-  @Inject
-  private Logger logger;
-  @Inject
-  private Injector injector;
+  @Inject private Logger logger;
+  @Inject private Injector injector;
 
   @Subscribe
   void onProxyInitialization(final ProxyInitializeEvent event) {

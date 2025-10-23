@@ -4,6 +4,7 @@
 plugins {
   id("java")
   kotlin("jvm") version "2.2.20"
+  alias(libs.plugins.spotless)
 }
 
 repositories {
@@ -13,6 +14,13 @@ repositories {
 allprojects {
   group = "pl.spcode.navauth"
   version = "0.1.0-SNAPSHOT"
+}
+
+tasks.register("formatAll") {
+  group = "formatting"
+  description = "Runs format task on all subprojects"
+
+  dependsOn(subprojects.mapNotNull { it.tasks.findByName("formatAll") })
 }
 
 subprojects {
@@ -27,6 +35,7 @@ subprojects {
   apply {
     plugin("java")
     plugin("kotlin")
+    plugin("com.diffplug.spotless")
   }
 
   dependencies {
@@ -44,6 +53,24 @@ subprojects {
 
   tasks.test {
     useJUnitPlatform()
+  }
+
+  tasks.register("formatAll") {
+    group = "formatting"
+
+    description = "Runs spotless tasks"
+
+    dependsOn("spotlessJavaApply")
+    dependsOn("spotlessKotlinApply")
+  }
+
+  spotless {
+    java {
+      googleJavaFormat().reorderImports(false)
+    }
+    kotlin {
+      ktfmt().googleStyle()
+    }
   }
 
 }
