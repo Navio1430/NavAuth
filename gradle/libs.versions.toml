@@ -1,0 +1,5 @@
+[versions]
+velocity-api = "3.4.0-SNAPSHOT"
+
+[libraries]
+velocitypowered-velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "velocity-api" }

@@ -1,18 +1,13 @@
-plugins {
-  kotlin("jvm") version "2.2.20"
-}
 
-repositories {
-  mavenCentral()
-}
+// todo add shadow plugin
+// todo add blossom plugin
+// todo setup velocity bootstrap java class
+// todo setup velocity kotlin main class
 
 dependencies {
-  testImplementation(kotlin("test"))
-}
 
-tasks.test {
-  useJUnitPlatform()
-}
-kotlin {
-  jvmToolchain(21)
+  project(":common")
+
+  compileOnly(libs.velocitypowered.velocity.api)
+  annotationProcessor(libs.velocitypowered.velocity.api)
 }
