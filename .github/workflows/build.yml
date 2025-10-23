@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: [ linux ]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
 
@@ -31,7 +31,7 @@ jobs:
         run: ./gradlew build
 
   dependency-submission:
-    runs-on: [ linux ]
+    runs-on: ubuntu-latest
     permissions:
       contents: write
 
