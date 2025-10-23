@@ -3,7 +3,7 @@
 velocity-api = "3.4.0-SNAPSHOT"
 # plugins
 shadow = "9.2.0"
-blossom = "1.2.0"
+blossom = "2.2.0"
 spotless = "8.0.0"
 
 [libraries]
