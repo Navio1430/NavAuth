@@ -30,7 +30,6 @@ LibertyBans is licensed under the GNU AGPL v3. See the license file for more inf
 
 ## TODO List
 
-- initialize project structure
 - readme:
    - add banner
    - add badges:
@@ -44,7 +43,6 @@ LibertyBans is licensed under the GNU AGPL v3. See the license file for more inf
    - modrinth CD
    - github CD
    - build & format CI
-   - dependabot
    - issue template:
       - bug report
       - feature request
