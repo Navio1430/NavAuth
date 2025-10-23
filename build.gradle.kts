@@ -38,7 +38,8 @@ subprojects {
   }
 
   java {
-    version = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
   }
 
   tasks.test {

@@ -1,5 +1,13 @@
 [versions]
+# libs
 velocity-api = "3.4.0-SNAPSHOT"
+# plugins
+shadow = "9.2.0"
+blossom = "1.2.0"
 
 [libraries]
 velocitypowered-velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "velocity-api" }
+
+[plugins]
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+blossom = { id = "net.kyori.blossom", version.ref = "blossom" }
