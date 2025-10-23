@@ -9,7 +9,7 @@ NavAuth is an upcoming next-generation Minecraft login plugin built for speed, s
 
 ## Contributors
 
-todo - logo designer
+urhatedjack - logo design
 
 ## Basic info
 
