@@ -1,6 +1,6 @@
 [versions]
 # libs
-velocity-api = "3.4.0-SNAPSHOT"
+velocity-api = "4.0.0-SNAPSHOT"
 # plugins
 shadow = "9.2.0"
 blossom = "1.2.0"
