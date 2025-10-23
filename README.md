@@ -24,7 +24,7 @@ todo - logo designer
 
 ### License
 
-LibertyBans is licensed under the GNU AGPL v3. See the license file for more information.
+NavAuth is licensed under the GNU AGPL v3. See the license file for more information.
 
 [![GNU AGPL Logo](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/agpl-3.0.en.html)
 
