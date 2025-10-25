@@ -1,34 +1,37 @@
 
-## Introduction
+<div display="flex" justify-content="space-between" align="center">
+ <h1>NavAuth 🔐 - autologin plugin</h1>
+  NavAuth is an upcoming next-generation Minecraft login plugin built for speed, security, and seamless player authentication. Designed with modern servers in mind, it combines performance, reliability, and integration flexibility.
+</div>
+<br>
+<br>
 
-NavAuth is an upcoming next-generation Minecraft login plugin built for speed, security, and seamless player authentication. Designed with modern servers in mind, it combines performance, reliability, and integration flexibility.
-
-## Main principles
+## 🧱 Main principles
 - be an auth/login plugin not an anti-vpn plugin
 - simple, fast & secure
 
-## Contributors
+## 👥 Contributors
 
 urhatedjack - logo design
 
-## Basic info
+## 📘 Basic info
 
 | Platform | Supported |
 |-----------|:---------:|
 | Velocity | ✅ |
 
-### Requirements
+### 🧩 Requirements
 
 * Java 21
 * Limbo server e.g., NanoLimbo, PicoLimbo
 
-### License
+### 📜 License
 
 NavAuth is licensed under the GNU AGPL v3. See the license file for more information.
 
 [![GNU AGPL Logo](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/agpl-3.0.en.html)
 
-## TODO List
+## 💡 TODO List
 
 - readme:
    - add banner
