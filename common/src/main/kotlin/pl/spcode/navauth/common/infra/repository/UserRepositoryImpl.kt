@@ -32,5 +32,4 @@ class UserRepositoryImpl @Inject constructor(databaseManager: DatabaseManager) :
     val query = queryBuilder().where().eq("username", username)
     return dao().queryForFirst(query.prepare())
   }
-
 }
