@@ -22,18 +22,23 @@ import java.util.UUID
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
+import javax.persistence.Index
+import javax.persistence.Table
 
 @Entity(name = "navauth_users")
+@Table(
+    indexes = [Index(name = "idx_navauth_users_username", columnList = "username")]
+)
 class User {
 
   @Id var uuid: UUID? = null
 
-  @Column(nullable = false) var nickname: String? = null
+  @Column(nullable = false) var username: String? = null
 
   constructor()
 
-  constructor(uuid: UUID?, nickname: String?) {
+  constructor(uuid: UUID?, username: String?) {
     this.uuid = uuid
-    this.nickname = nickname
+    this.username = username
   }
 }

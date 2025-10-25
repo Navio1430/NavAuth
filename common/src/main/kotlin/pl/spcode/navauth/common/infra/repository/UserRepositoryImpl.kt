@@ -26,4 +26,11 @@ import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.shared.OrmLiteCrudRepositoryImpl
 
 class UserRepositoryImpl @Inject constructor(databaseManager: DatabaseManager) :
-  OrmLiteCrudRepositoryImpl<User, UUID>(databaseManager, User::class), UserRepository {}
+  OrmLiteCrudRepositoryImpl<User, UUID>(databaseManager, User::class), UserRepository {
+
+  override fun findByUsername(username: String): User? {
+    val query = queryBuilder().where().eq("username", username)
+    return dao().queryForFirst(query.prepare())
+  }
+
+}
