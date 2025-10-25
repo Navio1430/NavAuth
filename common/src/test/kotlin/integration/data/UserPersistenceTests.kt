@@ -27,13 +27,13 @@ import kotlin.test.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import pl.spcode.navauth.common.domain.user.User
-import pl.spcode.navauth.common.infra.repository.UserRepositoryImpl
+import pl.spcode.navauth.common.domain.user.UserRepository
 import utils.generateRandomString
 
 @ExtendWith(ApplicationDataTestExtension::class)
 class UserPersistenceTests {
 
-  @Inject private lateinit var userRepo: UserRepositoryImpl
+  @Inject private lateinit var userRepo: UserRepository
 
   @Test
   fun `test persisted user exists`() {
