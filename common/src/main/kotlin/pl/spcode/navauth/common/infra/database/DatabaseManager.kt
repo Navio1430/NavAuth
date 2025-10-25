@@ -22,6 +22,7 @@ import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.dao.DaoManager
 import com.j256.ormlite.jdbc.DataSourceConnectionSource
 import com.j256.ormlite.support.ConnectionSource
+import com.j256.ormlite.table.TableUtils
 import com.zaxxer.hikari.HikariDataSource
 import kotlin.reflect.KClass
 
@@ -30,7 +31,9 @@ class DatabaseManager(val config: DatabaseConfig) {
   private val dataSource: HikariDataSource = HikariDataSource()
   lateinit var connectionSource: ConnectionSource
 
-  fun connect() {
+  private val daoMap = mutableMapOf<Class<*>, Dao<*, *>>()
+
+  fun connectAndInit(entitiesRegistrar: EntitiesRegistrar) {
     dataSource.addDataSourceProperty("cachePrepStmts", "true")
     dataSource.addDataSourceProperty("prepStmtCacheSize", "250")
     dataSource.addDataSourceProperty("prepStmtCacheSqlLimit", "2048")
@@ -51,6 +54,8 @@ class DatabaseManager(val config: DatabaseConfig) {
     dataSource.jdbcUrl = jdbcUrl
 
     connectionSource = DataSourceConnectionSource(dataSource, jdbcUrl)
+
+    initDatabase(entitiesRegistrar)
   }
 
   fun close() {
@@ -58,7 +63,16 @@ class DatabaseManager(val config: DatabaseConfig) {
     connectionSource.close()
   }
 
+  @Suppress("UNCHECKED_CAST")
   fun <T : Any, ID> getDao(clazz: KClass<T>): Dao<T, ID> {
-    return DaoManager.createDao(connectionSource, clazz.java)
+    return daoMap.computeIfAbsent(clazz.java) {
+      return@computeIfAbsent DaoManager.createDao(connectionSource, clazz.java)
+    } as Dao<T, ID>
+  }
+
+  private fun initDatabase(entitiesRegistrar: EntitiesRegistrar) {
+    entitiesRegistrar.getTypes().forEach {
+      TableUtils.createTableIfNotExists(connectionSource, it.java)
+    }
   }
 }

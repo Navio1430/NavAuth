@@ -16,14 +16,27 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.repository
+package utils
 
 import com.google.inject.Inject
-import java.util.UUID
-import pl.spcode.navauth.common.domain.user.User
-import pl.spcode.navauth.common.domain.user.UserRepository
-import pl.spcode.navauth.common.infra.database.DatabaseManager
-import pl.spcode.navauth.common.shared.OrmLiteCrudRepositoryImpl
+import com.google.inject.Injector
 
-class UserRepositoryImpl @Inject constructor(databaseManager: DatabaseManager) :
-  OrmLiteCrudRepositoryImpl<User, UUID>(databaseManager, User::class), UserRepository {}
+class GuiceUtils {
+  companion object {
+    fun injectToDeclaredFields(instance: Any, injector: Injector) {
+      instance::class.java.declaredFields.forEach { field ->
+        field.getAnnotation(Inject::class.java)?.let {
+          field.isAccessible = true
+          try {
+            field.set(instance, injector.getInstance(field.type))
+          } catch (e: Exception) {
+            throw IllegalStateException(
+              "Failed to inject field '${field.name}' of type ${field.type.name}",
+              e,
+            )
+          }
+        }
+      }
+    }
+  }
+}

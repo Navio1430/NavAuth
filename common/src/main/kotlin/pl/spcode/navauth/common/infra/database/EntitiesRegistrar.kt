@@ -16,14 +16,19 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.repository
+package pl.spcode.navauth.common.infra.database
 
-import com.google.inject.Inject
-import java.util.UUID
-import pl.spcode.navauth.common.domain.user.User
-import pl.spcode.navauth.common.domain.user.UserRepository
-import pl.spcode.navauth.common.infra.database.DatabaseManager
-import pl.spcode.navauth.common.shared.OrmLiteCrudRepositoryImpl
+import kotlin.reflect.KClass
 
-class UserRepositoryImpl @Inject constructor(databaseManager: DatabaseManager) :
-  OrmLiteCrudRepositoryImpl<User, UUID>(databaseManager, User::class), UserRepository {}
+class EntitiesRegistrar {
+
+  private val entityTypes = mutableListOf<KClass<*>>()
+
+  fun registerEntity(clazz: KClass<*>) {
+    entityTypes.add(clazz)
+  }
+
+  fun getTypes(): List<KClass<*>> {
+    return entityTypes
+  }
+}

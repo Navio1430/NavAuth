@@ -16,14 +16,9 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.repository
+package utils
 
-import com.google.inject.Inject
-import java.util.UUID
-import pl.spcode.navauth.common.domain.user.User
-import pl.spcode.navauth.common.domain.user.UserRepository
-import pl.spcode.navauth.common.infra.database.DatabaseManager
-import pl.spcode.navauth.common.shared.OrmLiteCrudRepositoryImpl
-
-class UserRepositoryImpl @Inject constructor(databaseManager: DatabaseManager) :
-  OrmLiteCrudRepositoryImpl<User, UUID>(databaseManager, User::class), UserRepository {}
+fun generateRandomString(length: Int): String {
+  val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+  return (1..length).map { allowedChars.random() }.joinToString("")
+}

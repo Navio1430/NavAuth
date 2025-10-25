@@ -32,5 +32,9 @@ class NavAuthVelocity @Inject constructor(val logger: Logger, val parentInjector
 
   fun init(event: ProxyInitializeEvent, pluginInstance: Bootstrap) {
     logger.info("Initializing NavAuth plugin...")
+
+    // todo: initialize child injector with database module
   }
+
+  // todo: close database connection on plugin shutdown
 }
