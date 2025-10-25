@@ -25,7 +25,7 @@ blossom {
 
 dependencies {
 
-  project(":common")
+  implementation(project(":common"))
 
   compileOnly(libs.velocitypowered.velocity.api)
   annotationProcessor(libs.velocitypowered.velocity.api)
