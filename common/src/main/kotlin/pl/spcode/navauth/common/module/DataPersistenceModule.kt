@@ -19,6 +19,7 @@
 package pl.spcode.navauth.common.module
 
 import com.google.inject.AbstractModule
+import com.google.inject.Singleton
 import kotlin.reflect.KClass
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserRepository
@@ -42,7 +43,7 @@ class DataPersistenceModule(val databaseConfig: DatabaseConfig) : AbstractModule
     val entitiesRegistrar = EntitiesRegistrar()
 
     for ((entity, repo, impl) in bindings) {
-      @Suppress("UNCHECKED_CAST") bind(repo as Class<Any>).to(impl)
+      @Suppress("UNCHECKED_CAST") bind(repo as Class<Any>).to(impl).`in`(Singleton::class.java)
 
       entitiesRegistrar.registerEntity(entity)
     }
