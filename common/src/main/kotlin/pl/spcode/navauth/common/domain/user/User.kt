@@ -18,24 +18,18 @@
 
 package pl.spcode.navauth.common.domain.user
 
+import com.j256.ormlite.field.DatabaseField
+import com.j256.ormlite.table.DatabaseTable
 import java.util.UUID
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.Index
-import javax.persistence.Table
 
-@Entity(name = "navauth_users")
-@Table(
-    indexes = [Index(name = "idx_navauth_users_username", columnList = "username")]
-)
+@DatabaseTable(tableName = "navauth_users")
 class User {
 
-  @Id var uuid: UUID? = null
+  @DatabaseField(id = true) var uuid: UUID? = null
 
-  @Column(nullable = false) var username: String? = null
+  @DatabaseField(canBeNull = false, index = true) var username: String? = null
 
-  constructor()
+  @Suppress("unused") constructor()
 
   constructor(uuid: UUID?, username: String?) {
     this.uuid = uuid
