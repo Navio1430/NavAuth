@@ -16,22 +16,25 @@
  *
  */
 
+package integration.data
+
 import com.google.inject.Inject
 import extension.ApplicationDataTestExtension
-import java.util.UUID
-import kotlin.test.DefaultAsserter.assertNotNull
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.infra.repository.UserRepositoryImpl
 import utils.generateRandomString
+import java.util.UUID
+import kotlin.test.DefaultAsserter.assertNotNull
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 @ExtendWith(ApplicationDataTestExtension::class)
 class UserPersistenceTests {
 
-  @Inject private lateinit var userRepo: UserRepositoryImpl
+  @Inject
+  private lateinit var userRepo: UserRepositoryImpl
 
   @Test
   fun `test persisted user exists`() {
@@ -42,14 +45,14 @@ class UserPersistenceTests {
 
     val user = userRepo.findById(id)
 
-    assertNotNull("Persisted user should exist in repository", user)
-    assertEquals(userToPersist.uuid, user?.uuid, "User ID should match")
-    assertEquals(userToPersist.username, user?.username, "User name should match")
+      assertNotNull("Persisted user should exist in repository", user)
+      assertEquals(userToPersist.uuid, user?.uuid, "User ID should match")
+      assertEquals(userToPersist.username, user?.username, "User name should match")
   }
 
   @Test
   fun `test findById non-existent user returns null`() {
     val user = userRepo.findById(UUID.randomUUID())
-    assertNull(user)
+      assertNull(user)
   }
 }
