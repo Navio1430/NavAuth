@@ -44,7 +44,7 @@ class UserPersistenceTests {
 
     assertNotNull("Persisted user should exist in repository", user)
     assertEquals(userToPersist.uuid, user?.uuid, "User ID should match")
-    assertEquals(userToPersist.nickname, user?.nickname, "User name should match")
+    assertEquals(userToPersist.username, user?.username, "User name should match")
   }
 
   @Test
