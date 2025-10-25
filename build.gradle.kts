@@ -3,7 +3,7 @@
 
 plugins {
   id("java")
-  kotlin("jvm") version "2.2.20"
+  kotlin("jvm") version "2.2.21"
   alias(libs.plugins.spotless)
 }
 
