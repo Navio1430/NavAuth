@@ -64,9 +64,9 @@ class UserPersistenceTests {
 
     val user = userRepo.findByUsername(name)
 
-    assertNotNull("User should be found by username", user)
-    assertEquals(userToPersist.uuid, user?.uuid, "User ID should match")
-    assertEquals(userToPersist.username, user?.username, "User name should match")
+    assertNotNull("User should be found by username", user!!)
+    assertEquals(userToPersist.uuid, user.uuid, "User ID should match")
+    assertEquals(userToPersist.username, user.username, "User name should match")
   }
 
   @Test
