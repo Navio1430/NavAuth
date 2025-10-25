@@ -24,6 +24,7 @@ import com.j256.ormlite.jdbc.DataSourceConnectionSource
 import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
 import com.zaxxer.hikari.HikariDataSource
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
 class DatabaseManager(val config: DatabaseConfig) {
@@ -31,7 +32,7 @@ class DatabaseManager(val config: DatabaseConfig) {
   private val dataSource: HikariDataSource = HikariDataSource()
   lateinit var connectionSource: ConnectionSource
 
-  private val daoMap = mutableMapOf<Class<*>, Dao<*, *>>()
+  private val daoMap = ConcurrentHashMap<Class<*>, Dao<*, *>>()
 
   fun connectAndInit(entitiesRegistrar: EntitiesRegistrar) {
     dataSource.addDataSourceProperty("cachePrepStmts", "true")
