@@ -18,6 +18,7 @@
 
 package pl.spcode.navauth.common.infra.database
 
+import com.google.inject.Singleton
 import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.dao.DaoManager
 import com.j256.ormlite.jdbc.DataSourceConnectionSource
@@ -27,6 +28,7 @@ import com.zaxxer.hikari.HikariDataSource
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
+@Singleton
 class DatabaseManager(val config: DatabaseConfig) {
 
   private val dataSource: HikariDataSource = HikariDataSource()
