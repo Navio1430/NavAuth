@@ -45,7 +45,6 @@ NavAuth is licensed under the GNU AGPL v3. See the license file for more informa
 - github/gh actions:
    - modrinth CD
    - github CD
-   - build & format CI
    - issue template:
       - bug report
       - feature request
