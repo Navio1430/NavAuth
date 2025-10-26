@@ -27,8 +27,8 @@ import pl.spcode.navauth.common.infra.crypto.BCryptCredentialsHasher
 class CredentialsService @Inject constructor(val credentialsRepository: UserCredentialsRepository) {
 
   /**
-   * @param user user who should be verified
-   * @param password raw, not hashed password
+   * @param user the user to be verified
+   * @param password the raw (not hashed) password
    */
   fun verifyCredentials(user: User, password: String): Boolean {
 
