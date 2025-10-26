@@ -21,11 +21,14 @@ package pl.spcode.navauth.common.module
 import com.google.inject.AbstractModule
 import com.google.inject.Singleton
 import kotlin.reflect.KClass
+import pl.spcode.navauth.common.domain.credentials.UserCredentials
+import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserRepository
 import pl.spcode.navauth.common.infra.database.DatabaseConfig
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.infra.database.EntitiesRegistrar
+import pl.spcode.navauth.common.infra.repository.UserCredentialsRepositoryImpl
 import pl.spcode.navauth.common.infra.repository.UserRepositoryImpl
 
 class DataPersistenceModule(val databaseConfig: DatabaseConfig) : AbstractModule() {
@@ -33,7 +36,14 @@ class DataPersistenceModule(val databaseConfig: DatabaseConfig) : AbstractModule
   private data class Binding(val entity: KClass<*>, val repo: Class<*>, val impl: Class<*>)
 
   private val bindings =
-    listOf(Binding(User::class, UserRepository::class.java, UserRepositoryImpl::class.java))
+    listOf(
+      Binding(User::class, UserRepository::class.java, UserRepositoryImpl::class.java),
+      Binding(
+        UserCredentials::class,
+        UserCredentialsRepository::class.java,
+        UserCredentialsRepositoryImpl::class.java,
+      ),
+    )
 
   override fun configure() {
     val manager = DatabaseManager(databaseConfig)

@@ -20,7 +20,7 @@ package unit
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import pl.spcode.navauth.common.domain.credential.HashingAlgorithm
+import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 
 class HashingAlgorithmTests {
 

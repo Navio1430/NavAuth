@@ -16,24 +16,8 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.crypto
+package pl.spcode.navauth.common.domain.credentials
 
-import at.favre.lib.crypto.bcrypt.BCrypt
-import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
-
-class BCryptCredentialsHasher : CredentialsHasher {
-
-  companion object {
-    private val hasher: BCrypt.Hasher = BCrypt.withDefaults()
-    private val verifier: BCrypt.Verifyer = BCrypt.verifyer()
-  }
-
-  override fun hash(password: String): HashedPassword {
-    val hash: String = hasher.hashToString(10, password.toCharArray())
-    return HashedPassword(hash, HashingAlgorithm.BCRYPT)
-  }
-
-  override fun verify(password: String, hashed: String): Boolean {
-    return verifier.verify(password.toByteArray(), hashed.toByteArray()).verified
-  }
+enum class HashingAlgorithm {
+  BCRYPT
 }

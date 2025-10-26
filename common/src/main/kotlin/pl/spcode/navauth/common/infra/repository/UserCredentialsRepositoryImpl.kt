@@ -16,8 +16,15 @@
  *
  */
 
-package pl.spcode.navauth.common.domain.credential
+package pl.spcode.navauth.common.infra.repository
 
-enum class HashingAlgorithm {
-  BCRYPT
-}
+import com.google.inject.Inject
+import java.util.UUID
+import pl.spcode.navauth.common.domain.credentials.UserCredentials
+import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
+import pl.spcode.navauth.common.infra.database.DatabaseManager
+import pl.spcode.navauth.common.shared.OrmLiteCrudRepositoryImpl
+
+class UserCredentialsRepositoryImpl @Inject constructor(databaseManager: DatabaseManager) :
+  OrmLiteCrudRepositoryImpl<UserCredentials, UUID>(databaseManager, UserCredentials::class),
+  UserCredentialsRepository {}

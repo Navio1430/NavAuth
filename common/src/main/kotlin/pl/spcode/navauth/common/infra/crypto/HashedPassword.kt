@@ -18,6 +18,6 @@
 
 package pl.spcode.navauth.common.infra.crypto
 
-import pl.spcode.navauth.common.domain.credential.HashingAlgorithm
+import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 
 data class HashedPassword(val hash: String, val algo: HashingAlgorithm)
