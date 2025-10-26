@@ -24,15 +24,21 @@ import java.util.UUID
 
 @DatabaseTable(tableName = "navauth_users")
 class User {
+  @DatabaseField(id = true) val uuid: UUID?
+  @DatabaseField(canBeNull = false, index = true) val username: String
 
-  @DatabaseField(id = true) var uuid: UUID? = null
+  @Suppress("unused") private constructor() : this(null, "")
 
-  @DatabaseField(canBeNull = false, index = true) var username: String? = null
-
-  @Suppress("unused") constructor()
-
-  constructor(uuid: UUID?, username: String?) {
+  private constructor(uuid: UUID?, username: String) {
     this.uuid = uuid
     this.username = username
+  }
+
+  companion object {
+    fun create(uuid: UUID, username: String): User {
+      // todo: check username with regex
+
+      return User(uuid, username)
+    }
   }
 }

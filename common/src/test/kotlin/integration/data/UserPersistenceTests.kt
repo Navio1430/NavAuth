@@ -39,7 +39,7 @@ class UserPersistenceTests {
   fun `test persisted user exists`() {
     val id = UUID.randomUUID()
     val name = generateRandomString(10)
-    val userToPersist = User(id, name)
+    val userToPersist = User.create(id, name)
     userRepo.save(userToPersist)
 
     val user = userRepo.findById(id)
@@ -59,7 +59,7 @@ class UserPersistenceTests {
   fun `test findByUsername existing user`() {
     val id = UUID.randomUUID()
     val name = generateRandomString(10)
-    val userToPersist = User(id, name)
+    val userToPersist = User.create(id, name)
     userRepo.save(userToPersist)
 
     val user = userRepo.findByUsername(name)
