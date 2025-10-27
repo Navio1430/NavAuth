@@ -16,19 +16,19 @@
  *
  */
 
-package pl.spcode.navauth.velocity.command
+package pl.spcode.navauth.velocity.command.user
 
-import pl.spcode.navauth.velocity.command.user.LoginCommand
-import pl.spcode.navauth.velocity.command.user.RegisterCommand
+import com.velocitypowered.api.proxy.Player
+import dev.rollczi.litecommands.annotations.argument.Arg
+import dev.rollczi.litecommands.annotations.command.Command
+import dev.rollczi.litecommands.annotations.context.Context
+import dev.rollczi.litecommands.annotations.execute.Execute
 
-class CommandsRegistrar {
+@Command(name = "register")
+class RegisterCommand {
 
-  companion object {
-    val commands = listOf(
-        // user
-        LoginCommand(),
-        RegisterCommand()
-        // admin
-    )
+  @Execute
+  fun register(@Context sender: Player, @Arg(value = "password") password: String, @Arg(value = "repeat_password") repeatPassword: String) {
+    // todo impl
   }
 }
