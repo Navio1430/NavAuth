@@ -61,7 +61,7 @@ class DatabaseManager(val config: DatabaseConfig) {
     initDatabase(entitiesRegistrar)
   }
 
-  fun close() {
+  fun closeConnections() {
     dataSource.close()
     connectionSource.close()
   }

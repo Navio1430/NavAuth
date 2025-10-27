@@ -26,17 +26,25 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
 import com.velocitypowered.api.proxy.ProxyServer
 import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.infra.database.DatabaseConfig
 import pl.spcode.navauth.common.infra.database.DatabaseDriverType
+import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.module.DataPersistenceModule
 
 @Singleton
-class NavAuthVelocity @Inject constructor(val logger: Logger, val parentInjector: Injector, val proxyServer: ProxyServer) {
+class NavAuthVelocity
+@Inject
+constructor(val parentInjector: Injector, val proxyServer: ProxyServer) {
+
+  val logger: Logger = LoggerFactory.getLogger(NavAuthVelocity::class.java)
 
   lateinit var pluginInstance: Bootstrap
   lateinit var injector: Injector
 
   fun init(event: ProxyInitializeEvent, pluginInstance: Bootstrap) {
+    // todo: do not let proxy to start on any errors
+
     logger.info("Initializing NavAuth plugin...")
 
     proxyServer.eventManager.register(pluginInstance, this)
@@ -46,9 +54,9 @@ class NavAuthVelocity @Inject constructor(val logger: Logger, val parentInjector
     injector = parentInjector.createChildInjector(DataPersistenceModule(databaseConfig))
   }
 
+  @Suppress("UNNECESSARY_SAFE_CALL")
   @Subscribe
   fun shutdown(proxyShutdownEvent: ProxyShutdownEvent) {
-    // todo: close database connection on plugin shutdown
+    injector?.getInstance(DatabaseManager::class.java)?.closeConnections()
   }
-
 }
