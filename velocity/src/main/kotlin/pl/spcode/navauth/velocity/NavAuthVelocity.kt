@@ -37,7 +37,7 @@ class NavAuthVelocity
 @Inject
 constructor(val parentInjector: Injector, val proxyServer: ProxyServer) {
 
-  val logger: Logger = LoggerFactory.getLogger(NavAuthVelocity::class.java)
+  private val logger: Logger = LoggerFactory.getLogger(NavAuthVelocity::class.java)
 
   lateinit var pluginInstance: Bootstrap
   lateinit var injector: Injector
@@ -46,6 +46,7 @@ constructor(val parentInjector: Injector, val proxyServer: ProxyServer) {
     // todo: do not let proxy to start on any errors
 
     logger.info("Initializing NavAuth plugin...")
+    this.pluginInstance = pluginInstance
 
     proxyServer.eventManager.register(pluginInstance, this)
 
