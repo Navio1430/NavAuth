@@ -1,0 +1,13 @@
+name: navauth-velocity
+
+services:
+  velocity:
+    image: itzg/mc-proxy
+    ports:
+      - "25577:25577"
+    environment:
+      TYPE: "VELOCITY"
+      EULA: "TRUE"
+
+    volumes:
+      - ./run/plugins:/plugins

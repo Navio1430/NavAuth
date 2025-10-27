@@ -16,6 +16,23 @@ tasks.shadowJar {
   relocate("kotlin", "${prefix}.kotlin")
 
   exclude("com/google/inject/**")
+
+  doLast {
+    val pluginsDir = file("./run/plugins")
+    if (pluginsDir.exists() && pluginsDir.isDirectory) {
+      pluginsDir.listFiles { _, name -> name.startsWith("${projectName}-velocity") }?.forEach {
+        it.delete()
+      }
+
+      val builtJar = archiveFile.get().asFile
+      copy {
+        from(builtJar)
+        into(pluginsDir)
+      }
+    } else {
+      logger.warn("run directory does not exist, skipping plugin copy to run directory")
+    }
+  }
 }
 
 blossom {
