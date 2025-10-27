@@ -40,9 +40,15 @@ blossom {
   replaceToken("@version@", rootProject.version.toString())
 }
 
+repositories {
+  maven { url = uri("https://repo.panda-lang.org/releases") }
+}
+
 dependencies {
 
   implementation(project(":common"))
+
+  implementation("dev.rollczi:litecommands-velocity:3.10.6")
 
   compileOnly(libs.velocitypowered.velocity.api)
   annotationProcessor(libs.velocitypowered.velocity.api)

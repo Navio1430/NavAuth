@@ -21,16 +21,21 @@ package pl.spcode.navauth.velocity
 import com.google.inject.Inject
 import com.google.inject.Injector
 import com.google.inject.Singleton
+import com.velocitypowered.api.command.CommandSource
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
 import com.velocitypowered.api.proxy.ProxyServer
+import dev.rollczi.litecommands.LiteCommands
+import dev.rollczi.litecommands.velocity.LiteVelocityFactory
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.infra.database.DatabaseConfig
 import pl.spcode.navauth.common.infra.database.DatabaseDriverType
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.module.DataPersistenceModule
+import pl.spcode.navauth.velocity.command.CommandsRegistrar
+import pl.spcode.navauth.velocity.command.user.LoginCommand
 
 @Singleton
 class NavAuthVelocity
@@ -41,6 +46,8 @@ constructor(val parentInjector: Injector, val proxyServer: ProxyServer) {
 
   lateinit var pluginInstance: Bootstrap
   lateinit var injector: Injector
+
+  lateinit var liteCommands: LiteCommands<CommandSource>
 
   fun init(event: ProxyInitializeEvent, pluginInstance: Bootstrap) {
     // todo: do not let proxy to start on any errors
@@ -53,11 +60,25 @@ constructor(val parentInjector: Injector, val proxyServer: ProxyServer) {
     val databaseConfig =
       DatabaseConfig(DatabaseDriverType.H2_MEM, 5, 30000, "", "", "", 0, "default")
     injector = parentInjector.createChildInjector(DataPersistenceModule(databaseConfig))
+
+    registerCommands()
+  }
+
+  fun registerCommands() {
+
+    // todo: inject into commands
+
+    this.liteCommands = LiteVelocityFactory.builder(this.proxyServer)
+        .commands(
+            *CommandsRegistrar.commands.toTypedArray()
+        )
+        .build();
   }
 
   @Suppress("UNNECESSARY_SAFE_CALL")
   @Subscribe
   fun shutdown(proxyShutdownEvent: ProxyShutdownEvent) {
     injector?.getInstance(DatabaseManager::class.java)?.closeConnections()
+    liteCommands?.unregister()
   }
 }
