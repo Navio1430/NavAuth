@@ -10,4 +10,21 @@ services:
       EULA: "TRUE"
 
     volumes:
-      - ./run/plugins:/plugins
+      - ./run/velocity/plugins:/plugins
+      - ./run/velocity/config:/config
+
+  paper:
+    hostname: paper1
+    image: itzg/minecraft-server
+    ports:
+      - "25565:25565"
+    environment:
+      - EULA=TRUE
+      - TYPE=PAPER
+      - VERSION=1.21.10
+      - ONLINE_MODE=FALSE
+      - MODRINTH_PROJECTS=luckperms:beta,viaversion:beta,viabackwards:beta
+#      - JVM_OPTS=-Dlog4j.configurationFile=log4j2.xml
+#      - JVM_XX_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+    volumes:
+      - ./run/paper:/data/

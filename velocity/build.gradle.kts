@@ -18,7 +18,7 @@ tasks.shadowJar {
   exclude("com/google/inject/**")
 
   doLast {
-    val pluginsDir = file("./run/plugins")
+    val pluginsDir = file("./run/velocity/plugins")
     if (pluginsDir.exists() && pluginsDir.isDirectory) {
       pluginsDir.listFiles { _, name -> name.startsWith("${projectName}-velocity") }?.forEach {
         it.delete()
