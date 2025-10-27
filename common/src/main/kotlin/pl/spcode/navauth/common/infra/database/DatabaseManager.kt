@@ -24,6 +24,7 @@ import com.j256.ormlite.dao.DaoManager
 import com.j256.ormlite.jdbc.DataSourceConnectionSource
 import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
+import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
@@ -37,6 +38,8 @@ class DatabaseManager(val config: DatabaseConfig) {
   private val daoMap = ConcurrentHashMap<Class<*>, Dao<*, *>>()
 
   fun connectAndInit(entitiesRegistrar: EntitiesRegistrar) {
+    dataSource.poolName = "NavAuthPool"
+
     dataSource.addDataSourceProperty("cachePrepStmts", "true")
     dataSource.addDataSourceProperty("prepStmtCacheSize", "250")
     dataSource.addDataSourceProperty("prepStmtCacheSqlLimit", "2048")
