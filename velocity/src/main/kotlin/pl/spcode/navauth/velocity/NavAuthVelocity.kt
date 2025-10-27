@@ -21,11 +21,17 @@ package pl.spcode.navauth.velocity
 import com.google.inject.Inject
 import com.google.inject.Injector
 import com.google.inject.Singleton
+import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
+import com.velocitypowered.api.proxy.ProxyServer
 import org.slf4j.Logger
+import pl.spcode.navauth.common.infra.database.DatabaseConfig
+import pl.spcode.navauth.common.infra.database.DatabaseDriverType
+import pl.spcode.navauth.common.module.DataPersistenceModule
 
 @Singleton
-class NavAuthVelocity @Inject constructor(val logger: Logger, val parentInjector: Injector) {
+class NavAuthVelocity @Inject constructor(val logger: Logger, val parentInjector: Injector, val proxyServer: ProxyServer) {
 
   lateinit var pluginInstance: Bootstrap
   lateinit var injector: Injector
@@ -33,8 +39,16 @@ class NavAuthVelocity @Inject constructor(val logger: Logger, val parentInjector
   fun init(event: ProxyInitializeEvent, pluginInstance: Bootstrap) {
     logger.info("Initializing NavAuth plugin...")
 
-    // todo: initialize child injector with database module
+    proxyServer.eventManager.register(pluginInstance, this)
+
+    val databaseConfig =
+      DatabaseConfig(DatabaseDriverType.H2_MEM, 5, 30000, "", "", "", 0, "default")
+    injector = parentInjector.createChildInjector(DataPersistenceModule(databaseConfig))
   }
 
-  // todo: close database connection on plugin shutdown
+  @Subscribe
+  fun shutdown(proxyShutdownEvent: ProxyShutdownEvent) {
+    // todo: close database connection on plugin shutdown
+  }
+
 }

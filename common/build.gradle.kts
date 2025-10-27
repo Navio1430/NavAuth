@@ -11,5 +11,5 @@ dependencies {
   // crypto
   implementation("at.favre.lib:bcrypt:0.10.2")
 
-  testRuntimeOnly("com.h2database:h2:2.4.240")
+  runtimeOnly("com.h2database:h2:2.4.240")
 }
