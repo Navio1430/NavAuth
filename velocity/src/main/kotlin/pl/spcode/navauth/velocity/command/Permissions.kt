@@ -22,6 +22,9 @@ class Permissions {
   companion object {
     const val BASE = "navauth"
 
+    const val USER_BASE = "$BASE.user"
+    const val USER_UNREGISTER = "$USER_BASE.unregister"
+
     const val ADMIN_BASE = "$BASE.admin"
     const val ADMIN_FORCE_UNREGISTER = "$ADMIN_BASE.forceunregister"
     const val ADMIN_FORCE_CHANGE_PASSWORD = "$ADMIN_BASE.forcechangepassword"
