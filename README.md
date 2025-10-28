@@ -1,10 +1,23 @@
 
 <div display="flex" justify-content="space-between" align="center">
- <h1>NavAuth 🔐 - autologin plugin</h1>
-  NavAuth is an upcoming next-generation Minecraft login plugin built for speed, security, and seamless player authentication. Designed with modern servers in mind, it combines performance, reliability, and integration flexibility.
+
+  <h1>NavAuth 🔐 - autologin plugin</h1>
+  <p><b>NavAuth</b> is an upcoming next-generation Minecraft login plugin built for speed, security, and seamless player authentication. Designed with modern servers in mind, it combines performance, reliability, and integration flexibility.</p>
+
 </div>
 <br>
-<br>
+
+<div style="width: 75%; margin: 0 auto; text-align: center;">
+
+  ![Velocity](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/supported/velocity_vector.svg)
+  [![Modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg)](https://modrinth.com/plugin/navauth)
+  [![Github](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/github_vector.svg)](https://github.com/Navio1430/NavAuth)
+  ![Gradle](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/built-with/gradle_vector.svg)
+  ![Kotlin](assets/built_with_kotlin.svg)
+  ![Java](assets/built_with_java.svg)
+
+</div>
+
 
 ## 🧱 Main principles
 - be an auth/login plugin not an anti-vpn plugin
