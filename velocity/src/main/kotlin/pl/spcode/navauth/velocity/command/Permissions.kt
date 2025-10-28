@@ -18,19 +18,11 @@
 
 package pl.spcode.navauth.velocity.command
 
-import pl.spcode.navauth.velocity.command.admin.ForceUnregisterAdminCommand
-import pl.spcode.navauth.velocity.command.user.LoginCommand
-import pl.spcode.navauth.velocity.command.user.RegisterCommand
-
-class CommandsRegistrar {
-
+class Permissions {
   companion object {
-    val commands = listOf(
-        // user
-        LoginCommand(),
-        RegisterCommand(),
-        // admin
-        ForceUnregisterAdminCommand()
-    )
+    const val BASE = "navauth"
+
+    const val ADMIN_BASE = "$BASE.admin"
+    const val ADMIN_FORCE_UNREGISTER = "$ADMIN_BASE.forceunregister"
   }
 }

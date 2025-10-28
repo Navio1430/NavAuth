@@ -16,21 +16,22 @@
  *
  */
 
-package pl.spcode.navauth.velocity.command
+package pl.spcode.navauth.velocity.command.admin
 
-import pl.spcode.navauth.velocity.command.admin.ForceUnregisterAdminCommand
-import pl.spcode.navauth.velocity.command.user.LoginCommand
-import pl.spcode.navauth.velocity.command.user.RegisterCommand
+import com.velocitypowered.api.proxy.Player
+import dev.rollczi.litecommands.annotations.argument.Arg
+import dev.rollczi.litecommands.annotations.command.Command
+import dev.rollczi.litecommands.annotations.context.Context
+import dev.rollczi.litecommands.annotations.execute.Execute
+import dev.rollczi.litecommands.annotations.permission.Permission
+import pl.spcode.navauth.velocity.command.Permissions
 
-class CommandsRegistrar {
+@Command(name = "forceunregister")
+@Permission(Permissions.ADMIN_FORCE_UNREGISTER)
+class ForceUnregisterAdminCommand {
 
-  companion object {
-    val commands = listOf(
-        // user
-        LoginCommand(),
-        RegisterCommand(),
-        // admin
-        ForceUnregisterAdminCommand()
-    )
+  @Execute
+  fun forceUnregister(@Context sender: Player, @Arg(value = "playerName") playerName: String) {
+    // todo impl
   }
 }
