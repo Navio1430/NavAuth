@@ -16,15 +16,18 @@
  *
  */
 
-package pl.spcode.navauth.velocity.module
+package pl.spcode.navauth.velocity.listener
 
-import com.google.inject.AbstractModule
-import com.velocitypowered.api.plugin.PluginContainer
+import com.google.inject.Injector
 
-class VelocityPluginModule(val pluginInstance: Any) : AbstractModule() {
+class ListenersRegistry {
 
-  override fun configure() {
-    @Suppress("UNCHECKED_CAST")
-    bind(PluginContainer::class.java).to(pluginInstance as Class<PluginContainer>)
+  companion object {
+    val listenersClasses = listOf(CommandsListeners::class, ChatListeners::class)
+
+    /** @return list of listeners from registry each instantiated with injection */
+    fun getWithInjection(injector: Injector): List<Any> {
+      return listenersClasses.map { injector.getInstance(it.java) }
+    }
   }
 }

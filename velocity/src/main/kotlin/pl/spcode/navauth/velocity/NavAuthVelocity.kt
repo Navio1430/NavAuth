@@ -36,6 +36,7 @@ import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.module.DataPersistenceModule
 import pl.spcode.navauth.common.module.ServicesModule
 import pl.spcode.navauth.velocity.command.CommandsRegistry
+import pl.spcode.navauth.velocity.listener.ListenersRegistry
 
 @Singleton
 class NavAuthVelocity
@@ -60,11 +61,9 @@ constructor(val parentInjector: Injector, val proxyServer: ProxyServer) {
     val databaseConfig =
       DatabaseConfig(DatabaseDriverType.H2_MEM, 5, 30000, "", "", "", 0, "default")
     injector =
-      parentInjector.createChildInjector(
-        DataPersistenceModule(databaseConfig),
-        ServicesModule(),
-      )
+      parentInjector.createChildInjector(DataPersistenceModule(databaseConfig), ServicesModule())
 
+    registerListeners(injector)
     registerCommands(injector)
   }
 
@@ -72,6 +71,11 @@ constructor(val parentInjector: Injector, val proxyServer: ProxyServer) {
     val commands = CommandsRegistry.getWithInjection(injector)
     this.liteCommands =
       LiteVelocityFactory.builder(this.proxyServer).commands(*commands.toTypedArray()).build()
+  }
+
+  fun registerListeners(injector: Injector) {
+    val listeners = ListenersRegistry.getWithInjection(injector)
+    listeners.forEach { proxyServer.eventManager.register(pluginInstance, it) }
   }
 
   @Suppress("UNNECESSARY_SAFE_CALL")
