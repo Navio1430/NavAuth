@@ -6,8 +6,9 @@ services:
     ports:
       - "25577:25577"
     environment:
-      TYPE: "VELOCITY"
-      EULA: "TRUE"
+      - TYPE=VELOCITY
+      - EULA=TRUE
+      - JVM_OPTS=-Dlog4j.configurationFile=log4j2.xml
 
     volumes:
       - ./run/velocity/plugins:/plugins
@@ -24,7 +25,7 @@ services:
       - VERSION=1.21.10
       - ONLINE_MODE=FALSE
       - MODRINTH_PROJECTS=luckperms:beta,viaversion:beta,viabackwards:beta
-#      - JVM_OPTS=-Dlog4j.configurationFile=log4j2.xml
+      - JVM_OPTS=-Dlog4j.configurationFile=log4j2.xml
 #      - JVM_XX_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     volumes:
       - ./run/paper:/data/
