@@ -1,2 +1,10 @@
+# Run
+
 run/
-!run/velocity/velocity.toml
+
+## paper
+!run/paper/log4j2.xml
+
+## velocity
+!run/velocity/config/velocity.toml
+!run/velocity/config/log4j2.xml
