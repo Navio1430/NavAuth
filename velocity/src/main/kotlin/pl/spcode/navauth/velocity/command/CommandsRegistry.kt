@@ -27,7 +27,7 @@ import pl.spcode.navauth.velocity.command.user.PremiumAccountCommand
 import pl.spcode.navauth.velocity.command.user.RegisterCommand
 import pl.spcode.navauth.velocity.command.user.UnregisterCommand
 
-class CommandsRegistrar {
+class CommandsRegistry {
 
   companion object {
     val commandsClasses =
