@@ -20,7 +20,9 @@ package pl.spcode.navauth.velocity.command
 
 import pl.spcode.navauth.velocity.command.admin.ForceChangePasswordAdminCommand
 import pl.spcode.navauth.velocity.command.admin.ForceUnregisterAdminCommand
+import pl.spcode.navauth.velocity.command.user.ChangePasswordCommand
 import pl.spcode.navauth.velocity.command.user.LoginCommand
+import pl.spcode.navauth.velocity.command.user.PremiumAccountCommand
 import pl.spcode.navauth.velocity.command.user.RegisterCommand
 import pl.spcode.navauth.velocity.command.user.UnregisterCommand
 
