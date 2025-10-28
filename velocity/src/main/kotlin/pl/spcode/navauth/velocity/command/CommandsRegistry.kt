@@ -43,7 +43,7 @@ class CommandsRegistry {
         ForceChangePasswordAdminCommand::class,
       )
 
-    /** @return list of commands from registrar instantiated with injection */
+    /** @return list of commands from registry each instantiated with injection */
     fun getWithInjection(injector: Injector): List<Any> {
       return commandsClasses.map { injector.getInstance(it.java) }
     }
