@@ -18,6 +18,7 @@
 
 package pl.spcode.navauth.velocity.command
 
+import pl.spcode.navauth.velocity.command.admin.ForceChangePasswordAdminCommand
 import pl.spcode.navauth.velocity.command.admin.ForceUnregisterAdminCommand
 import pl.spcode.navauth.velocity.command.user.LoginCommand
 import pl.spcode.navauth.velocity.command.user.RegisterCommand
@@ -30,7 +31,8 @@ class CommandsRegistrar {
         LoginCommand(),
         RegisterCommand(),
         // admin
-        ForceUnregisterAdminCommand()
+        ForceUnregisterAdminCommand(),
+        ForceChangePasswordAdminCommand()
     )
   }
 }
