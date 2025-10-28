@@ -36,6 +36,7 @@ import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.module.DataPersistenceModule
 import pl.spcode.navauth.common.module.ServicesModule
 import pl.spcode.navauth.velocity.command.CommandsRegistry
+import pl.spcode.navauth.velocity.module.VelocityPluginModule
 
 @Singleton
 class NavAuthVelocity
@@ -60,7 +61,11 @@ constructor(val parentInjector: Injector, val proxyServer: ProxyServer) {
     val databaseConfig =
       DatabaseConfig(DatabaseDriverType.H2_MEM, 5, 30000, "", "", "", 0, "default")
     injector =
-      parentInjector.createChildInjector(DataPersistenceModule(databaseConfig), ServicesModule())
+      parentInjector.createChildInjector(
+        VelocityPluginModule(pluginInstance),
+        DataPersistenceModule(databaseConfig),
+        ServicesModule(),
+      )
 
     registerCommands(injector)
   }
