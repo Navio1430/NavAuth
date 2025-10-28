@@ -34,6 +34,12 @@ class CommandsListeners {
       return
     }
 
+    val player = event.commandSource as Player
+    val authenticated = false // todo check if player is authenticated
+    if (authenticated) {
+      return;
+    }
+
     val command = event.command.split(" ", ignoreCase = true, limit = 2).first()
 
     // todo check if command is whitelisted
