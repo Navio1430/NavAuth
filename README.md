@@ -4,12 +4,12 @@
   <h1>NavAuth 🔐 - autologin plugin</h1>
   <p><b>NavAuth</b> is an upcoming next-generation Minecraft login plugin built for speed, security, and seamless player authentication. Designed with modern servers in mind, it combines performance, reliability, and integration flexibility.</p>
 
-  ![Velocity](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/supported/velocity_vector.svg)
+  [![Velocity](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/supported/velocity_vector.svg)](https://modrinth.com/plugin/navauth)
   [![Modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg)](https://modrinth.com/plugin/navauth)
   [![Github](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/github_vector.svg)](https://github.com/Navio1430/NavAuth)
   
-  ![Gradle](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/built-with/gradle_vector.svg)
-  ![Kotlin](assets/built_with_kotlin.svg)
+  [![Gradle](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/built-with/gradle_vector.svg)](https://gradle.org/)
+  [![Kotlin](assets/built_with_kotlin.svg)](https://kotlinlang.org/docs/home.html)
   ![Java](assets/built_with_java.svg)
 
 </div>
