@@ -18,17 +18,21 @@
 
 package pl.spcode.navauth.velocity.listener
 
-import com.google.inject.Injector
+import com.velocitypowered.api.event.PostOrder
+import com.velocitypowered.api.event.Subscribe
+import com.velocitypowered.api.event.player.ServerPreConnectEvent
 
-class ListenersRegistry {
+class ConnectListeners {
 
-  companion object {
-    val listenersClasses =
-      listOf(CommandsListeners::class, ChatListeners::class, ConnectListeners::class)
+  @Subscribe(order = PostOrder.FIRST)
+  fun onServerConnect(event: ServerPreConnectEvent) {
 
-    /** @return list of listeners from registry each instantiated with injection */
-    fun getWithInjection(injector: Injector): List<Any> {
-      return listenersClasses.map { injector.getInstance(it.java) }
+    val player = event.player
+    // todo check if authenticated
+    val authenticated = true
+
+    if (!authenticated) {
+      event.result = ServerPreConnectEvent.ServerResult.denied()
     }
   }
 }

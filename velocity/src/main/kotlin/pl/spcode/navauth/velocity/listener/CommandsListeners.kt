@@ -37,7 +37,7 @@ class CommandsListeners {
     val player = event.commandSource as Player
     val authenticated = false // todo check if player is authenticated
     if (authenticated) {
-      return;
+      return
     }
 
     val command = event.command.split(" ", ignoreCase = true, limit = 2).first()
