@@ -31,7 +31,11 @@ import pl.spcode.navauth.velocity.command.Permissions
 class ForceChangePasswordAdminCommand {
 
   @Execute
-  fun forceChangePassword(@Context sender: Player, @Arg(value = "playerName") playerName: String, @Arg(value = "new_password") newPassword: String) {
+  fun forceChangePassword(
+    @Context sender: Player,
+    @Arg(value = "playerName") playerName: String,
+    @Arg(value = "new_password") newPassword: String,
+  ) {
     // todo impl
   }
 }

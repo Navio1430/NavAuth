@@ -31,7 +31,10 @@ import pl.spcode.navauth.velocity.command.Permissions
 class UnregisterCommand {
 
   @Execute
-  fun unregister(@Context sender: Player, @Arg(value = "current_password") currentPassword: String) {
+  fun unregister(
+    @Context sender: Player,
+    @Arg(value = "current_password") currentPassword: String,
+  ) {
     // todo impl
   }
 }

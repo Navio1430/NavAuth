@@ -28,7 +28,11 @@ import dev.rollczi.litecommands.annotations.execute.Execute
 class RegisterCommand {
 
   @Execute
-  fun register(@Context sender: Player, @Arg(value = "password") password: String, @Arg(value = "repeat_password") repeatPassword: String) {
+  fun register(
+    @Context sender: Player,
+    @Arg(value = "password") password: String,
+    @Arg(value = "repeat_password") repeatPassword: String,
+  ) {
     // todo impl
   }
 }

@@ -35,7 +35,6 @@ import pl.spcode.navauth.common.infra.database.DatabaseDriverType
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.module.DataPersistenceModule
 import pl.spcode.navauth.velocity.command.CommandsRegistrar
-import pl.spcode.navauth.velocity.command.user.LoginCommand
 
 @Singleton
 class NavAuthVelocity
@@ -68,11 +67,10 @@ constructor(val parentInjector: Injector, val proxyServer: ProxyServer) {
 
     // todo: inject into commands
 
-    this.liteCommands = LiteVelocityFactory.builder(this.proxyServer)
-        .commands(
-            *CommandsRegistrar.commands.toTypedArray()
-        )
-        .build();
+    this.liteCommands =
+      LiteVelocityFactory.builder(this.proxyServer)
+        .commands(*CommandsRegistrar.commands.toTypedArray())
+        .build()
   }
 
   @Suppress("UNNECESSARY_SAFE_CALL")

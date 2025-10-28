@@ -29,7 +29,8 @@ import pl.spcode.navauth.velocity.command.user.UnregisterCommand
 class CommandsRegistrar {
 
   companion object {
-    val commands = listOf(
+    val commands =
+      listOf(
         // user
         LoginCommand(),
         RegisterCommand(),
@@ -38,7 +39,7 @@ class CommandsRegistrar {
         PremiumAccountCommand(),
         // admin
         ForceUnregisterAdminCommand(),
-        ForceChangePasswordAdminCommand()
-    )
+        ForceChangePasswordAdminCommand(),
+      )
   }
 }
