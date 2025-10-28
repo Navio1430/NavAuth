@@ -19,11 +19,13 @@
 package pl.spcode.navauth.common.application.credentials
 
 import com.google.inject.Inject
+import com.google.inject.Singleton
 import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.infra.crypto.BCryptCredentialsHasher
 
+@Singleton
 class CredentialsService @Inject constructor(val credentialsRepository: UserCredentialsRepository) {
 
   /**
