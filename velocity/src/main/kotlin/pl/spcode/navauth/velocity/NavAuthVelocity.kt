@@ -34,7 +34,7 @@ import pl.spcode.navauth.common.infra.database.DatabaseConfig
 import pl.spcode.navauth.common.infra.database.DatabaseDriverType
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.module.DataPersistenceModule
-import pl.spcode.navauth.velocity.command.CommandsRegistrar
+import pl.spcode.navauth.velocity.command.CommandsRegistry
 
 @Singleton
 class NavAuthVelocity
@@ -64,7 +64,7 @@ constructor(val parentInjector: Injector, val proxyServer: ProxyServer) {
   }
 
   fun registerCommands(injector: Injector) {
-    val commands = CommandsRegistrar.getWithInjection(injector)
+    val commands = CommandsRegistry.getWithInjection(injector)
     this.liteCommands =
       LiteVelocityFactory.builder(this.proxyServer).commands(*commands.toTypedArray()).build()
   }
