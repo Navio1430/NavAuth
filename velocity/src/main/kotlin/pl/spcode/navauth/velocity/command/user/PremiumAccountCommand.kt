@@ -16,19 +16,21 @@
  *
  */
 
-package pl.spcode.navauth.velocity.command
+package pl.spcode.navauth.velocity.command.user
 
-class Permissions {
-  companion object {
-    const val BASE = "navauth"
+import com.velocitypowered.api.proxy.Player
+import dev.rollczi.litecommands.annotations.command.Command
+import dev.rollczi.litecommands.annotations.context.Context
+import dev.rollczi.litecommands.annotations.execute.Execute
+import dev.rollczi.litecommands.annotations.permission.Permission
+import pl.spcode.navauth.velocity.command.Permissions
 
-    const val USER_BASE = "$BASE.user"
-    const val USER_UNREGISTER = "$USER_BASE.unregister"
-    const val USER_CHANGE_PASSWORD = "$USER_BASE.changepassword"
-    const val USER_CHANGE_TO_PREMIUM_ACCOUNT = "$USER_BASE.premium"
+@Command(name = "premium")
+@Permission(Permissions.USER_CHANGE_TO_PREMIUM_ACCOUNT)
+class PremiumAccountCommand {
 
-    const val ADMIN_BASE = "$BASE.admin"
-    const val ADMIN_FORCE_UNREGISTER = "$ADMIN_BASE.forceunregister"
-    const val ADMIN_FORCE_CHANGE_PASSWORD = "$ADMIN_BASE.forcechangepassword"
+  @Execute
+  fun changeToPremiumAccount(@Context sender: Player) {
+    // todo impl
   }
 }

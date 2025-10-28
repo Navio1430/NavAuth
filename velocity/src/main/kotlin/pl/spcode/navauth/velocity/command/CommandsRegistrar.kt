@@ -32,6 +32,8 @@ class CommandsRegistrar {
         LoginCommand(),
         RegisterCommand(),
         UnregisterCommand(),
+        ChangePasswordCommand(),
+        PremiumAccountCommand(),
         // admin
         ForceUnregisterAdminCommand(),
         ForceChangePasswordAdminCommand()
