@@ -18,6 +18,7 @@
 
 package pl.spcode.navauth.velocity.command
 
+import com.google.inject.Injector
 import pl.spcode.navauth.velocity.command.admin.ForceChangePasswordAdminCommand
 import pl.spcode.navauth.velocity.command.admin.ForceUnregisterAdminCommand
 import pl.spcode.navauth.velocity.command.user.ChangePasswordCommand
@@ -29,17 +30,22 @@ import pl.spcode.navauth.velocity.command.user.UnregisterCommand
 class CommandsRegistrar {
 
   companion object {
-    val commands =
+    val commandsClasses =
       listOf(
         // user
-        LoginCommand(),
-        RegisterCommand(),
-        UnregisterCommand(),
-        ChangePasswordCommand(),
-        PremiumAccountCommand(),
+        LoginCommand::class,
+        RegisterCommand::class,
+        UnregisterCommand::class,
+        ChangePasswordCommand::class,
+        PremiumAccountCommand::class,
         // admin
-        ForceUnregisterAdminCommand(),
-        ForceChangePasswordAdminCommand(),
+        ForceUnregisterAdminCommand::class,
+        ForceChangePasswordAdminCommand::class,
       )
+
+    /** @return list of commands from registrar instantiated with injection */
+    fun getWithInjection(injector: Injector): List<Any> {
+      return commandsClasses.map { injector.getInstance(it.java) }
+    }
   }
 }

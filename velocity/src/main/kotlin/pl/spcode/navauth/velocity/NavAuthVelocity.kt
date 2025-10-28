@@ -60,17 +60,13 @@ constructor(val parentInjector: Injector, val proxyServer: ProxyServer) {
       DatabaseConfig(DatabaseDriverType.H2_MEM, 5, 30000, "", "", "", 0, "default")
     injector = parentInjector.createChildInjector(DataPersistenceModule(databaseConfig))
 
-    registerCommands()
+    registerCommands(injector)
   }
 
-  fun registerCommands() {
-
-    // todo: inject into commands
-
+  fun registerCommands(injector: Injector) {
+    val commands = CommandsRegistrar.getWithInjection(injector)
     this.liteCommands =
-      LiteVelocityFactory.builder(this.proxyServer)
-        .commands(*CommandsRegistrar.commands.toTypedArray())
-        .build()
+      LiteVelocityFactory.builder(this.proxyServer).commands(*commands.toTypedArray()).build()
   }
 
   @Suppress("UNNECESSARY_SAFE_CALL")
