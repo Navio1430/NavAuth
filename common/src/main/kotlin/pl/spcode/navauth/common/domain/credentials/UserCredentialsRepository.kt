@@ -19,6 +19,6 @@
 package pl.spcode.navauth.common.domain.credentials
 
 import java.util.UUID
-import pl.spcode.navauth.common.shared.OrmLiteCrudRepository
+import pl.spcode.navauth.common.shared.data.OrmLiteCrudRepository
 
 interface UserCredentialsRepository : OrmLiteCrudRepository<UserCredentials, UUID> {}

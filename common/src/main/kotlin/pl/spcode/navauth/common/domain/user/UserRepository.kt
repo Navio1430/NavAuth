@@ -19,7 +19,7 @@
 package pl.spcode.navauth.common.domain.user
 
 import java.util.UUID
-import pl.spcode.navauth.common.shared.OrmLiteCrudRepository
+import pl.spcode.navauth.common.shared.data.OrmLiteCrudRepository
 
 interface UserRepository : OrmLiteCrudRepository<User, UUID> {
   fun findByUsername(username: String): User?
