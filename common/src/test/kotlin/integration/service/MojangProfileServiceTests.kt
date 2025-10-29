@@ -19,7 +19,7 @@
 package integration.service
 
 import com.google.inject.Inject
-import extension.ApplicationTestExtension
+import extension.app.ApplicationTestExtension
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals

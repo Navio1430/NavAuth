@@ -19,7 +19,7 @@
 package integration.data
 
 import com.google.inject.Inject
-import extension.DataPersistenceTestExtension
+import extension.app.DataPersistenceTestExtension
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -16,7 +16,7 @@
  *
  */
 
-package extension
+package extension.app
 
 import com.google.inject.Guice
 import com.google.inject.Injector
@@ -25,21 +25,18 @@ import org.junit.jupiter.api.extension.TestInstancePostProcessor
 import pl.spcode.navauth.common.infra.database.DatabaseConfig
 import pl.spcode.navauth.common.infra.database.DatabaseDriverType
 import pl.spcode.navauth.common.module.DataPersistenceModule
-import pl.spcode.navauth.common.module.HttpClientModule
-import pl.spcode.navauth.common.module.ServicesModule
 import utils.GuiceUtils
 
-class ApplicationTestExtension : TestInstancePostProcessor {
+class DataPersistenceTestExtension : TestInstancePostProcessor {
 
   var injector: Injector
 
   init {
     val config = DatabaseConfig(DatabaseDriverType.H2_MEM, 5, 30000, "", "", "", 0, "default")
-    injector =
-      Guice.createInjector(HttpClientModule(), DataPersistenceModule(config), ServicesModule())
+    injector = Guice.createInjector(DataPersistenceModule(config))
   }
 
   override fun postProcessTestInstance(testInstance: Any, context: ExtensionContext) {
-    GuiceUtils.injectToDeclaredFields(testInstance, injector)
+    GuiceUtils.Companion.injectToDeclaredFields(testInstance, injector)
   }
 }
