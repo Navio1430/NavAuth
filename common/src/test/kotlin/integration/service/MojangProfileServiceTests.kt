@@ -20,6 +20,8 @@ package integration.service
 
 import com.google.inject.Inject
 import extension.app.ApplicationTestExtension
+import extension.retry.Retry
+import extension.retry.RetryExtension
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -43,7 +45,8 @@ class MojangProfileServiceTests {
     assertEquals(profile.uuid, UUID.fromString("069a79f4-44e9-4726-a5be-fca90e38aaf5"))
   }
 
-  // add retry extension
+  @ExtendWith(RetryExtension::class)
+  @Retry(value = 2)
   @Test
   fun `test fetched mojang profile doesn't exists`() {
     val profile = mojangProfileService.fetchProfileInfo(generateRandomString(15))
