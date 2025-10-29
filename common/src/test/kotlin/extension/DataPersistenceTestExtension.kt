@@ -27,7 +27,7 @@ import pl.spcode.navauth.common.infra.database.DatabaseDriverType
 import pl.spcode.navauth.common.module.DataPersistenceModule
 import utils.GuiceUtils
 
-class ApplicationDataTestExtension : TestInstancePostProcessor {
+class DataPersistenceTestExtension : TestInstancePostProcessor {
 
   var injector: Injector
 

@@ -19,7 +19,7 @@
 package integration.data
 
 import com.google.inject.Inject
-import extension.ApplicationDataTestExtension
+import extension.DataPersistenceTestExtension
 import java.util.UUID
 import kotlin.test.DefaultAsserter.assertNotNull
 import kotlin.test.assertEquals
@@ -30,7 +30,7 @@ import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserRepository
 import utils.generateRandomString
 
-@ExtendWith(ApplicationDataTestExtension::class)
+@ExtendWith(DataPersistenceTestExtension::class)
 class UserPersistenceTests {
 
   @Inject private lateinit var userRepo: UserRepository
