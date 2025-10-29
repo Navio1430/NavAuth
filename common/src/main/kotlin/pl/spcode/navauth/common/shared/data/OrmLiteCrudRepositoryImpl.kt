@@ -22,12 +22,12 @@ import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.stmt.DeleteBuilder
 import com.j256.ormlite.stmt.QueryBuilder
 import com.j256.ormlite.stmt.UpdateBuilder
-import pl.spcode.navauth.common.infra.database.DatabaseManager
 import kotlin.reflect.KClass
+import pl.spcode.navauth.common.infra.database.DatabaseManager
 
 open class OrmLiteCrudRepositoryImpl<T : Any, ID>(
-    private val databaseManager: DatabaseManager,
-    private val clazz: KClass<T>,
+  private val databaseManager: DatabaseManager,
+  private val clazz: KClass<T>,
 ) : OrmLiteCrudRepository<T, ID> {
 
   override fun save(entity: T): Dao.CreateOrUpdateStatus {

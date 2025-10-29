@@ -23,7 +23,7 @@ import java.util.UUID
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
 import pl.spcode.navauth.common.infra.database.DatabaseManager
-import pl.spcode.navauth.common.shared.OrmLiteCrudRepositoryImpl
+import pl.spcode.navauth.common.shared.data.OrmLiteCrudRepositoryImpl
 
 class UserCredentialsRepositoryImpl @Inject constructor(databaseManager: DatabaseManager) :
   OrmLiteCrudRepositoryImpl<UserCredentials, UUID>(databaseManager, UserCredentials::class),

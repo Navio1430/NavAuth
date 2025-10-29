@@ -14,6 +14,7 @@ tasks.shadowJar {
 
   var prefix = "pl.spcode.${projectName.lowercase()}.lib";
   relocate("kotlin", "${prefix}.kotlin")
+  // todo: relocate gson lib
 
   exclude("com/google/inject/**")
 

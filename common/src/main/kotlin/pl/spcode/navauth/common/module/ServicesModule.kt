@@ -20,10 +20,12 @@ package pl.spcode.navauth.common.module
 
 import com.google.inject.AbstractModule
 import pl.spcode.navauth.common.application.credentials.CredentialsService
+import pl.spcode.navauth.common.application.mojang.MojangProfileService
 
 class ServicesModule : AbstractModule() {
 
   override fun configure() {
     bind(CredentialsService::class.java)
+    bind(MojangProfileService::class.java)
   }
 }

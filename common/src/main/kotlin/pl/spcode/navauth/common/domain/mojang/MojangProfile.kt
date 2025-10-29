@@ -16,31 +16,8 @@
  *
  */
 
-package pl.spcode.navauth.common.shared
+package pl.spcode.navauth.common.domain.mojang
 
-import com.j256.ormlite.dao.Dao
+import java.util.UUID
 
-interface OrmLiteCrudRepository<T : Any, ID> {
-
-  fun save(entity: T): Dao.CreateOrUpdateStatus
-
-  fun saveAll(entities: Iterable<T>): List<Dao.CreateOrUpdateStatus>
-
-  fun findById(id: ID): T?
-
-  fun existsById(id: ID): Boolean
-
-  fun findAll(): List<T>
-
-  fun findAllById(ids: Iterable<ID>): List<T>
-
-  fun count(): Long
-
-  fun deleteById(id: ID): Int
-
-  fun delete(entity: T): Int
-
-  fun deleteAll(entities: Iterable<T>): Int
-
-  fun deleteAll(): Int
-}
+data class MojangProfile(val uuid: UUID, val name: String)
