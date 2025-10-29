@@ -16,7 +16,7 @@
  *
  */
 
-package pl.spcode.navauth.velocity.listener
+package pl.spcode.navauth.velocity.listener.velocity
 
 import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
