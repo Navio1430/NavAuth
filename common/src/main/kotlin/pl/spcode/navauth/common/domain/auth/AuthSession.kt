@@ -18,4 +18,4 @@
 
 package pl.spcode.navauth.common.domain.auth
 
-class AuthSession(val username: String, val isPremium: Boolean, state: AuthState) {}
+class AuthSession(val username: String, val isPremium: Boolean, val state: AuthState) {}
