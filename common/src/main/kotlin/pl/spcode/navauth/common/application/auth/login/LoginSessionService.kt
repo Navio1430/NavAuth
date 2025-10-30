@@ -20,6 +20,7 @@ package pl.spcode.navauth.common.application.auth.login
 
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
+import com.google.inject.Inject
 import com.google.inject.Singleton
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -32,7 +33,7 @@ import pl.spcode.navauth.common.infra.auth.login.LoginSessionImpl
 import java.time.Duration
 
 @Singleton
-class LoginSessionService(val credentialsService: CredentialsService) {
+class LoginSessionService @Inject constructor(val credentialsService: CredentialsService) {
 
   val logger: Logger = LoggerFactory.getLogger(LoginSessionService::class.java)
 
