@@ -57,6 +57,7 @@ constructor(val parentInjector: Injector, val proxyServer: ProxyServer) {
     logger.info("Initializing NavAuth plugin...")
     this.pluginInstance = pluginInstance
 
+    // register self as listener because of the shutdown event
     proxyServer.eventManager.register(pluginInstance, this)
 
     val databaseConfig =

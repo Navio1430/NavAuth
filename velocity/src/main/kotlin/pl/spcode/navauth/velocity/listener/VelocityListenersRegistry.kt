@@ -23,7 +23,7 @@ import pl.spcode.navauth.velocity.listener.velocity.ChatListeners
 import pl.spcode.navauth.velocity.listener.velocity.CommandsListeners
 import pl.spcode.navauth.velocity.listener.velocity.ConnectListeners
 
-class ListenersRegistry {
+class VelocityListenersRegistry {
 
   companion object {
     val listenersClasses =
