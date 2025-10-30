@@ -26,13 +26,13 @@ import com.velocitypowered.api.event.connection.PreLoginEvent
 import com.velocitypowered.api.event.player.ServerPreConnectEvent
 import com.velocitypowered.api.proxy.ProxyServer
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.TextColor
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.application.auth.AuthSessionService
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.domain.auth.AuthState
+import pl.spcode.navauth.velocity.component.TextColors
 
 class ConnectListeners
 @Inject
@@ -105,12 +105,17 @@ constructor(
   // event invoked after preLogin event and encryption protocol completion (online only)
   @Subscribe(order = PostOrder.FIRST)
   fun onPostLogin(event: PostLoginEvent) {
-    val username = event.player.username
+    val player = event.player
+    val username = player.username
     val session = authSessionService.findSession(username)
     if (session == null) {
+      logger.warn(
+        "Player {}:{} went through preLogin event without auth session",
+        username,
+        player.uniqueId,
+      )
       // there must be an auth session for specified user, otherwise abort
-      // todo add to config
-      event.player.disconnect(Component.text("No auth session found", TextColor.color(255, 0, 0)))
+      player.disconnect(Component.text("NavAuth: Auth session not found", TextColors.RED))
     }
 
     // todo create login/register session if needed
@@ -125,7 +130,7 @@ constructor(
     if (!authenticated) {
       val player = event.player
 
-      logger.debug(
+      logger.warn(
         "Player {}:{} tried to connect to {} while being unauthenticated, player's auth state: {}",
         player,
         player.uniqueId,
@@ -135,8 +140,8 @@ constructor(
 
       player.disconnect(
         Component.text(
-          "You can't change the server while being unauthenticated",
-          TextColor.color(255, 0, 0),
+          "NavAuth: You can't change the server while being unauthenticated",
+          TextColors.RED,
         )
       )
       event.result = ServerPreConnectEvent.ServerResult.denied()
