@@ -23,7 +23,6 @@ import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.connection.PostLoginEvent
 import com.velocitypowered.api.event.connection.PreLoginEvent
-import com.velocitypowered.api.event.player.ServerPreConnectEvent
 import com.velocitypowered.api.proxy.ProxyServer
 import net.kyori.adventure.text.Component
 import org.slf4j.Logger
@@ -34,7 +33,7 @@ import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.domain.auth.AuthState
 import pl.spcode.navauth.velocity.component.TextColors
 
-class ConnectListeners
+class LoginListeners
 @Inject
 constructor(
   val proxyServer: ProxyServer,
@@ -43,7 +42,7 @@ constructor(
   val authSessionService: AuthSessionService,
 ) {
 
-  val logger: Logger = LoggerFactory.getLogger(ConnectListeners::class.java)
+  val logger: Logger = LoggerFactory.getLogger(LoginListeners::class.java)
 
   @Subscribe(order = PostOrder.LAST)
   fun onPreLogin(event: PreLoginEvent) {
@@ -119,32 +118,5 @@ constructor(
     }
 
     // todo create login/register session if needed
-  }
-
-  @Subscribe(order = PostOrder.FIRST)
-  fun onServerConnect(event: ServerPreConnectEvent) {
-
-    val session = authSessionService.findSession(event.player.username)
-    val authenticated = session == null || session.state == AuthState.AUTHENTICATED
-
-    if (!authenticated) {
-      val player = event.player
-
-      logger.warn(
-        "Player {}:{} tried to connect to {} while being unauthenticated, player's auth state: {}",
-        player,
-        player.uniqueId,
-        event.originalServer.serverInfo.name,
-        session.state,
-      )
-
-      player.disconnect(
-        Component.text(
-          "NavAuth: You can't change the server while being unauthenticated",
-          TextColors.RED,
-        )
-      )
-      event.result = ServerPreConnectEvent.ServerResult.denied()
-    }
   }
 }

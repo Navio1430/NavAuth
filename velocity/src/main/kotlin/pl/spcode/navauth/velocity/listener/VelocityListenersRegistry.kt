@@ -21,13 +21,19 @@ package pl.spcode.navauth.velocity.listener
 import com.google.inject.Injector
 import pl.spcode.navauth.velocity.listener.velocity.ChatListeners
 import pl.spcode.navauth.velocity.listener.velocity.CommandsListeners
-import pl.spcode.navauth.velocity.listener.velocity.ConnectListeners
+import pl.spcode.navauth.velocity.listener.velocity.ConnectionListeners
+import pl.spcode.navauth.velocity.listener.velocity.LoginListeners
 
 class VelocityListenersRegistry {
 
   companion object {
     val listenersClasses =
-      listOf(CommandsListeners::class, ChatListeners::class, ConnectListeners::class)
+      listOf(
+        CommandsListeners::class,
+        ChatListeners::class,
+        ConnectionListeners::class,
+        LoginListeners::class,
+      )
 
     /** @return list of listeners from registry each instantiated with injection */
     fun getWithInjection(injector: Injector): List<Any> {
