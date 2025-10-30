@@ -16,19 +16,18 @@
  *
  */
 
-package pl.spcode.navauth.common.module
+package pl.spcode.navauth.common.application.user
 
-import com.google.inject.AbstractModule
-import pl.spcode.navauth.common.application.credentials.CredentialsService
-import pl.spcode.navauth.common.application.mojang.MojangProfileService
-import pl.spcode.navauth.common.application.user.UserService
+import com.google.inject.Inject
+import com.google.inject.Singleton
+import pl.spcode.navauth.common.domain.user.User
+import pl.spcode.navauth.common.domain.user.UserRepository
 
-class ServicesModule : AbstractModule() {
+@Singleton
+class UserService @Inject constructor(val userRepository: UserRepository) {
 
-  override fun configure() {
-    bind(MojangProfileService::class.java)
-
-    bind(CredentialsService::class.java)
-    bind(UserService::class.java)
+  fun findUserByUsername(username: String, ignoreCase: Boolean): User? {
+    // todo impl ignore case option
+    return userRepository.findByUsername(username)
   }
 }
