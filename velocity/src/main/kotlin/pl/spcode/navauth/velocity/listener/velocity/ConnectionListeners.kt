@@ -21,22 +21,30 @@ package pl.spcode.navauth.velocity.listener.velocity
 import com.google.inject.Inject
 import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
+import com.velocitypowered.api.event.connection.DisconnectEvent
 import com.velocitypowered.api.event.player.ServerPreConnectEvent
 import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import pl.spcode.navauth.common.application.auth.AuthSessionService
+import pl.spcode.navauth.common.application.auth.AuthHandshakeSessionService
 import pl.spcode.navauth.common.domain.auth.AuthState
 import pl.spcode.navauth.velocity.component.TextColors
 
-class ConnectionListeners @Inject constructor(val authSessionService: AuthSessionService) {
+class ConnectionListeners
+@Inject
+constructor(val authHandshakeSessionService: AuthHandshakeSessionService) {
 
   val logger: Logger = LoggerFactory.getLogger(ConnectionListeners::class.java)
+
+  @Subscribe
+  fun onDisconnect(event: DisconnectEvent) {
+    // todo invalidate login session if exists
+  }
 
   @Subscribe(order = PostOrder.FIRST)
   fun onServerConnect(event: ServerPreConnectEvent) {
 
-    val session = authSessionService.findSession(event.player.username)
+    val session = authHandshakeSessionService.findSession(event.player.username)
     val authenticated = session == null || session.state == AuthState.AUTHENTICATED
 
     if (!authenticated) {

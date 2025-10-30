@@ -19,6 +19,7 @@
 package pl.spcode.navauth.common.domain.auth
 
 enum class AuthState {
+  REQUIRES_ONLINE_ENCRYPTION,
   REQUIRES_LOGIN,
   AUTHENTICATED,
 }

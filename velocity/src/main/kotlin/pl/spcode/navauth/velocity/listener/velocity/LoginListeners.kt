@@ -27,7 +27,7 @@ import com.velocitypowered.api.proxy.ProxyServer
 import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import pl.spcode.navauth.common.application.auth.AuthSessionService
+import pl.spcode.navauth.common.application.auth.AuthHandshakeSessionService
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.domain.auth.AuthState
@@ -39,7 +39,7 @@ constructor(
   val proxyServer: ProxyServer,
   val profileService: MojangProfileService,
   val userService: UserService,
-  val authSessionService: AuthSessionService,
+  val authHandshakeSessionService: AuthHandshakeSessionService,
 ) {
 
   val logger: Logger = LoggerFactory.getLogger(LoginListeners::class.java)
@@ -77,14 +77,13 @@ constructor(
     val state =
       if (forcePremiumSession) {
         // We force velocity to authenticate the player and
-        // that's why we can set state to AUTHENTICATED.
         // User won't go any further than this event if not authenticated by velocity
-        AuthState.AUTHENTICATED
+        AuthState.REQUIRES_ONLINE_ENCRYPTION
       } else {
         AuthState.REQUIRES_LOGIN
       }
 
-    authSessionService.createSession(connUsername, forcePremiumSession, state)
+    authHandshakeSessionService.createSession(connUsername, state)
 
     // todo create advanced auto resolution strategy
 
@@ -106,7 +105,7 @@ constructor(
   fun onPostLogin(event: PostLoginEvent) {
     val player = event.player
     val username = player.username
-    val session = authSessionService.findSession(username)
+    val session = authHandshakeSessionService.findSession(username)
     if (session == null) {
       logger.warn(
         "Player {}:{} went through preLogin event without auth session",
@@ -114,9 +113,27 @@ constructor(
         player.uniqueId,
       )
       // there must be an auth session for specified user, otherwise abort
-      player.disconnect(Component.text("NavAuth: Auth session not found", TextColors.RED))
+      player.disconnect(
+        Component.text("NavAuth: Auth session expired, please try again", TextColors.RED)
+      )
+      return
     }
 
-    // todo create login/register session if needed
+    if (session.state == AuthState.REQUIRES_ONLINE_ENCRYPTION) {
+      // we can assume player got authenticated by velocity
+      authHandshakeSessionService.authenticateSession(session)
+      return
+    } else if (session.state == AuthState.REQUIRES_LOGIN) {
+      // todo create login/register session
+      return
+    }
+
+    logger.warn(
+      "Player {}:{} went through preLogin with bad auth state: {}",
+      username,
+      player.uniqueId,
+      session.state.toString(),
+    )
+    player.disconnect(Component.text("NavAuth: Bad auth state", TextColors.RED))
   }
 }

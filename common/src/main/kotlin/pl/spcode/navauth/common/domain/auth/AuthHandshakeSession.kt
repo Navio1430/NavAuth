@@ -18,4 +18,8 @@
 
 package pl.spcode.navauth.common.domain.auth
 
-class AuthSession(val username: String, val isPremium: Boolean, val state: AuthState) {}
+class AuthHandshakeSession(val username: String, var state: AuthState) {
+  override fun toString(): String {
+    return "AuthHandshakeSession(username='$username', state=$state)"
+  }
+}
