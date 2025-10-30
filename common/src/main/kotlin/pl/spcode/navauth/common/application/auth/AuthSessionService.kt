@@ -19,9 +19,9 @@
 package pl.spcode.navauth.common.application.auth
 
 import com.google.inject.Singleton
+import java.util.concurrent.ConcurrentHashMap
 import pl.spcode.navauth.common.domain.auth.AuthSession
 import pl.spcode.navauth.common.domain.auth.AuthState
-import java.util.concurrent.ConcurrentHashMap
 
 @Singleton
 class AuthSessionService {
@@ -43,5 +43,4 @@ class AuthSessionService {
   fun invalidateSession(session: AuthSession) {
     sessionsByUsername.remove(session.username)
   }
-
 }

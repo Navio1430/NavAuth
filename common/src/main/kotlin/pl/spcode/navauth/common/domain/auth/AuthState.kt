@@ -20,5 +20,5 @@ package pl.spcode.navauth.common.domain.auth
 
 enum class AuthState {
   REQUIRES_LOGIN,
-  AUTHENTICATED
+  AUTHENTICATED,
 }
