@@ -16,24 +16,18 @@
  *
  */
 
-package pl.spcode.navauth.common.module
+package pl.spcode.navauth.velocity.infra.auth
 
-import com.google.inject.AbstractModule
-import pl.spcode.navauth.common.application.auth.handshake.AuthHandshakeSessionService
-import pl.spcode.navauth.common.application.auth.login.AuthSessionService
-import pl.spcode.navauth.common.application.credentials.CredentialsService
-import pl.spcode.navauth.common.application.mojang.MojangProfileService
-import pl.spcode.navauth.common.application.user.UserService
+import java.net.InetSocketAddress
+import pl.spcode.navauth.common.domain.auth.UniqueSessionId
 
-class ServicesModule : AbstractModule() {
+class VelocityUniqueSessionId : UniqueSessionId {
 
-  override fun configure() {
-    bind(MojangProfileService::class.java)
-    bind(AuthHandshakeSessionService::class.java)
+  override val id: String
 
-    bind(CredentialsService::class.java)
-    bind(UserService::class.java)
-
-    bind(AuthSessionService::class.java)
+  private constructor(id: String) {
+    this.id = id
   }
+
+  constructor(username: String, socket: InetSocketAddress) : this("$username:${socket.port}")
 }

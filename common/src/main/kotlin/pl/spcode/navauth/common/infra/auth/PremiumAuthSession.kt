@@ -16,13 +16,14 @@
  *
  */
 
-package pl.spcode.navauth.common.domain.auth.login
+package pl.spcode.navauth.common.infra.auth
 
-interface LoginSession {
+import pl.spcode.navauth.common.domain.auth.session.AuthSession
+import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 
-  /**
-   * @param password raw (not hashed) password
-   */
-  fun verifyPassword(password: String): Boolean;
+class PremiumAuthSession : AuthSession() {
 
+  override fun getSessionType(): AuthSessionType {
+    return AuthSessionType.PREMIUM
+  }
 }

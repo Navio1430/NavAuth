@@ -16,7 +16,24 @@
  *
  */
 
-package pl.spcode.navauth.common.application.auth.login
+package pl.spcode.navauth.common.infra.auth
 
-class LoginSessionException(message: String, cause: Throwable? = null): Exception(message, cause) {
+import pl.spcode.navauth.common.application.credentials.CredentialsService
+import pl.spcode.navauth.common.domain.auth.session.AuthSession
+import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
+import pl.spcode.navauth.common.domain.credentials.UserCredentials
+
+class LoginAuthSession(
+  val userCredentials: UserCredentials,
+  val credentialsService: CredentialsService,
+) : AuthSession() {
+
+  override fun getSessionType(): AuthSessionType {
+    return AuthSessionType.LOGIN
+  }
+
+  /** @param password raw (not hashed) password */
+  fun verifyByPassword(password: String): Boolean {
+    return credentialsService.verifyPassword(userCredentials, password)
+  }
 }

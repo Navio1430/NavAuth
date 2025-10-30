@@ -16,16 +16,25 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.auth.login
+package pl.spcode.navauth.common.domain.auth
 
-import pl.spcode.navauth.common.application.credentials.CredentialsService
-import pl.spcode.navauth.common.domain.auth.login.LoginSession
-import pl.spcode.navauth.common.domain.credentials.UserCredentials
+abstract class UniqueSessionId {
+  abstract val id: String
 
-class LoginSessionImpl(val userCredentials: UserCredentials, val credentialsService: CredentialsService): LoginSession {
-
-  override fun verifyPassword(password: String): Boolean {
-    return credentialsService.verifyPassword(userCredentials, password)
+  override fun hashCode(): Int {
+    return id.hashCode()
   }
 
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as UniqueSessionId
+
+    return id == other.id
+  }
+
+  override fun toString(): String {
+    return id
+  }
 }

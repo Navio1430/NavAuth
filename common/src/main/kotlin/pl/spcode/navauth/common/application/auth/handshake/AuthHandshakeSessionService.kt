@@ -21,39 +21,52 @@ package pl.spcode.navauth.common.application.auth.handshake
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import com.google.inject.Singleton
+import java.time.Duration
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import pl.spcode.navauth.common.domain.auth.UniqueSessionId
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeSession
-import pl.spcode.navauth.common.domain.auth.handshake.AuthState
-import java.time.Duration
+import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeState
+import pl.spcode.navauth.common.domain.user.User
 
 @Singleton
 class AuthHandshakeSessionService {
 
-  val logger: Logger = LoggerFactory.getLogger(AuthHandshakeSessionService::class.java)
+  private val logger: Logger = LoggerFactory.getLogger(AuthHandshakeSessionService::class.java)
 
-  val sessionsByUsername: Cache<String, AuthHandshakeSession> =
-    CacheBuilder.newBuilder().expireAfterWrite(Duration.ofSeconds(10)).build()
+  private val sessionsCache: Cache<UniqueSessionId, AuthHandshakeSession> =
+    CacheBuilder.newBuilder().expireAfterWrite(Duration.ofSeconds(15)).build()
 
-  // todo add "hash" made out of unique properties such as connection id
-  fun createSession(connUsername: String, state: AuthState): AuthHandshakeSession {
-    val session = AuthHandshakeSession(connUsername, state)
-    sessionsByUsername.put(connUsername, session)
-    logger.debug("created auth handshake session for {} username {}", connUsername, session)
+  /**
+   * @param sessionId id which must be unique for each connection of using the same user data at the
+   *   same time (e.g., socket port)
+   * @param existingUser user who already exists in the database
+   * @param connUsername username who made the initial connection
+   * @param state current state of the handshake session
+   */
+  fun createSession(
+    sessionId: UniqueSessionId,
+    existingUser: User?,
+    connUsername: String,
+    state: AuthHandshakeState,
+  ): AuthHandshakeSession {
+    val session = AuthHandshakeSession(existingUser, connUsername, state)
+    sessionsCache.put(sessionId, session)
+    logger.debug(
+      "created auth handshake session (id='{}') for user {}: {}",
+      sessionId,
+      connUsername,
+      session,
+    )
     return session
   }
 
-  fun findSession(connUsername: String): AuthHandshakeSession? {
-    return sessionsByUsername.getIfPresent(connUsername)
+  fun findSession(sessionId: UniqueSessionId): AuthHandshakeSession? {
+    return sessionsCache.getIfPresent(sessionId)
   }
 
-  fun authenticateSession(session: AuthHandshakeSession) {
-    session.state = AuthState.AUTHENTICATED
-    invalidateSession(session.username)
-  }
-
-  fun invalidateSession(connUsername: String) {
-    logger.debug("invalidated auth handshake session for {} username", connUsername)
-    sessionsByUsername.invalidate(connUsername)
+  fun closeSession(sessionId: UniqueSessionId) {
+    logger.debug("invalidated auth handshake session with id {}", sessionId.id)
+    sessionsCache.invalidate(sessionId)
   }
 }

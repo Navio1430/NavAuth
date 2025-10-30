@@ -16,10 +16,19 @@
  *
  */
 
-package pl.spcode.navauth.common.domain.auth.handshake
+package pl.spcode.navauth.common.domain.auth.session
 
-enum class AuthState {
-  REQUIRES_ONLINE_ENCRYPTION,
-  REQUIRES_LOGIN,
-  AUTHENTICATED,
+abstract class AuthSession {
+
+  abstract fun getSessionType(): AuthSessionType
+
+  var state: AuthSessionState = AuthSessionState.WAITING_FOR_ALLOCATION
+
+  var isAuthenticated: Boolean = false
+    private set
+
+  fun authenticate() {
+    isAuthenticated = true
+    state = AuthSessionState.AUTHENTICATED
+  }
 }

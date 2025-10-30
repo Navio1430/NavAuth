@@ -16,21 +16,6 @@
  *
  */
 
-package pl.spcode.navauth.common.domain.auth.handshake
+package pl.spcode.navauth.common.application.auth.login
 
-import pl.spcode.navauth.common.domain.user.User
-
-/**
- * @param existingUser user who already exists in the database
- * @param connUsername username who made the initial connection
- * @param state current state of the handshake session
- */
-class AuthHandshakeSession(
-  val existingUser: User?,
-  val connUsername: String,
-  var state: AuthHandshakeState,
-) {
-  override fun toString(): String {
-    return "AuthHandshakeSession(connUsername='$connUsername', state=$state)"
-  }
-}
+class AuthSessionException(message: String, cause: Throwable? = null) : Exception(message, cause) {}

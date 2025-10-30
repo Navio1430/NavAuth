@@ -23,15 +23,20 @@ import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.connection.PostLoginEvent
 import com.velocitypowered.api.event.connection.PreLoginEvent
+import com.velocitypowered.api.proxy.Player
 import com.velocitypowered.api.proxy.ProxyServer
 import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.application.auth.handshake.AuthHandshakeSessionService
+import pl.spcode.navauth.common.application.auth.login.AuthSessionService
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
-import pl.spcode.navauth.common.domain.auth.handshake.AuthState
+import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeSession
+import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeState
+import pl.spcode.navauth.common.domain.auth.session.AuthSessionState
 import pl.spcode.navauth.velocity.component.TextColors
+import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 
 class LoginListeners
 @Inject
@@ -40,6 +45,7 @@ constructor(
   val profileService: MojangProfileService,
   val userService: UserService,
   val authHandshakeSessionService: AuthHandshakeSessionService,
+  val authSessionService: AuthSessionService,
 ) {
 
   val logger: Logger = LoggerFactory.getLogger(LoginListeners::class.java)
@@ -48,42 +54,74 @@ constructor(
   fun onPreLogin(event: PreLoginEvent) {
     if (!event.result.isAllowed) return
 
+    logger.info("PreLogin - System identity hash: {}", event.connection.remoteAddress.port)
+
     // todo check if user nickname matches regex
 
     val connUsername = event.username
 
     if (proxyServer.configuration.isOnlineMode) {
       // skip any checks because everyone is premium, proceed to onLogin event
+      // todo make sure to omit checks on other events too
       return
     }
 
-    val persistedUser = userService.findUserByUsername(connUsername, ignoreCase = true)
-    val isNewAccount = persistedUser == null
+    // todo handle situation where player changes its nickname
 
+    val existingUser = userService.findUserByUsername(connUsername, ignoreCase = true)
     val correspondingPremiumProfile = profileService.fetchProfileInfo(connUsername)
-    val isPremiumAccount = correspondingPremiumProfile != null
-    val isSamePremiumProfileUsername: Boolean =
-      connUsername.equals(correspondingPremiumProfile?.name)
 
     val forcePremiumSession: Boolean
 
-    if (isNewAccount) {
-      forcePremiumSession = isSamePremiumProfileUsername
-    } else {
-      // todo
-      forcePremiumSession = true
+    // account already exists
+    if (existingUser != null) {
+      if (!connUsername.equals(existingUser.username)) {
+        // todo add to config
+        // todo if connUsername is premium then announce a conflict
+        event.result =
+          PreLoginEvent.PreLoginComponentResult.denied(
+            Component.text(
+              "There's already a user with the same nickname: ${existingUser.username}. \n\nIf its your account, then please use the same nickname.",
+              TextColors.RED,
+            )
+          )
+        return
+      }
+
+      forcePremiumSession = existingUser.isPremium
+    }
+    // fresh account
+    else {
+      if (correspondingPremiumProfile != null) {
+        if (!connUsername.equals(correspondingPremiumProfile.name)) {
+          // todo add to config
+          event.result =
+            PreLoginEvent.PreLoginComponentResult.denied(
+              Component.text(
+                "Your nickname is already occupied. \n\nIf its your account, then please use the same nickname: ${correspondingPremiumProfile.name}",
+                TextColors.RED,
+              )
+            )
+          return
+        } else {
+          forcePremiumSession = true
+        }
+      } else {
+        forcePremiumSession = false
+      }
     }
 
     val state =
       if (forcePremiumSession) {
         // We force velocity to authenticate the player and
         // User won't go any further than this event if not authenticated by velocity
-        AuthState.REQUIRES_ONLINE_ENCRYPTION
+        AuthHandshakeState.REQUIRES_ONLINE_ENCRYPTION
       } else {
-        AuthState.REQUIRES_LOGIN
+        AuthHandshakeState.REQUIRES_CREDENTIALS
       }
 
-    authHandshakeSessionService.createSession(connUsername, state)
+    val sessionId = VelocityUniqueSessionId(event.username, event.connection.remoteAddress)
+    authHandshakeSessionService.createSession(sessionId, existingUser, connUsername, state)
 
     // todo create advanced auto resolution strategy
 
@@ -105,7 +143,8 @@ constructor(
   fun onPostLogin(event: PostLoginEvent) {
     val player = event.player
     val username = player.username
-    val session = authHandshakeSessionService.findSession(username)
+    val sessionId = VelocityUniqueSessionId(username, event.player.remoteAddress)
+    val session = authHandshakeSessionService.findSession(sessionId)
     if (session == null) {
       logger.warn(
         "Player {}:{} went through preLogin event without auth session",
@@ -119,12 +158,31 @@ constructor(
       return
     }
 
-    if (session.state == AuthState.REQUIRES_ONLINE_ENCRYPTION) {
-      // we can assume player got authenticated by velocity
-      authHandshakeSessionService.authenticateSession(session)
+    createAuthSession(player, session, username)
+    authHandshakeSessionService.closeSession(sessionId)
+  }
+
+  private fun createAuthSession(
+    player: Player,
+    handshakeSession: AuthHandshakeSession,
+    username: String,
+  ) {
+    if (handshakeSession.state == AuthHandshakeState.REQUIRES_ONLINE_ENCRYPTION) {
+      val session = authSessionService.createPremiumAuthSession(username)
+      // we are in postLogin event so we can assume
+      // that velocity did the verification for us
+      session.authenticate()
       return
-    } else if (session.state == AuthState.REQUIRES_LOGIN) {
-      // todo create login/register session
+    } else if (handshakeSession.state == AuthHandshakeState.REQUIRES_CREDENTIALS) {
+      val session =
+        if (handshakeSession.existingUser != null) {
+          authSessionService.createLoginAuthSession(handshakeSession.existingUser!!)
+        } else {
+          // todo create register auth session
+          authSessionService.createRegisterAuthSession(username)
+        }
+
+      session.state = AuthSessionState.WAITING_FOR_ALLOCATION
       return
     }
 
@@ -132,7 +190,7 @@ constructor(
       "Player {}:{} went through preLogin with bad auth state: {}",
       username,
       player.uniqueId,
-      session.state.toString(),
+      handshakeSession.state.toString(),
     )
     player.disconnect(Component.text("NavAuth: Bad auth state", TextColors.RED))
   }

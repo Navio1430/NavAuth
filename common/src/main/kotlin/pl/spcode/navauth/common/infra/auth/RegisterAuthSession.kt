@@ -16,24 +16,14 @@
  *
  */
 
-package pl.spcode.navauth.common.module
+package pl.spcode.navauth.common.infra.auth
 
-import com.google.inject.AbstractModule
-import pl.spcode.navauth.common.application.auth.handshake.AuthHandshakeSessionService
-import pl.spcode.navauth.common.application.auth.login.AuthSessionService
-import pl.spcode.navauth.common.application.credentials.CredentialsService
-import pl.spcode.navauth.common.application.mojang.MojangProfileService
-import pl.spcode.navauth.common.application.user.UserService
+import pl.spcode.navauth.common.domain.auth.session.AuthSession
+import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 
-class ServicesModule : AbstractModule() {
+class RegisterAuthSession : AuthSession() {
 
-  override fun configure() {
-    bind(MojangProfileService::class.java)
-    bind(AuthHandshakeSessionService::class.java)
-
-    bind(CredentialsService::class.java)
-    bind(UserService::class.java)
-
-    bind(AuthSessionService::class.java)
+  override fun getSessionType(): AuthSessionType {
+    return AuthSessionType.REGISTER
   }
 }
