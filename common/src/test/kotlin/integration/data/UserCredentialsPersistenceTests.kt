@@ -39,7 +39,7 @@ class UserCredentialsPersistenceTests {
   @Test
   fun `create user credentials from user and hashed password`() {
     val uuid = UUID.randomUUID()
-    val user = User.create(uuid, generateRandomString(10))
+    val user = User.create(uuid, generateRandomString(10), false)
     val hashedPassword = HashedPassword("hashed_pw", HashingAlgorithm.BCRYPT)
 
     val credentials = UserCredentials.create(user, hashedPassword)

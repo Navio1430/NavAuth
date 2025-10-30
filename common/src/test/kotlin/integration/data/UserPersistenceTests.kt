@@ -29,6 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserRepository
 import utils.generateRandomString
+import kotlin.test.assertFalse
 
 @ExtendWith(DataPersistenceTestExtension::class)
 class UserPersistenceTests {
@@ -39,14 +40,15 @@ class UserPersistenceTests {
   fun `test persisted user exists`() {
     val id = UUID.randomUUID()
     val name = generateRandomString(10)
-    val userToPersist = User.create(id, name)
+    val userToPersist = User.create(id, name, false)
     userRepo.save(userToPersist)
 
     val user = userRepo.findById(id)
 
-    assertNotNull("Persisted user should exist in repository", user)
-    assertEquals(userToPersist.uuid, user?.uuid, "User ID should match")
-    assertEquals(userToPersist.username, user?.username, "User name should match")
+    assertNotNull("Persisted user should exist in repository", user!!)
+    assertEquals(userToPersist.uuid, user.uuid, "User ID should match")
+    assertEquals(userToPersist.username, user.username, "User name should match")
+    assertEquals(false, user.isPremium)
   }
 
   @Test
@@ -59,7 +61,7 @@ class UserPersistenceTests {
   fun `test findByUsername existing user`() {
     val id = UUID.randomUUID()
     val name = generateRandomString(10)
-    val userToPersist = User.create(id, name)
+    val userToPersist = User.create(id, name, true)
     userRepo.save(userToPersist)
 
     val user = userRepo.findByUsername(name)
@@ -67,6 +69,7 @@ class UserPersistenceTests {
     assertNotNull("User should be found by username", user!!)
     assertEquals(userToPersist.uuid, user.uuid, "User ID should match")
     assertEquals(userToPersist.username, user.username, "User name should match")
+    assertEquals(true, user.isPremium)
   }
 
   @Test
