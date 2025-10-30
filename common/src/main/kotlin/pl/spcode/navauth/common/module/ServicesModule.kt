@@ -19,7 +19,8 @@
 package pl.spcode.navauth.common.module
 
 import com.google.inject.AbstractModule
-import pl.spcode.navauth.common.application.auth.AuthHandshakeSessionService
+import pl.spcode.navauth.common.application.auth.handshake.AuthHandshakeSessionService
+import pl.spcode.navauth.common.application.auth.login.LoginSessionService
 import pl.spcode.navauth.common.application.credentials.CredentialsService
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
@@ -32,5 +33,7 @@ class ServicesModule : AbstractModule() {
 
     bind(CredentialsService::class.java)
     bind(UserService::class.java)
+
+    bind(LoginSessionService::class.java)
   }
 }

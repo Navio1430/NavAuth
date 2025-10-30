@@ -16,7 +16,7 @@
  *
  */
 
-package pl.spcode.navauth.common.domain.auth
+package pl.spcode.navauth.common.domain.auth.handshake
 
 enum class AuthState {
   REQUIRES_ONLINE_ENCRYPTION,

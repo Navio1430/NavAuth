@@ -21,6 +21,7 @@ package pl.spcode.navauth.common.application.credentials
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
+import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.infra.crypto.BCryptCredentialsHasher
@@ -28,16 +29,14 @@ import pl.spcode.navauth.common.infra.crypto.BCryptCredentialsHasher
 @Singleton
 class CredentialsService @Inject constructor(val credentialsRepository: UserCredentialsRepository) {
 
+  fun findCredentials(user: User): UserCredentials? {
+    return credentialsRepository.findById(user.uuid!!)
+  }
+
   /**
-   * @param user the user to be verified
    * @param password the raw (not hashed) password
    */
-  fun verifyCredentials(user: User, password: String): Boolean {
-
-    val credentials =
-      credentialsRepository.findById(user.uuid!!)
-        ?: // todo: throw exception, credentials not found but tried to verify
-        return false
+  fun verifyPassword(credentials: UserCredentials, password: String): Boolean {
 
     val verified =
       when (credentials.algo) {

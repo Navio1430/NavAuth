@@ -26,8 +26,8 @@ import com.velocitypowered.api.event.player.ServerPreConnectEvent
 import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import pl.spcode.navauth.common.application.auth.AuthHandshakeSessionService
-import pl.spcode.navauth.common.domain.auth.AuthState
+import pl.spcode.navauth.common.application.auth.handshake.AuthHandshakeSessionService
+import pl.spcode.navauth.common.domain.auth.handshake.AuthState
 import pl.spcode.navauth.velocity.component.TextColors
 
 class ConnectionListeners

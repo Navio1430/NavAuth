@@ -16,16 +16,16 @@
  *
  */
 
-package pl.spcode.navauth.common.application.auth
+package pl.spcode.navauth.common.application.auth.handshake
 
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import com.google.inject.Singleton
-import java.time.Duration
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import pl.spcode.navauth.common.domain.auth.AuthHandshakeSession
-import pl.spcode.navauth.common.domain.auth.AuthState
+import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeSession
+import pl.spcode.navauth.common.domain.auth.handshake.AuthState
+import java.time.Duration
 
 @Singleton
 class AuthHandshakeSessionService {

@@ -16,10 +16,13 @@
  *
  */
 
-package pl.spcode.navauth.common.domain.auth
+package pl.spcode.navauth.common.domain.auth.login
 
-class AuthHandshakeSession(val username: String, var state: AuthState) {
-  override fun toString(): String {
-    return "AuthHandshakeSession(username='$username', state=$state)"
-  }
+interface LoginSession {
+
+  /**
+   * @param password raw (not hashed) password
+   */
+  fun verifyPassword(password: String): Boolean;
+
 }
