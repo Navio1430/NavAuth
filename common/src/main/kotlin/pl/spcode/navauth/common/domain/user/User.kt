@@ -26,19 +26,21 @@ import java.util.UUID
 class User {
   @DatabaseField(id = true) val uuid: UUID?
   @DatabaseField(canBeNull = false, index = true) val username: String
+  @DatabaseField(canBeNull = false) val isPremium: Boolean
 
-  @Suppress("unused") private constructor() : this(null, "")
+  @Suppress("unused") private constructor() : this(null, "", false)
 
-  private constructor(uuid: UUID?, username: String) {
+  private constructor(uuid: UUID?, username: String, isPremium: Boolean) {
     this.uuid = uuid
     this.username = username
+    this.isPremium = isPremium
   }
 
   companion object {
-    fun create(uuid: UUID, username: String): User {
+    fun create(uuid: UUID, username: String, isPremium: Boolean): User {
       // todo: check username with regex
 
-      return User(uuid, username)
+      return User(uuid, username, isPremium)
     }
   }
 }
