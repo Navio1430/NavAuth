@@ -34,6 +34,8 @@ urhatedjack - logo design
 
 * Java 21
 * Limbo server e.g., NanoLimbo, PicoLimbo
+* Velocity forwarding set to MODERN
+* All backend servers must be 1.13+
 
 ### 📜 License
 
