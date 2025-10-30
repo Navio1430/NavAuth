@@ -21,6 +21,7 @@ package pl.spcode.navauth.common.application.mojang
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.google.inject.Inject
+import com.google.inject.Singleton
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -29,6 +30,7 @@ import pl.spcode.navauth.common.domain.mojang.MojangProfile
 import pl.spcode.navauth.common.shared.http.HttpStatusCodes
 import pl.spcode.navauth.common.shared.utils.UuidUtils
 
+@Singleton
 class MojangProfileService @Inject constructor(val httpClient: HttpClient) {
 
   val gson: Gson = Gson()
