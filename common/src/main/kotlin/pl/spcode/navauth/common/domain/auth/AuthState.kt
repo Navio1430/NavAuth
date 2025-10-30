@@ -16,21 +16,9 @@
  *
  */
 
-package pl.spcode.navauth.common.module
+package pl.spcode.navauth.common.domain.auth
 
-import com.google.inject.AbstractModule
-import pl.spcode.navauth.common.application.auth.AuthSessionService
-import pl.spcode.navauth.common.application.credentials.CredentialsService
-import pl.spcode.navauth.common.application.mojang.MojangProfileService
-import pl.spcode.navauth.common.application.user.UserService
-
-class ServicesModule : AbstractModule() {
-
-  override fun configure() {
-    bind(MojangProfileService::class.java)
-    bind(AuthSessionService::class.java)
-
-    bind(CredentialsService::class.java)
-    bind(UserService::class.java)
-  }
+enum class AuthState {
+  REQUIRES_LOGIN,
+  AUTHENTICATED
 }
