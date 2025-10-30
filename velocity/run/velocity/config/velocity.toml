@@ -16,7 +16,7 @@ show-max-players = 500
 online-mode = false
 
 # Should the proxy enforce the new public key security standard? By default, this is on.
-force-key-authentication = true
+force-key-authentication = false
 
 # If client's ISP/AS sent from this proxy is different from the one from Mojang's
 # authentication server, the player is kicked. This disallows some VPN and proxy
@@ -34,7 +34,7 @@ prevent-client-proxy-connections = false
 #                  unable to implement network level firewalling (on a shared host).
 # - "modern":      Forward player IPs and UUIDs as part of the login process using
 #                  Velocity's native forwarding. Only applicable for Minecraft 1.13 or higher.
-player-info-forwarding-mode = "NONE"
+player-info-forwarding-mode = "MODERN"
 
 # If you are using modern or BungeeGuard IP forwarding, configure a file that contains a unique secret here.
 # The file is expected to be UTF-8 encoded and not empty.
