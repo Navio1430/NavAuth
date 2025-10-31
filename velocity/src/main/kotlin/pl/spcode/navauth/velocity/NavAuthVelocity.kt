@@ -37,7 +37,7 @@ import pl.spcode.navauth.common.module.DataPersistenceModule
 import pl.spcode.navauth.common.module.HttpClientModule
 import pl.spcode.navauth.common.module.ServicesModule
 import pl.spcode.navauth.velocity.command.CommandsRegistry
-import pl.spcode.navauth.velocity.listener.ListenersRegistry
+import pl.spcode.navauth.velocity.listener.VelocityListenersRegistry
 
 @Singleton
 class NavAuthVelocity
@@ -80,7 +80,7 @@ constructor(val parentInjector: Injector, val proxyServer: ProxyServer) {
   }
 
   fun registerListeners(injector: Injector) {
-    val listeners = ListenersRegistry.getWithInjection(injector)
+    val listeners = VelocityListenersRegistry.getWithInjection(injector)
     listeners.forEach { proxyServer.eventManager.register(pluginInstance, it) }
   }
 
