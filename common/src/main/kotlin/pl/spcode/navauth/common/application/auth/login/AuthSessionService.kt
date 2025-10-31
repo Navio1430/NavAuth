@@ -51,6 +51,7 @@ class AuthSessionService @Inject constructor(val credentialsService: Credentials
 
   fun createRegisterAuthSession(username: String): AuthSession {
     val session = RegisterAuthSession()
+    sessionsMap[username] = session
     logger.debug("created auth session (register) for user {}: {}", username, session)
     return session
   }
