@@ -43,6 +43,7 @@ blossom {
 
 repositories {
   maven { url = uri("https://repo.panda-lang.org/releases") }
+  maven { url = uri("https://repo.codemc.io/repository/maven-releases/") }
 }
 
 dependencies {
@@ -50,6 +51,8 @@ dependencies {
   implementation(project(":common"))
 
   implementation("dev.rollczi:litecommands-velocity:3.10.6")
+
+  compileOnly("com.github.retrooper:packetevents-velocity:2.10.0")
 
   compileOnly(libs.velocitypowered.velocity.api)
   annotationProcessor(libs.velocitypowered.velocity.api)

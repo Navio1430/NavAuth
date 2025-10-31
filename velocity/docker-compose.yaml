@@ -9,6 +9,8 @@ services:
       - TYPE=VELOCITY
       - EULA=TRUE
       - JVM_OPTS=-Dlog4j.configurationFile=log4j2.xml
+      - MINECRAFT_VERSION=1.21.10
+      - MODRINTH_PROJECTS=packetevents:release
 
     volumes:
       - ./run/velocity/plugins:/plugins

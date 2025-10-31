@@ -22,6 +22,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
 import org.slf4j.Logger;
 
@@ -29,6 +30,7 @@ import org.slf4j.Logger;
     id = "navauth",
     name = "NavAuth",
     version = "@version@",
+    dependencies = {@Dependency(id = "packetevents")},
     url = "https://spcode.pl/navauth",
     description =
         "Minecraft login plugin built for speed, security, and seamless player authentication.",

@@ -18,6 +18,8 @@
 
 package pl.spcode.navauth.velocity
 
+import com.github.retrooper.packetevents.PacketEvents
+import com.github.retrooper.packetevents.event.PacketListenerPriority
 import com.google.inject.Inject
 import com.google.inject.Injector
 import com.google.inject.Singleton
@@ -37,7 +39,8 @@ import pl.spcode.navauth.common.module.DataPersistenceModule
 import pl.spcode.navauth.common.module.HttpClientModule
 import pl.spcode.navauth.common.module.ServicesModule
 import pl.spcode.navauth.velocity.command.CommandsRegistry
-import pl.spcode.navauth.velocity.listener.ListenersRegistry
+import pl.spcode.navauth.velocity.listener.VelocityListenersRegistry
+import pl.spcode.navauth.velocity.listener.packetevents.PacketListeners
 
 @Singleton
 class NavAuthVelocity
@@ -60,6 +63,11 @@ constructor(val parentInjector: Injector, val proxyServer: ProxyServer) {
     // register self as listener because of the shutdown event
     proxyServer.eventManager.register(pluginInstance, this)
 
+    // todo make sure packetevents is available, otherwise abort
+    PacketEvents.getAPI()
+      .eventManager
+      .registerListener(PacketListeners(), PacketListenerPriority.NORMAL)
+
     val databaseConfig =
       DatabaseConfig(DatabaseDriverType.H2_MEM, 5, 30000, "", "", "", 0, "default")
     injector =
@@ -80,7 +88,7 @@ constructor(val parentInjector: Injector, val proxyServer: ProxyServer) {
   }
 
   fun registerListeners(injector: Injector) {
-    val listeners = ListenersRegistry.getWithInjection(injector)
+    val listeners = VelocityListenersRegistry.getWithInjection(injector)
     listeners.forEach { proxyServer.eventManager.register(pluginInstance, it) }
   }
 
