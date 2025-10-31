@@ -25,9 +25,11 @@ import com.velocitypowered.api.command.CommandSource
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
+import com.velocitypowered.api.plugin.annotation.DataDirectory
 import com.velocitypowered.api.proxy.ProxyServer
 import dev.rollczi.litecommands.LiteCommands
 import dev.rollczi.litecommands.velocity.LiteVelocityFactory
+import java.nio.file.Path
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.infra.database.DatabaseConfig
@@ -36,13 +38,19 @@ import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.module.DataPersistenceModule
 import pl.spcode.navauth.common.module.HttpClientModule
 import pl.spcode.navauth.common.module.ServicesModule
+import pl.spcode.navauth.common.module.YamlConfigModule
 import pl.spcode.navauth.velocity.command.CommandsRegistry
+import pl.spcode.navauth.velocity.config.GeneralConfig
 import pl.spcode.navauth.velocity.listener.VelocityListenersRegistry
 
 @Singleton
 class NavAuthVelocity
 @Inject
-constructor(val parentInjector: Injector, val proxyServer: ProxyServer) {
+constructor(
+  val parentInjector: Injector,
+  val proxyServer: ProxyServer,
+  @param:DataDirectory val dataDirectory: Path,
+) {
 
   private val logger: Logger = LoggerFactory.getLogger(NavAuthVelocity::class.java)
 
@@ -60,10 +68,15 @@ constructor(val parentInjector: Injector, val proxyServer: ProxyServer) {
     // register self as listener because of the shutdown event
     proxyServer.eventManager.register(pluginInstance, this)
 
+    val generalConfigModule =
+      YamlConfigModule(GeneralConfig::class, dataDirectory.resolve("general.yml").toFile())
+
     val databaseConfig =
       DatabaseConfig(DatabaseDriverType.H2_MEM, 5, 30000, "", "", "", 0, "default")
     injector =
       parentInjector.createChildInjector(
+        // loading hierarchy here is crucial
+        generalConfigModule,
         HttpClientModule(),
         DataPersistenceModule(databaseConfig),
         ServicesModule(),

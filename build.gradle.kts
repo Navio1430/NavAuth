@@ -30,6 +30,7 @@ subprojects {
       name = "papermc"
       url = uri("https://repo.papermc.io/repository/maven-public/")
     }
+    maven("https://storehouse.okaeri.eu/repository/maven-public/")
   }
 
   apply {
