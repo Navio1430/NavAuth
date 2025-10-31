@@ -24,13 +24,30 @@ import dev.rollczi.litecommands.annotations.argument.Arg
 import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
-import pl.spcode.navauth.common.domain.user.UserRepository
+import net.kyori.adventure.text.Component
+import pl.spcode.navauth.common.application.auth.login.AuthSessionService
+import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
+import pl.spcode.navauth.common.infra.auth.LoginAuthSession
+import pl.spcode.navauth.velocity.component.TextColors
 
 @Command(name = "login")
-class LoginCommand @Inject constructor(val userRepository: UserRepository) {
+class LoginCommand @Inject constructor(val authSessionService: AuthSessionService) {
 
   @Execute
   fun login(@Context sender: Player, @Arg(value = "password") password: String) {
-    // todo impl
+    val session = authSessionService.findSession(sender.username)
+    if (session?.getSessionType() != AuthSessionType.LOGIN) {
+      sender.sendMessage(Component.text("Can't use this command right now.", TextColors.RED))
+      return
+    }
+
+    session as LoginAuthSession
+
+    if (session.authWithPassword(password)) {
+      sender.sendMessage(Component.text("Logged in!", TextColors.GREEN))
+      return
+    }
+
+    sender.sendMessage(Component.text("Wrong password!", TextColors.RED))
   }
 }

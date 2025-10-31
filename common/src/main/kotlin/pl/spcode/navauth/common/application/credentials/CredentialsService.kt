@@ -33,6 +33,10 @@ class CredentialsService @Inject constructor(val credentialsRepository: UserCred
     return credentialsRepository.findById(user.uuid!!)
   }
 
+  fun storeUserCredentials(userCredentials: UserCredentials) {
+    credentialsRepository.save(userCredentials)
+  }
+
   /** @param password the raw (not hashed) password */
   fun verifyPassword(credentials: UserCredentials, password: String): Boolean {
 

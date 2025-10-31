@@ -32,8 +32,18 @@ class LoginAuthSession(
     return AuthSessionType.LOGIN
   }
 
-  /** @param password raw (not hashed) password */
-  fun verifyByPassword(password: String): Boolean {
-    return credentialsService.verifyPassword(userCredentials, password)
+  /**
+   * @param password raw (not hashed) password
+   * @return true if authenticated, otherwise false
+   */
+  fun authWithPassword(password: String): Boolean {
+    val verified = credentialsService.verifyPassword(userCredentials, password)
+
+    if (verified) {
+      authenticate()
+      // todo move player to lobby
+    }
+
+    return verified
   }
 }

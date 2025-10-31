@@ -18,14 +18,25 @@
 
 package pl.spcode.navauth.velocity.command.user
 
+import com.google.inject.Inject
 import com.velocitypowered.api.proxy.Player
 import dev.rollczi.litecommands.annotations.argument.Arg
 import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.TextColor
+import pl.spcode.navauth.common.application.auth.login.AuthSessionService
+import pl.spcode.navauth.common.application.user.UserService
+import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
+import pl.spcode.navauth.common.domain.user.User
+import pl.spcode.navauth.common.infra.crypto.BCryptCredentialsHasher
+import pl.spcode.navauth.velocity.component.TextColors
 
 @Command(name = "register")
-class RegisterCommand {
+class RegisterCommand
+@Inject
+constructor(val authSessionService: AuthSessionService, val userService: UserService) {
 
   @Execute
   fun register(
@@ -33,6 +44,24 @@ class RegisterCommand {
     @Arg(value = "password") password: String,
     @Arg(value = "repeat_password") repeatPassword: String,
   ) {
-    // todo impl
+    val session = authSessionService.findSession(sender.username)
+    if (session?.getSessionType() != AuthSessionType.REGISTER) {
+      sender.sendMessage(Component.text("Can't use this command right now.", TextColors.RED))
+      return
+    }
+
+    if (password != repeatPassword) {
+      // todo send error message
+      return
+    }
+
+    userService.storeUserWithCredentials(
+      User.create(sender.uniqueId, sender.username, false),
+      BCryptCredentialsHasher().hash(password),
+    )
+    session.authenticate()
+
+    sender.sendMessage(Component.text("Account created", TextColor.color(0, 200, 0)))
+    // todo move player to lobby
   }
 }

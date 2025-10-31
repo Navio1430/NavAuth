@@ -28,18 +28,13 @@ import com.velocitypowered.api.proxy.ProxyServer
 import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import pl.spcode.navauth.common.application.auth.handshake.AuthHandshakeSessionService
 import pl.spcode.navauth.common.application.auth.login.AuthSessionService
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionState
 import pl.spcode.navauth.velocity.component.TextColors
 
 class ConnectionListeners
 @Inject
-constructor(
-  val authHandshakeSessionService: AuthHandshakeSessionService,
-  val authSessionService: AuthSessionService,
-  val proxyServer: ProxyServer,
-) {
+constructor(val authSessionService: AuthSessionService, val proxyServer: ProxyServer) {
 
   val logger: Logger = LoggerFactory.getLogger(ConnectionListeners::class.java)
 
@@ -103,13 +98,14 @@ constructor(
 
   @Subscribe(order = PostOrder.LAST)
   fun onPlayerChooseInitialServer(event: PlayerChooseInitialServerEvent) {
+    // todo add try catch
 
     val player = event.player
     val authSession = authSessionService.findSession(player.username)
 
     if (authSession != null && !authSession.isAuthenticated) {
       logger.debug(
-        "found unauthenticated auth session for user {}: {}",
+        "PlayerChooseInitialServerEvent: found unauthenticated auth session for user {}: {}",
         player.username,
         authSession,
       )
@@ -126,9 +122,12 @@ constructor(
         return
       }
       // todo: send player to limbo
-      val serverName = "paper"
-      val limbo = proxyServer.getServer(serverName).get()
-      logger.debug("redirecting player {} to limbo server named {}", player.username, serverName)
+      val limbo = proxyServer.allServers.first()
+      logger.debug(
+        "redirecting player {} to limbo server named {}",
+        player.username,
+        limbo.serverInfo.name,
+      )
       event.setInitialServer(limbo)
       authSession.state = AuthSessionState.WAITING_FOR_HANDLER
       return
