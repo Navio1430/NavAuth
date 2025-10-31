@@ -29,7 +29,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserRepository
 import utils.generateRandomString
-import kotlin.test.assertFalse
 
 @ExtendWith(DataPersistenceTestExtension::class)
 class UserPersistenceTests {
