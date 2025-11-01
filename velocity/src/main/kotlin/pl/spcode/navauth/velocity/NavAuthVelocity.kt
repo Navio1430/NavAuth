@@ -32,15 +32,13 @@ import dev.rollczi.litecommands.velocity.LiteVelocityFactory
 import java.nio.file.Path
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import pl.spcode.navauth.common.infra.database.DatabaseConfig
-import pl.spcode.navauth.common.infra.database.DatabaseDriverType
+import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.module.DataPersistenceModule
 import pl.spcode.navauth.common.module.HttpClientModule
 import pl.spcode.navauth.common.module.ServicesModule
 import pl.spcode.navauth.common.module.YamlConfigModule
 import pl.spcode.navauth.velocity.command.CommandsRegistry
-import pl.spcode.navauth.velocity.config.GeneralConfig
 import pl.spcode.navauth.velocity.listener.VelocityListenersRegistry
 
 @Singleton
@@ -71,19 +69,23 @@ constructor(
     val generalConfigModule =
       YamlConfigModule(GeneralConfig::class, dataDirectory.resolve("general.yml").toFile())
 
-    val databaseConfig =
-      DatabaseConfig(DatabaseDriverType.H2_MEM, 5, 30000, "", "", "", 0, "default")
     injector =
       parentInjector.createChildInjector(
         // loading hierarchy here is crucial
         generalConfigModule,
         HttpClientModule(),
-        DataPersistenceModule(databaseConfig),
+        DataPersistenceModule(),
         ServicesModule(),
       )
 
+    connectAndInitDatabase()
+
     registerListeners(injector)
     registerCommands(injector)
+  }
+
+  fun connectAndInitDatabase() {
+    injector.getInstance(DatabaseManager::class.java).connectAndInit()
   }
 
   fun registerCommands(injector: Injector) {

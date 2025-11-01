@@ -16,8 +16,19 @@
  *
  */
 
-package pl.spcode.navauth.velocity.config
+package pl.spcode.navauth.common.config
 
 import eu.okaeri.configs.OkaeriConfig
+import eu.okaeri.configs.annotation.Comment
+import eu.okaeri.configs.annotation.Variable
+import pl.spcode.navauth.common.infra.database.DatabaseConfig
 
-class GeneralConfig : OkaeriConfig() {}
+class GeneralConfig : OkaeriConfig() {
+
+  @Comment("Database connection config")
+  private val databaseConfig: DatabaseConfig = DatabaseConfig()
+
+  @Variable("CONFIG_VERSION")
+  @Comment("Config version. DO NOT CHANGE this property!")
+  private var configVersion: Int = 0
+}

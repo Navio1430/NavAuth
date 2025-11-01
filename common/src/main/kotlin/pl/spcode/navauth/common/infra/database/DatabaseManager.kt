@@ -18,6 +18,7 @@
 
 package pl.spcode.navauth.common.infra.database
 
+import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.dao.DaoManager
@@ -29,14 +30,16 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
 @Singleton
-class DatabaseManager(val config: DatabaseConfig) {
+class DatabaseManager
+@Inject
+constructor(val config: DatabaseConfig, val entitiesRegistrar: EntitiesRegistrar) {
 
   private val dataSource: HikariDataSource = HikariDataSource()
   lateinit var connectionSource: ConnectionSource
 
   private val daoMap = ConcurrentHashMap<Class<*>, Dao<*, *>>()
 
-  fun connectAndInit(entitiesRegistrar: EntitiesRegistrar) {
+  fun connectAndInit() {
     dataSource.poolName = "NavAuthPool"
 
     dataSource.addDataSourceProperty("cachePrepStmts", "true")

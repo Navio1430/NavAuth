@@ -12,6 +12,7 @@ services:
 
     volumes:
       - ./run/velocity/plugins:/plugins
+      - ./run/velocity/navauth:/server/plugins/navauth
       - ./run/velocity/config:/config
 
   paper:
