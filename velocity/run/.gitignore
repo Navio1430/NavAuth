@@ -1,0 +1,13 @@
+
+# ignore all
+/*
+
+# paper
+!paper/log4j2.xml
+
+# velocity
+!velocity/config/velocity.toml
+!velocity/config/log4j2.xml
+
+# limbo
+!limbo/server.toml

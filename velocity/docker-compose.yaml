@@ -1,6 +1,13 @@
 name: navauth-velocity
 
 services:
+
+  limbo:
+    image: ghcr.io/quozul/picolimbo:latest
+    restart: unless-stopped
+    volumes:
+      - ./run/limbo/server.toml:/usr/src/app/server.toml
+
   velocity:
     image: itzg/mc-proxy
     ports:
@@ -18,8 +25,6 @@ services:
   paper:
     hostname: paper1
     image: itzg/minecraft-server
-    ports:
-      - "25565:25565"
     environment:
       - EULA=TRUE
       - TYPE=PAPER

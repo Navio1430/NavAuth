@@ -72,7 +72,8 @@ enable-player-address-logging = true
 [servers]
 # Configure your servers here. Each key represents the server's name, and the value
 # represents the IP address of the server to connect to.
-limbo = "paper:25565"
+limbo = "limbo:25565"
+paper = "paper:25565"
 
 # In what order we should try servers when a player logs in or is kicked from a server.
 try = [
