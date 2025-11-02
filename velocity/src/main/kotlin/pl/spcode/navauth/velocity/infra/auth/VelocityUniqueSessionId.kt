@@ -21,6 +21,13 @@ package pl.spcode.navauth.velocity.infra.auth
 import java.net.InetSocketAddress
 import pl.spcode.navauth.common.domain.auth.UniqueSessionId
 
+/**
+ * Unique id based on nickname and socket port.
+ * Structure: "username:port"
+ *
+ * NOTE: Do not use this as an identifier outside single host.
+ * This ID loses its uniqueness in a distributed system.
+ */
 class VelocityUniqueSessionId : UniqueSessionId {
 
   override val id: String
