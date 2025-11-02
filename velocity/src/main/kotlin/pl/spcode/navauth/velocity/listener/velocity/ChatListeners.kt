@@ -18,22 +18,26 @@
 
 package pl.spcode.navauth.velocity.listener.velocity
 
+import com.google.inject.Inject
 import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.player.PlayerChatEvent
+import pl.spcode.navauth.common.application.auth.session.AuthSessionService
+import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 
-class ChatListeners {
+class ChatListeners @Inject constructor(val authSessionService: AuthSessionService) {
 
   @Subscribe(order = PostOrder.FIRST)
   fun onChat(event: PlayerChatEvent) {
     val player = event.player
 
-    // todo check if player is authenticated
-    val authenticated = false
-
-    @Suppress("DEPRECATION") // IDK why do they mark this as deprecated if there's no other option
-    if (!authenticated) {
-      event.result = PlayerChatEvent.ChatResult.denied()
+    val sessionId = VelocityUniqueSessionId(player)
+    val session = authSessionService.findSession(sessionId)
+    if (session != null) {
+      @Suppress("DEPRECATION") // IDK why do they mark this as deprecated if there's no other option
+      if (!session.isAuthenticated) {
+        event.result = PlayerChatEvent.ChatResult.denied()
+      }
     }
   }
 }
