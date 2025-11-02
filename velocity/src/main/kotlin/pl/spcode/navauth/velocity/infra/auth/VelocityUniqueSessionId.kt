@@ -18,6 +18,7 @@
 
 package pl.spcode.navauth.velocity.infra.auth
 
+import com.velocitypowered.api.proxy.Player
 import java.net.InetSocketAddress
 import pl.spcode.navauth.common.domain.auth.UniqueSessionId
 
@@ -36,4 +37,14 @@ class VelocityUniqueSessionId : UniqueSessionId {
   }
 
   constructor(username: String, socket: InetSocketAddress) : this("$username:${socket.port}")
+
+  constructor(player: Player) : this(player.username, player.remoteAddress)
+
+  override fun hashCode(): Int {
+    return super.hashCode()
+  }
+
+  override fun equals(other: Any?): Boolean {
+    return super.equals(other)
+  }
 }
