@@ -18,13 +18,16 @@
 
 package pl.spcode.navauth.velocity.listener.velocity
 
+import com.google.inject.Inject
 import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.command.CommandExecuteEvent
 import com.velocitypowered.api.event.command.PlayerAvailableCommandsEvent
 import com.velocitypowered.api.proxy.Player
+import pl.spcode.navauth.common.application.auth.session.AuthSessionService
+import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 
-class CommandsListeners {
+class CommandsListeners @Inject constructor(val authSessionService: AuthSessionService) {
 
   val whitelist = listOf("login", "register")
 
@@ -34,24 +37,30 @@ class CommandsListeners {
       return
     }
 
-    val player = event.commandSource as Player
-    val authenticated = false // todo check if player is authenticated
-    if (authenticated) {
+    val command = event.command.split(" ", ignoreCase = true, limit = 2).first()
+    val whitelisted = whitelist.contains(command)
+    if (whitelisted) {
+      event.result = CommandExecuteEvent.CommandResult.allowed()
       return
     }
 
-    val command = event.command.split(" ", ignoreCase = true, limit = 2).first()
-
-    // todo check if command is whitelisted
-    val whitelisted = whitelist.contains(command)
-
-    if (!whitelisted) {
+    val player = event.commandSource as Player
+    val sessionId = VelocityUniqueSessionId(player)
+    val session = authSessionService.findSession(sessionId)
+    if (session == null || !session.isAuthenticated) {
       event.result = CommandExecuteEvent.CommandResult.denied()
+      return
     }
   }
 
   @Subscribe(order = PostOrder.FIRST)
   fun onPlayerAvailableCommands(event: PlayerAvailableCommandsEvent) {
-    event.rootNode.children.removeIf { !whitelist.contains(it.name) }
+    val sessionId = VelocityUniqueSessionId(event.player)
+    val session = authSessionService.findSession(sessionId)
+    if (session == null) {
+      event.rootNode.children.clear()
+    } else if (!session.isAuthenticated) {
+      event.rootNode.children.removeIf { !whitelist.contains(it.name) }
+    }
   }
 }

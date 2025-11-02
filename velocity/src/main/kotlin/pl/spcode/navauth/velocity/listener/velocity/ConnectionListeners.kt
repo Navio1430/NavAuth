@@ -156,7 +156,7 @@ constructor(val authSessionService: AuthSessionService, val proxyServer: ProxySe
         return
       }
       // todo: send player to limbo
-      val limbo = proxyServer.allServers.first()
+      val limbo = proxyServer.getServer("limbo").get()
       logger.debug(
         "redirecting player {} to limbo server named {}",
         player.username,
@@ -165,6 +165,9 @@ constructor(val authSessionService: AuthSessionService, val proxyServer: ProxySe
       event.setInitialServer(limbo)
       authSession.state = AuthSessionState.WAITING_FOR_HANDLER
       return
+    } else {
+      val paper = proxyServer.getServer("paper").get()
+      event.setInitialServer(paper)
     }
 
     //    val player = event.player

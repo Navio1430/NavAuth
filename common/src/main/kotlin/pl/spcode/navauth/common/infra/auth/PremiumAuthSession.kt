@@ -27,7 +27,5 @@ class PremiumAuthSession : AuthSession() {
     return AuthSessionType.PREMIUM
   }
 
-  override fun destroy() {
-    TODO("Not yet implemented")
-  }
+  override fun destroy() {}
 }
