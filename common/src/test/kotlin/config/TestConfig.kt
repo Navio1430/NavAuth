@@ -24,7 +24,7 @@ import pl.spcode.navauth.common.infra.database.DatabaseDriverType
 
 class TestConfig : GeneralConfig() {
 
-  private class TestDatabaseConfig: DatabaseConfig() {
+  private class TestDatabaseConfig : DatabaseConfig() {
     init {
       this.driverType = DatabaseDriverType.H2_MEM
       this.database = "testdb"

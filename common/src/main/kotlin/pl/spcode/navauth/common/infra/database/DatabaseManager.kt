@@ -26,9 +26,9 @@ import com.j256.ormlite.jdbc.DataSourceConnectionSource
 import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
 import com.zaxxer.hikari.HikariDataSource
-import pl.spcode.navauth.common.config.GeneralConfig
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
+import pl.spcode.navauth.common.config.GeneralConfig
 
 @Singleton
 class DatabaseManager
