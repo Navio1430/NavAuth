@@ -23,7 +23,7 @@ import pl.spcode.navauth.common.domain.auth.session.AuthSession
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 
-class LoginAuthSession(
+open class LoginAuthSession(
   val userCredentials: UserCredentials,
   val credentialsService: CredentialsService,
 ) : AuthSession() {
@@ -31,6 +31,8 @@ class LoginAuthSession(
   override fun getSessionType(): AuthSessionType {
     return AuthSessionType.LOGIN
   }
+
+  override fun destroy() {}
 
   /**
    * @param password raw (not hashed) password

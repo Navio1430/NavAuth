@@ -21,9 +21,11 @@ package pl.spcode.navauth.common.infra.auth
 import pl.spcode.navauth.common.domain.auth.session.AuthSession
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 
-class RegisterAuthSession : AuthSession() {
+open class RegisterAuthSession : AuthSession() {
 
   override fun getSessionType(): AuthSessionType {
     return AuthSessionType.REGISTER
   }
+
+  override fun destroy() {}
 }

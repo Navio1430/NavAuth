@@ -40,6 +40,8 @@ import pl.spcode.navauth.common.module.ServicesModule
 import pl.spcode.navauth.common.module.YamlConfigModule
 import pl.spcode.navauth.velocity.command.CommandsRegistry
 import pl.spcode.navauth.velocity.listener.VelocityListenersRegistry
+import pl.spcode.navauth.velocity.module.SchedulerModule
+import pl.spcode.navauth.velocity.module.VelocityServicesModule
 
 @Singleton
 class NavAuthVelocity
@@ -73,9 +75,11 @@ constructor(
       parentInjector.createChildInjector(
         // loading hierarchy here is crucial
         generalConfigModule,
+        SchedulerModule(pluginInstance, proxyServer.scheduler),
         HttpClientModule(),
         DataPersistenceModule(),
         ServicesModule(),
+        VelocityServicesModule(),
       )
 
     connectAndInitDatabase()

@@ -26,4 +26,8 @@ class PremiumAuthSession : AuthSession() {
   override fun getSessionType(): AuthSessionType {
     return AuthSessionType.PREMIUM
   }
+
+  override fun destroy() {
+    TODO("Not yet implemented")
+  }
 }

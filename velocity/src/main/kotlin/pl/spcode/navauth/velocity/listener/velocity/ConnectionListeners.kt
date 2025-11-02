@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionState
 import pl.spcode.navauth.velocity.component.TextColors
+import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 
 class ConnectionListeners
 @Inject
@@ -40,16 +41,31 @@ constructor(val authSessionService: AuthSessionService, val proxyServer: ProxySe
 
   @Subscribe
   fun onDisconnect(event: DisconnectEvent) {
-    authSessionService.invalidateSession(event.player.username)
+    authSessionService.invalidateSession(VelocityUniqueSessionId(event.player))
   }
 
   @Subscribe(order = PostOrder.FIRST)
   fun onServerConnect(event: ServerPreConnectEvent) {
 
     val player = event.player
-    val authSession = authSessionService.findSession(player.username)
+    val uniqueSessionId = VelocityUniqueSessionId(player)
+    val authSession = authSessionService.findSession(uniqueSessionId)
 
-    if (authSession != null && !authSession.isAuthenticated) {
+    if (authSession == null) {
+      logger.warn(
+        "OnServerConnect: player ${player.username} tried to connect without an auth session, disconnecting the player..."
+      )
+      player.disconnect(
+        Component.text(
+          "NavAuth: user tried to connect into a server without an auth session",
+          TextColors.RED,
+        )
+      )
+      event.result = ServerPreConnectEvent.ServerResult.denied()
+      return
+    }
+
+    if (!authSession.isAuthenticated) {
       if (authSession.state != AuthSessionState.WAITING_FOR_HANDLER) {
         logger.warn(
           "OnServerConnect: user {}:{} has bad auth state: {}",
@@ -58,7 +74,7 @@ constructor(val authSessionService: AuthSessionService, val proxyServer: ProxySe
           authSession.toString(),
         )
         player.disconnect(
-          Component.text("NavAuth: Bad auth state on server connect", TextColors.RED)
+          Component.text("NavAuth: bad auth state on server connect", TextColors.RED)
         )
         event.result = ServerPreConnectEvent.ServerResult.denied()
         return
@@ -101,9 +117,24 @@ constructor(val authSessionService: AuthSessionService, val proxyServer: ProxySe
     // todo add try catch
 
     val player = event.player
-    val authSession = authSessionService.findSession(player.username)
+    val uniqueSessionId = VelocityUniqueSessionId(event.player)
+    val authSession = authSessionService.findSession(uniqueSessionId)
 
-    if (authSession != null && !authSession.isAuthenticated) {
+    if (authSession == null) {
+      logger.warn(
+        "PlayerChooseInitialServer: server tried to pick initial server for ${player.username} user without an auth session, disconnecting the player..."
+      )
+      player.disconnect(
+        Component.text(
+          "NavAuth: server tried to choose an initial server for you without an auth session",
+          TextColors.RED,
+        )
+      )
+      event.setInitialServer(null)
+      return
+    }
+
+    if (!authSession.isAuthenticated) {
       logger.debug(
         "PlayerChooseInitialServerEvent: found unauthenticated auth session for user {}: {}",
         player.username,
@@ -111,13 +142,16 @@ constructor(val authSessionService: AuthSessionService, val proxyServer: ProxySe
       )
       if (authSession.state != AuthSessionState.WAITING_FOR_ALLOCATION) {
         logger.warn(
-          "PlayerChooseInitialServerEvent: user {}:{} has bad auth state: {}",
+          "PlayerChooseInitialServerEvent: server tried to choose initial server for user {}:{} with a bad auth state: {}",
           player.username,
           player.uniqueId,
           authSession.toString(),
         )
         player.disconnect(
-          Component.text("NavAuth: Bad auth state on initial server event", TextColors.RED)
+          Component.text(
+            "NavAuth: can't choose an initial server with a bad auth state",
+            TextColors.RED,
+          )
         )
         return
       }

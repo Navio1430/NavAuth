@@ -16,21 +16,15 @@
  *
  */
 
-package pl.spcode.navauth.common.domain.auth.session
+package pl.spcode.navauth.velocity.module
 
-abstract class AuthSession {
+import com.google.inject.AbstractModule
+import com.google.inject.Singleton
+import pl.spcode.navauth.velocity.application.auth.session.VelocityAuthSessionFactory
 
-  abstract fun getSessionType(): AuthSessionType
+class VelocityServicesModule : AbstractModule() {
 
-  abstract fun destroy()
-
-  var state: AuthSessionState = AuthSessionState.WAITING_FOR_ALLOCATION
-
-  var isAuthenticated: Boolean = false
-    private set
-
-  fun authenticate() {
-    isAuthenticated = true
-    state = AuthSessionState.AUTHENTICATED
+  override fun configure() {
+    bind(VelocityAuthSessionFactory::class.java).`in`(Singleton::class.java)
   }
 }

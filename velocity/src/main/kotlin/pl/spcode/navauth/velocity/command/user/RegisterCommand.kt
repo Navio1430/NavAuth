@@ -32,6 +32,7 @@ import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.infra.crypto.BCryptCredentialsHasher
 import pl.spcode.navauth.velocity.component.TextColors
+import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 
 @Command(name = "register")
 class RegisterCommand
@@ -44,7 +45,7 @@ constructor(val authSessionService: AuthSessionService, val userService: UserSer
     @Arg(value = "password") password: String,
     @Arg(value = "repeat_password") repeatPassword: String,
   ) {
-    val session = authSessionService.findSession(sender.username)
+    val session = authSessionService.findSession(VelocityUniqueSessionId(sender))
     if (session?.getSessionType() != AuthSessionType.REGISTER) {
       sender.sendMessage(Component.text("Can't use this command right now.", TextColors.RED))
       return

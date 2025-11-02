@@ -35,6 +35,8 @@ import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeSession
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeState
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionState
+import pl.spcode.navauth.common.infra.auth.PremiumAuthSession
+import pl.spcode.navauth.velocity.application.auth.session.VelocityAuthSessionFactory
 import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 
@@ -46,6 +48,7 @@ constructor(
   val userService: UserService,
   val authHandshakeSessionService: AuthHandshakeSessionService,
   val authSessionService: AuthSessionService,
+  val authSessionFactory: VelocityAuthSessionFactory,
 ) {
 
   val logger: Logger = LoggerFactory.getLogger(LoginListeners::class.java)
@@ -53,8 +56,6 @@ constructor(
   @Subscribe(order = PostOrder.LAST)
   fun onPreLogin(event: PreLoginEvent) {
     if (!event.result.isAllowed) return
-
-    logger.info("PreLogin - System identity hash: {}", event.connection.remoteAddress.port)
 
     // todo check if user nickname matches regex
 
@@ -167,8 +168,9 @@ constructor(
     handshakeSession: AuthHandshakeSession,
     username: String,
   ) {
+    val uniqueSessionId = VelocityUniqueSessionId(player)
     if (handshakeSession.state == AuthHandshakeState.REQUIRES_ONLINE_ENCRYPTION) {
-      val session = authSessionService.createPremiumAuthSession(username)
+      val session = authSessionService.registerSession(uniqueSessionId, PremiumAuthSession())
       // we are in postLogin event so we can assume
       // that velocity did the verification for us
       session.authenticate()
@@ -176,10 +178,13 @@ constructor(
     } else if (handshakeSession.state == AuthHandshakeState.REQUIRES_CREDENTIALS) {
       val session =
         if (handshakeSession.existingUser != null) {
-          authSessionService.createLoginAuthSession(handshakeSession.existingUser!!)
+          authSessionFactory.createLoginAuthSession(
+            player,
+            uniqueSessionId,
+            handshakeSession.existingUser!!,
+          )
         } else {
-          // todo create register auth session
-          authSessionService.createRegisterAuthSession(username)
+          authSessionFactory.createRegisterAuthSession(player, uniqueSessionId)
         }
 
       session.state = AuthSessionState.WAITING_FOR_ALLOCATION

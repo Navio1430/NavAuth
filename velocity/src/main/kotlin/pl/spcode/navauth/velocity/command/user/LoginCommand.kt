@@ -27,21 +27,23 @@ import dev.rollczi.litecommands.annotations.execute.Execute
 import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
-import pl.spcode.navauth.common.infra.auth.LoginAuthSession
 import pl.spcode.navauth.velocity.component.TextColors
+import pl.spcode.navauth.velocity.infra.auth.VelocityLoginAuthSession
+import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 
 @Command(name = "login")
 class LoginCommand @Inject constructor(val authSessionService: AuthSessionService) {
 
   @Execute
   fun login(@Context sender: Player, @Arg(value = "password") password: String) {
-    val session = authSessionService.findSession(sender.username)
+    val uniqueSessionId = VelocityUniqueSessionId(sender)
+    val session = authSessionService.findSession(uniqueSessionId)
     if (session?.getSessionType() != AuthSessionType.LOGIN) {
       sender.sendMessage(Component.text("Can't use this command right now.", TextColors.RED))
       return
     }
 
-    session as LoginAuthSession
+    session as VelocityLoginAuthSession
 
     if (session.authWithPassword(password)) {
       sender.sendMessage(Component.text("Logged in!", TextColors.GREEN))
