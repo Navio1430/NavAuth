@@ -12,10 +12,12 @@ services:
     image: itzg/mc-proxy
     ports:
       - "25577:25577"
+      - "5005:5005"
     environment:
       - TYPE=VELOCITY
       - EULA=TRUE
       - JVM_OPTS=-Dlog4j.configurationFile=log4j2.xml
+      - JVM_XX_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
 
     volumes:
       - ./run/velocity/plugins:/plugins
