@@ -26,7 +26,7 @@ import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
-import pl.spcode.navauth.common.application.auth.login.AuthSessionService
+import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 import pl.spcode.navauth.common.domain.user.User

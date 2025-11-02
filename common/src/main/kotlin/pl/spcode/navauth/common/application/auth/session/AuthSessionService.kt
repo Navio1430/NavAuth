@@ -16,7 +16,7 @@
  *
  */
 
-package pl.spcode.navauth.common.application.auth.login
+package pl.spcode.navauth.common.application.auth.session
 
 import com.google.inject.Inject
 import com.google.inject.Singleton

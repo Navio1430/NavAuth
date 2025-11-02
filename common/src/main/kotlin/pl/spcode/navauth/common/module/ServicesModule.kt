@@ -20,7 +20,7 @@ package pl.spcode.navauth.common.module
 
 import com.google.inject.AbstractModule
 import pl.spcode.navauth.common.application.auth.handshake.AuthHandshakeSessionService
-import pl.spcode.navauth.common.application.auth.login.AuthSessionService
+import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.credentials.CredentialsService
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService

@@ -29,7 +29,7 @@ import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.application.auth.handshake.AuthHandshakeSessionService
-import pl.spcode.navauth.common.application.auth.login.AuthSessionService
+import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeSession

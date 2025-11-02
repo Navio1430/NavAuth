@@ -16,6 +16,6 @@
  *
  */
 
-package pl.spcode.navauth.common.application.auth.login
+package pl.spcode.navauth.common.application.auth.session
 
 class AuthSessionException(message: String, cause: Throwable? = null) : Exception(message, cause) {}
