@@ -16,21 +16,23 @@
  *
  */
 
-package pl.spcode.navauth.common.config
+package config
 
-import eu.okaeri.configs.OkaeriConfig
-import eu.okaeri.configs.annotation.Comment
-import eu.okaeri.configs.annotation.Variable
+import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.infra.database.DatabaseConfig
+import pl.spcode.navauth.common.infra.database.DatabaseDriverType
 
-open class GeneralConfig : OkaeriConfig() {
+class TestConfig : GeneralConfig() {
 
-  @Comment("Database connection config")
-  var databaseConfig: DatabaseConfig = DatabaseConfig()
-    protected set
+  private class TestDatabaseConfig: DatabaseConfig() {
+    init {
+      this.driverType = DatabaseDriverType.H2_MEM
+      this.database = "testdb"
+      this.username = "test"
+    }
+  }
 
-  @Variable("CONFIG_VERSION")
-  @Comment("Config version. DO NOT CHANGE this property!")
-  var configVersion: Int = 0
-    protected set
+  init {
+    this.databaseConfig = TestDatabaseConfig()
+  }
 }

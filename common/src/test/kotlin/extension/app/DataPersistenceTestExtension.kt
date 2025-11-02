@@ -20,20 +20,18 @@ package extension.app
 
 import com.google.inject.Guice
 import com.google.inject.Injector
+import module.TestsConfigModule
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.TestInstancePostProcessor
-import pl.spcode.navauth.common.infra.database.DatabaseConfig
-import pl.spcode.navauth.common.infra.database.DatabaseDriverType
+import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.module.DataPersistenceModule
 import utils.GuiceUtils
 
 class DataPersistenceTestExtension : TestInstancePostProcessor {
-
-  var injector: Injector
+  var injector: Injector = Guice.createInjector(TestsConfigModule(), DataPersistenceModule())
 
   init {
-    val config = DatabaseConfig(DatabaseDriverType.H2_MEM, 5, 30000, "", "", "", 0, "default")
-    injector = Guice.createInjector(DataPersistenceModule(config))
+    injector.getInstance(DatabaseManager::class.java).connectAndInit()
   }
 
   override fun postProcessTestInstance(testInstance: Any, context: ExtensionContext) {

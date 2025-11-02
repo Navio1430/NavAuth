@@ -26,13 +26,16 @@ import com.j256.ormlite.jdbc.DataSourceConnectionSource
 import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
 import com.zaxxer.hikari.HikariDataSource
+import pl.spcode.navauth.common.config.GeneralConfig
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
 @Singleton
 class DatabaseManager
 @Inject
-constructor(val config: DatabaseConfig, val entitiesRegistrar: EntitiesRegistrar) {
+constructor(val generalConfig: GeneralConfig, val entitiesRegistrar: EntitiesRegistrar) {
+
+  val config: DatabaseConfig = generalConfig.databaseConfig
 
   private val dataSource: HikariDataSource = HikariDataSource()
   lateinit var connectionSource: ConnectionSource

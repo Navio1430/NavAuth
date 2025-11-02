@@ -16,21 +16,15 @@
  *
  */
 
-package pl.spcode.navauth.common.config
+package module
 
-import eu.okaeri.configs.OkaeriConfig
-import eu.okaeri.configs.annotation.Comment
-import eu.okaeri.configs.annotation.Variable
-import pl.spcode.navauth.common.infra.database.DatabaseConfig
+import com.google.inject.AbstractModule
+import config.TestConfig
+import pl.spcode.navauth.common.config.GeneralConfig
 
-open class GeneralConfig : OkaeriConfig() {
+class TestsConfigModule : AbstractModule() {
 
-  @Comment("Database connection config")
-  var databaseConfig: DatabaseConfig = DatabaseConfig()
-    protected set
-
-  @Variable("CONFIG_VERSION")
-  @Comment("Config version. DO NOT CHANGE this property!")
-  var configVersion: Int = 0
-    protected set
+  override fun configure() {
+    bind(GeneralConfig::class.java).toInstance(TestConfig())
+  }
 }
