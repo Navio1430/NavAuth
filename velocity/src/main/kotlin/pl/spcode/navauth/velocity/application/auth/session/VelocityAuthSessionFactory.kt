@@ -25,6 +25,7 @@ import pl.spcode.navauth.common.application.auth.session.AuthSessionException
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.credentials.CredentialsService
 import pl.spcode.navauth.common.domain.user.User
+import pl.spcode.navauth.velocity.application.event.VelocityEventDispatcher
 import pl.spcode.navauth.velocity.infra.auth.VelocityLoginAuthSession
 import pl.spcode.navauth.velocity.infra.auth.VelocityPremiumAuthSession
 import pl.spcode.navauth.velocity.infra.auth.VelocityRegisterAuthSession
@@ -39,6 +40,7 @@ constructor(
   val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
   val credentialsService: CredentialsService,
   val scheduler: NavAuthScheduler,
+  val velocityEventDispatcher: VelocityEventDispatcher,
 ) {
 
   fun createLoginAuthSession(
@@ -52,7 +54,14 @@ constructor(
           "failed to create a login session: player ${player.username} credentials not found"
         )
 
-    val session = VelocityLoginAuthSession(player, credentials, credentialsService, scheduler)
+    val session =
+      VelocityLoginAuthSession(
+        player,
+        credentials,
+        credentialsService,
+        scheduler,
+        velocityEventDispatcher,
+      )
     return authSessionService.registerSession(uniqueSessionId, session)
   }
 
@@ -60,7 +69,7 @@ constructor(
     player: Player,
     uniqueSessionId: VelocityUniqueSessionId,
   ): VelocityRegisterAuthSession {
-    val session = VelocityRegisterAuthSession(player, scheduler)
+    val session = VelocityRegisterAuthSession(player, scheduler, velocityEventDispatcher)
     return authSessionService.registerSession(uniqueSessionId, session)
   }
 

@@ -23,12 +23,16 @@ import com.velocitypowered.api.scheduler.ScheduledTask
 import java.time.Duration
 import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.infra.auth.RegisterAuthSession
+import pl.spcode.navauth.velocity.application.event.VelocityEventDispatcher
 import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 import pl.spcode.navauth.velocity.scheduler.NavAuthScheduler
 
-class VelocityRegisterAuthSession(val player: Player, scheduler: NavAuthScheduler) :
-  RegisterAuthSession<VelocityPlayerAdapter>(VelocityPlayerAdapter(player)) {
+class VelocityRegisterAuthSession(
+  val player: Player,
+  scheduler: NavAuthScheduler,
+  val velocityEventDispatcher: VelocityEventDispatcher,
+) : RegisterAuthSession<VelocityPlayerAdapter>(VelocityPlayerAdapter(player)) {
 
   val notifyMessageTask: ScheduledTask
   @Suppress("JoinDeclarationAndAssignment") val disconnectPlayerTask: ScheduledTask
@@ -63,10 +67,16 @@ class VelocityRegisterAuthSession(val player: Player, scheduler: NavAuthSchedule
   }
 
   override fun onAuthenticated() {
+    cancelTasks()
     player.sendMessage(Component.text("authenticated"))
+    velocityEventDispatcher.fireVelocityChooseInitialServerEventAsync(player)
   }
 
   override fun onInvalidate() {
+    cancelTasks()
+  }
+
+  fun cancelTasks() {
     notifyMessageTask.cancel()
     disconnectPlayerTask.cancel()
   }

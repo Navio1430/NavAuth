@@ -24,7 +24,6 @@ import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.connection.DisconnectEvent
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent
 import com.velocitypowered.api.event.player.ServerPreConnectEvent
-import com.velocitypowered.api.proxy.ProxyServer
 import com.velocitypowered.api.proxy.server.RegisteredServer
 import net.kyori.adventure.text.Component
 import org.slf4j.Logger
@@ -42,7 +41,6 @@ class ConnectionListeners
 constructor(
   val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
   val serverSelectionService: VelocityServerSelectionService,
-  val proxyServer: ProxyServer,
 ) {
 
   val logger: Logger = LoggerFactory.getLogger(ConnectionListeners::class.java)
@@ -90,7 +88,7 @@ constructor(
     }
   }
 
-  @Subscribe(order = PostOrder.LAST)
+  @Subscribe(order = PostOrder.FIRST)
   fun onPlayerChooseInitialServer(event: PlayerChooseInitialServerEvent) {
     // todo add try catch
 
@@ -109,14 +107,17 @@ constructor(
         )
       )
       return
-    }
-
-    if (!authSession.isAuthenticated) {
+    } else {
       logger.debug(
-        "PlayerChooseInitialServerEvent: found unauthenticated auth session for user {}: {}",
+        "PlayerChooseInitialServerEvent: found auth session for user {}: {}",
         player.username,
         authSession,
       )
+    }
+
+    if (authSession.isAuthenticated) {
+      setInitialServerAuthenticated(event)
+    } else {
       if (authSession.state != AuthSessionState.WAITING_FOR_ALLOCATION) {
         logger.warn(
           "PlayerChooseInitialServerEvent: server tried to choose initial server for user {}:{} with a bad auth state: {}",
@@ -132,30 +133,65 @@ constructor(
         )
         return
       }
-
-      val limbo: RegisteredServer
       try {
-        limbo = serverSelectionService.getLimboServer(player)
+        val limbo = getLimboServerUnauthenticated(event)
+        logger.debug(
+          "set user '{}' initial server to limbo server named {}",
+          player.username,
+          limbo.serverInfo.name,
+        )
+
+        authSession.state = AuthSessionState.WAITING_FOR_HANDLER
       } catch (ex: ServerNotFoundException) {
         logger.warn(
-          "PlayerChooseInitialServer: failed to get limbo server for player '${player.username}'",
+          "PlayerChooseInitialServer: failed to get limbo server for unauthenticated user '${player.username}'",
           ex,
         )
         player.disconnect(Component.text("NavAuth: limbo server not found", TextColors.RED))
         return
       }
-
-      logger.debug(
-        "redirecting player {} to limbo server named {}",
-        player.username,
-        limbo.serverInfo.name,
-      )
-      event.setInitialServer(limbo)
-      authSession.state = AuthSessionState.WAITING_FOR_HANDLER
-      return
-    } else {
-      val paper = proxyServer.getServer("paper").get()
-      event.setInitialServer(paper)
     }
+  }
+
+  /**
+   * If server found then sets it as the initial server, if there's no initial server defined, then
+   * nothing happens.
+   */
+  private fun setInitialServerAuthenticated(event: PlayerChooseInitialServerEvent) {
+    val player = event.player
+    val backend: RegisteredServer?
+    try {
+      backend = serverSelectionService.getInitialServer(player)
+
+      if (backend != null) {
+        logger.debug(
+          "set user '{}' initial server to '{}'",
+          player.username,
+          backend.serverInfo.name,
+        )
+        event.setInitialServer(backend)
+      }
+    } catch (ex: ServerNotFoundException) {
+      logger.debug(
+        "PlayerChooseInitialServer: initial server not found for an authenticated user '${player.username}'",
+        ex,
+      )
+      player.disconnect(
+        Component.text("NavAuth: initial server not found '${ex.serverName}'", TextColors.RED)
+      )
+      return
+    }
+  }
+
+  /**
+   * @return RegisteredServer if found, otherwise null if server has not been found and player was
+   *   disconnected
+   * @throws ServerNotFoundException if no registered limbo was found
+   */
+  private fun getLimboServerUnauthenticated(
+    event: PlayerChooseInitialServerEvent
+  ): RegisteredServer {
+    val player = event.player
+    return serverSelectionService.getLimboServer(player)
   }
 }

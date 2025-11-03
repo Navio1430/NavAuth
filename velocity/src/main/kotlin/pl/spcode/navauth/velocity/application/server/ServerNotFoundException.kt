@@ -18,4 +18,5 @@
 
 package pl.spcode.navauth.velocity.application.server
 
-class ServerNotFoundException(message: String) : Exception(message) {}
+class ServerNotFoundException(message: String, val serverName: String? = null) :
+  Exception(message) {}

@@ -21,7 +21,6 @@ package pl.spcode.navauth.common.config
 import eu.okaeri.configs.OkaeriConfig
 import eu.okaeri.configs.annotation.Comment
 import eu.okaeri.configs.annotation.Variable
-import pl.spcode.navauth.common.domain.server.LoadBalancerType
 import pl.spcode.navauth.common.infra.database.DatabaseConfig
 
 open class GeneralConfig : OkaeriConfig() {
@@ -30,17 +29,20 @@ open class GeneralConfig : OkaeriConfig() {
   var databaseConfig: DatabaseConfig = DatabaseConfig()
     protected set
 
-  @Comment("The limbo servers, players should be sent to, while waiting for an authentication")
-  var limboServers: List<String> = listOf("limbo")
+  @Comment(
+    "The backend servers players should be sent to after successful authentication.",
+    "Players are LoadBalanced with 'least conn' by default.",
+    "If no servers are defined then we won't do anything on initial server event.",
+  )
+  var initialServers: List<String> = listOf("paper")
     protected set
 
   @Comment(
-    "Type of LoadBalancer to use for picking an available limbo server.",
-    "Available types:",
-    " - LEAST_CONN (picks the server with the least number of players)",
-    " - ROUND_ROBIN (just round-robin)",
+    "The limbo servers players should be sent to while waiting for an authentication.",
+    "Players are LoadBalanced with 'least conn' by default.",
+    "There must be at least 1 properly registered server available.",
   )
-  var limboLoadBalancer: LoadBalancerType = LoadBalancerType.LEAST_CONN
+  var limboServers: List<String> = listOf("limbo")
     protected set
 
   @Variable("CONFIG_VERSION")

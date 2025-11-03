@@ -23,12 +23,16 @@ import com.google.inject.Singleton
 import com.velocitypowered.api.proxy.Player
 import com.velocitypowered.api.proxy.ProxyServer
 import com.velocitypowered.api.proxy.server.RegisteredServer
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.config.GeneralConfig
 
 @Singleton
 class VelocityServerSelectionService
 @Inject
 constructor(val proxyServer: ProxyServer, val generalConfig: GeneralConfig) {
+
+  private val logger: Logger = LoggerFactory.getLogger(VelocityServerSelectionService::class.java)
 
   /** @throws ServerNotFoundException if no registered limbo was found */
   fun getLimboServer(player: Player): RegisteredServer {
@@ -49,11 +53,43 @@ constructor(val proxyServer: ProxyServer, val generalConfig: GeneralConfig) {
 
     val limbo = proxyServer.getServer(serverName)
     if (limbo.isEmpty) {
-      throw ServerNotFoundException("limbo backend server with name '$serverName' not found")
+      throw ServerNotFoundException(
+        "limbo backend server with name '$serverName' not found",
+        serverName,
+      )
     }
 
     return limbo.get()
   }
 
-  fun chooseInitialServer() {}
+  /**
+   * @return if server was found then RegisteredServer, otherwise null
+   * @throws ServerNotFoundException if initial server was set and not found as registered one
+   */
+  fun getInitialServer(player: Player): RegisteredServer? {
+
+    // todo send event
+    // todo get server from loadbalancer
+    val serverName: String? =
+      when {
+        !generalConfig.initialServers.isEmpty() -> {
+          generalConfig.initialServers.first()
+        }
+        else -> null
+      }
+
+    if (serverName == null) {
+      return null
+    }
+
+    val server = proxyServer.getServer(serverName)
+    if (server.isEmpty) {
+      throw ServerNotFoundException(
+        "initial server (the one after authentication) with name '$serverName' not found",
+        serverName,
+      )
+    }
+
+    return server.get()
+  }
 }
