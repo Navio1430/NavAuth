@@ -16,17 +16,9 @@
  *
  */
 
-package pl.spcode.navauth.velocity.module
+package pl.spcode.navauth.common.domain.server
 
-import com.google.inject.AbstractModule
-import com.google.inject.Singleton
-import pl.spcode.navauth.velocity.application.auth.session.VelocityAuthSessionFactory
-import pl.spcode.navauth.velocity.application.server.VelocityServerSelectionService
-
-class VelocityServicesModule : AbstractModule() {
-
-  override fun configure() {
-    bind(VelocityAuthSessionFactory::class.java).`in`(Singleton::class.java)
-    bind(VelocityServerSelectionService::class.java).`in`(Singleton::class.java)
-  }
+enum class LoadBalancerType {
+  ROUND_ROBIN,
+  LEAST_CONN,
 }

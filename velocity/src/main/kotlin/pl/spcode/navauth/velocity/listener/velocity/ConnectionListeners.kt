@@ -25,11 +25,14 @@ import com.velocitypowered.api.event.connection.DisconnectEvent
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent
 import com.velocitypowered.api.event.player.ServerPreConnectEvent
 import com.velocitypowered.api.proxy.ProxyServer
+import com.velocitypowered.api.proxy.server.RegisteredServer
 import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionState
+import pl.spcode.navauth.velocity.application.server.ServerNotFoundException
+import pl.spcode.navauth.velocity.application.server.VelocityServerSelectionService
 import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
@@ -38,6 +41,7 @@ class ConnectionListeners
 @Inject
 constructor(
   val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
+  val serverSelectionService: VelocityServerSelectionService,
   val proxyServer: ProxyServer,
 ) {
 
@@ -83,37 +87,7 @@ constructor(
         event.result = ServerPreConnectEvent.ServerResult.denied()
         return
       }
-
-      // todo check if limbo server name matches
     }
-
-    //    if (handshakeSession != null && handshakeSession.state !=
-    // AuthHandshakeState.AUTHENTICATED) {
-    //      if (handshakeSession.state == AuthHandshakeState.REQUIRES_LOGIN) {
-    //        // allow for connection to limbo
-    //        // todo check if its actually a limbo
-    //        return
-    //      }
-    //
-    //      val player = event.player
-    //
-    //      logger.warn(
-    //        "Player {}:{} tried to connect to {} while being unauthenticated, player's auth state:
-    // {}",
-    //        player,
-    //        player.uniqueId,
-    //        event.originalServer.serverInfo.name,
-    //        handshakeSession.state,
-    //      )
-    //
-    //      player.disconnect(
-    //        Component.text(
-    //          "NavAuth: You can't change the server while being unauthenticated",
-    //          TextColors.RED,
-    //        )
-    //      )
-    //      event.result = ServerPreConnectEvent.ServerResult.denied()
-    //    }
   }
 
   @Subscribe(order = PostOrder.LAST)
@@ -134,7 +108,6 @@ constructor(
           TextColors.RED,
         )
       )
-      event.setInitialServer(null)
       return
     }
 
@@ -159,8 +132,19 @@ constructor(
         )
         return
       }
-      // todo: send player to limbo
-      val limbo = proxyServer.getServer("limbo").get()
+
+      val limbo: RegisteredServer
+      try {
+        limbo = serverSelectionService.getLimboServer(player)
+      } catch (ex: ServerNotFoundException) {
+        logger.warn(
+          "PlayerChooseInitialServer: failed to get limbo server for player '${player.username}'",
+          ex,
+        )
+        player.disconnect(Component.text("NavAuth: limbo server not found", TextColors.RED))
+        return
+      }
+
       logger.debug(
         "redirecting player {} to limbo server named {}",
         player.username,
@@ -173,48 +157,5 @@ constructor(
       val paper = proxyServer.getServer("paper").get()
       event.setInitialServer(paper)
     }
-
-    //    val player = event.player
-    //    // todo check if this nickname differs after gameprofile event
-    //    val username = player.username
-    //
-    //    val authSession = authHandshakeSessionService.findSession(username)
-    //
-    //    if (authSession != null) {
-    //      logger.debug("PlayerChooseInitialServerEvent: found auth session for user {}", username)
-    //      if (authSession.state == AuthHandshakeState.AUTHENTICATED) {
-    //        logger.debug(
-    //          "PlayerChooseInitialServerEvent: user {} already authenticated, credentials check
-    // skip",
-    //          username,
-    //        )
-    //        return
-    //      } else if (authSession.state != AuthHandshakeState.REQUIRES_LOGIN) {
-    //        logger.warn(
-    //          "PlayerChooseInitialServerEvent: user {}:{} has bad auth state: {}",
-    //          username,
-    //          player.uniqueId,
-    //          authSession.toString(),
-    //        )
-    //        player.disconnect(
-    //          Component.text("NavAuth: Bad auth state on initial server event", TextColors.RED)
-    //        )
-    //        return
-    //      }
-    //    }
-    //
-    //    val loginSession = authSessionService.findSession(username)
-    //    // if login session is present then send player directly to limbo
-    //    if (loginSession != null) {
-    //      logger.debug(
-    //        "PlayerChooseInitialServerEvent: found login session for user {}, sending player to
-    // limbo...",
-    //        username,
-    //      )
-    //      val serverName = "paper"
-    //      val limbo = proxyServer.getServer(serverName).get()
-    //      event.setInitialServer(limbo)
-    //      return
-    //    }
   }
 }

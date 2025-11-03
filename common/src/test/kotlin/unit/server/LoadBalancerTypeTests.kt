@@ -16,17 +16,17 @@
  *
  */
 
-package pl.spcode.navauth.velocity.module
+package unit.server
 
-import com.google.inject.AbstractModule
-import com.google.inject.Singleton
-import pl.spcode.navauth.velocity.application.auth.session.VelocityAuthSessionFactory
-import pl.spcode.navauth.velocity.application.server.VelocityServerSelectionService
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import pl.spcode.navauth.common.domain.server.LoadBalancerType
 
-class VelocityServicesModule : AbstractModule() {
+class LoadBalancerTypeTests {
 
-  override fun configure() {
-    bind(VelocityAuthSessionFactory::class.java).`in`(Singleton::class.java)
-    bind(VelocityServerSelectionService::class.java).`in`(Singleton::class.java)
+  @Test
+  fun `test enum naming integrity`() {
+    assertEquals(LoadBalancerType.valueOf("LEAST_CONN"), LoadBalancerType.LEAST_CONN)
+    assertEquals(LoadBalancerType.valueOf("ROUND_ROBIN"), LoadBalancerType.ROUND_ROBIN)
   }
 }
