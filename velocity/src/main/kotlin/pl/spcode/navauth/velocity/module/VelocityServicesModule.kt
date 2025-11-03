@@ -21,12 +21,16 @@ package pl.spcode.navauth.velocity.module
 import com.google.inject.AbstractModule
 import com.google.inject.Singleton
 import pl.spcode.navauth.velocity.application.auth.session.VelocityAuthSessionFactory
+import pl.spcode.navauth.velocity.application.event.VelocityEventDispatcher
 import pl.spcode.navauth.velocity.application.server.VelocityServerSelectionService
 
 class VelocityServicesModule : AbstractModule() {
 
   override fun configure() {
     bind(VelocityAuthSessionFactory::class.java).`in`(Singleton::class.java)
+
     bind(VelocityServerSelectionService::class.java).`in`(Singleton::class.java)
+
+    bind(VelocityEventDispatcher::class.java).`in`(Singleton::class.java)
   }
 }
