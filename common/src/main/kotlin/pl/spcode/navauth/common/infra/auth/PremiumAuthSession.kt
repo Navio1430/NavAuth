@@ -28,5 +28,5 @@ class PremiumAuthSession<T : PlayerAdapter>(playerAdapter: T) : AuthSession<T>(p
     return AuthSessionType.PREMIUM
   }
 
-  override fun destroy() {}
+  override fun onInvalidate() {}
 }

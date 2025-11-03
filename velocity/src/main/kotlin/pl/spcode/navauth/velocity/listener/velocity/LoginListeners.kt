@@ -35,7 +35,6 @@ import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeSession
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeState
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionState
-import pl.spcode.navauth.common.infra.auth.PremiumAuthSession
 import pl.spcode.navauth.velocity.application.auth.session.VelocityAuthSessionFactory
 import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
@@ -171,11 +170,7 @@ constructor(
   ) {
     val uniqueSessionId = VelocityUniqueSessionId(player)
     if (handshakeSession.state == AuthHandshakeState.REQUIRES_ONLINE_ENCRYPTION) {
-      val session =
-        authSessionService.registerSession(
-          uniqueSessionId,
-          PremiumAuthSession(VelocityPlayerAdapter(player)),
-        )
+      val session = authSessionFactory.createPremiumAuthSession(player, uniqueSessionId)
       // we are in postLogin event so we can assume
       // that velocity did the verification for us
       session.authenticate()

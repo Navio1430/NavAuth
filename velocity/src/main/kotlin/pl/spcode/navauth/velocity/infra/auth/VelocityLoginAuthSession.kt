@@ -77,7 +77,7 @@ class VelocityLoginAuthSession(
     player.sendMessage(Component.text("authenticated"))
   }
 
-  override fun destroy() {
+  override fun onInvalidate() {
     cancelTasks()
   }
 

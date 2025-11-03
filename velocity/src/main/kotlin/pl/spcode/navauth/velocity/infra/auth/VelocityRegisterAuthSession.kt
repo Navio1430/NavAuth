@@ -66,7 +66,7 @@ class VelocityRegisterAuthSession(val player: Player, scheduler: NavAuthSchedule
     player.sendMessage(Component.text("authenticated"))
   }
 
-  override fun destroy() {
+  override fun onInvalidate() {
     notifyMessageTask.cancel()
     disconnectPlayerTask.cancel()
   }

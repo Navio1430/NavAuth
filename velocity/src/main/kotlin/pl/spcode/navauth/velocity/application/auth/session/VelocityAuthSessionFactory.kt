@@ -26,6 +26,7 @@ import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.credentials.CredentialsService
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.velocity.infra.auth.VelocityLoginAuthSession
+import pl.spcode.navauth.velocity.infra.auth.VelocityPremiumAuthSession
 import pl.spcode.navauth.velocity.infra.auth.VelocityRegisterAuthSession
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
@@ -60,6 +61,14 @@ constructor(
     uniqueSessionId: VelocityUniqueSessionId,
   ): VelocityRegisterAuthSession {
     val session = VelocityRegisterAuthSession(player, scheduler)
+    return authSessionService.registerSession(uniqueSessionId, session)
+  }
+
+  fun createPremiumAuthSession(
+    player: Player,
+    uniqueSessionId: VelocityUniqueSessionId,
+  ): VelocityPremiumAuthSession {
+    val session = VelocityPremiumAuthSession(player)
     return authSessionService.registerSession(uniqueSessionId, session)
   }
 }

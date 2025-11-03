@@ -16,28 +16,19 @@
  *
  */
 
-package pl.spcode.navauth.common.domain.auth.session
+package pl.spcode.navauth.velocity.infra.auth
 
-import pl.spcode.navauth.common.domain.player.PlayerAdapter
+import com.velocitypowered.api.proxy.Player
+import pl.spcode.navauth.common.domain.auth.session.AuthSession
+import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
+import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 
-abstract class AuthSession<T : PlayerAdapter>(val playerAdapter: T) {
+class VelocityPremiumAuthSession(val player: Player) :
+  AuthSession<VelocityPlayerAdapter>(VelocityPlayerAdapter(player)) {
 
-  abstract fun getSessionType(): AuthSessionType
-
-  /** Invoked when session is invalidated by an auth service */
-  open fun onInvalidate() {}
-
-  /** Invoked after session is authenticated */
-  protected open fun onAuthenticated() {}
-
-  var state: AuthSessionState = AuthSessionState.WAITING_FOR_ALLOCATION
-
-  var isAuthenticated: Boolean = false
-    private set
-
-  fun authenticate() {
-    isAuthenticated = true
-    state = AuthSessionState.AUTHENTICATED
-    onAuthenticated()
+  override fun getSessionType(): AuthSessionType {
+    return AuthSessionType.PREMIUM
   }
+
+  override fun onInvalidate() {}
 }

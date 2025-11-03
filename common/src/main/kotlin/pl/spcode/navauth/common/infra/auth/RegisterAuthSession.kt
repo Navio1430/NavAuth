@@ -29,5 +29,5 @@ open class RegisterAuthSession<T : PlayerAdapter>(playerAdapter: T) :
     return AuthSessionType.REGISTER
   }
 
-  override fun destroy() {}
+  override fun onInvalidate() {}
 }

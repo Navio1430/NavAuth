@@ -34,7 +34,7 @@ open class LoginAuthSession<T : PlayerAdapter>(
     return AuthSessionType.LOGIN
   }
 
-  override fun destroy() {}
+  override fun onInvalidate() {}
 
   /**
    * @param password raw (not hashed) password
