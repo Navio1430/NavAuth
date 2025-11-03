@@ -22,28 +22,27 @@ import com.velocitypowered.api.proxy.Player
 import com.velocitypowered.api.scheduler.ScheduledTask
 import java.time.Duration
 import net.kyori.adventure.text.Component
-import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.infra.auth.RegisterAuthSession
 import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 import pl.spcode.navauth.velocity.scheduler.NavAuthScheduler
 
-class VelocityRegisterAuthSession(
-  player: Player,
-  scheduler: NavAuthScheduler,
-  authSessionService: AuthSessionService<VelocityPlayerAdapter>,
-) : RegisterAuthSession<VelocityPlayerAdapter>(VelocityPlayerAdapter(player)) {
+class VelocityRegisterAuthSession(val player: Player, scheduler: NavAuthScheduler) :
+  RegisterAuthSession<VelocityPlayerAdapter>(VelocityPlayerAdapter(player)) {
 
   val notifyMessageTask: ScheduledTask
-  val closeSessionTask: ScheduledTask
+  @Suppress("JoinDeclarationAndAssignment") val disconnectPlayerTask: ScheduledTask
 
   init {
-    closeSessionTask =
+    player.sendMessage(Component.text("Please register using /register command.", TextColors.GREEN))
+
+    disconnectPlayerTask =
       scheduler
         .buildTask(
           Runnable {
-            val sessionId = VelocityUniqueSessionId(player)
-            authSessionService.closeSession(sessionId)
+            player.disconnect(
+              Component.text("You've exceeded register time, please try again", TextColors.RED)
+            )
           }
         )
         // todo use config property
@@ -59,13 +58,16 @@ class VelocityRegisterAuthSession(
             )
           }
         )
-        .delay(Duration.ofSeconds(1))
-        .repeat(Duration.ofSeconds(1))
+        .repeat(Duration.ofSeconds(3))
         .schedule()
+  }
+
+  override fun onAuthenticated() {
+    player.sendMessage(Component.text("authenticated"))
   }
 
   override fun destroy() {
     notifyMessageTask.cancel()
-    closeSessionTask.cancel()
+    disconnectPlayerTask.cancel()
   }
 }

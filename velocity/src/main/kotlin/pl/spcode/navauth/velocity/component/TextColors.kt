@@ -22,7 +22,7 @@ import net.kyori.adventure.text.format.TextColor
 
 class TextColors {
   companion object {
-    val RED = TextColor.color(200, 0, 0)
+    val RED = TextColor.color(242, 55, 41)
     val GREEN = TextColor.color(0, 200, 0)
   }
 }

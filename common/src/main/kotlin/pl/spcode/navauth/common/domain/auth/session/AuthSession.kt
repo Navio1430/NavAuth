@@ -20,11 +20,14 @@ package pl.spcode.navauth.common.domain.auth.session
 
 import pl.spcode.navauth.common.domain.player.PlayerAdapter
 
-abstract class AuthSession<T : PlayerAdapter>(val player: T) {
+abstract class AuthSession<T : PlayerAdapter>(val playerAdapter: T) {
 
   abstract fun getSessionType(): AuthSessionType
 
   abstract fun destroy()
+
+  /** Invoked after session is authenticated */
+  protected open fun onAuthenticated() {}
 
   var state: AuthSessionState = AuthSessionState.WAITING_FOR_ALLOCATION
 
@@ -34,5 +37,6 @@ abstract class AuthSession<T : PlayerAdapter>(val player: T) {
   fun authenticate() {
     isAuthenticated = true
     state = AuthSessionState.AUTHENTICATED
+    onAuthenticated()
   }
 }

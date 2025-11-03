@@ -25,10 +25,10 @@ import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.player.PlayerAdapter
 
 open class LoginAuthSession<T : PlayerAdapter>(
-  player: T,
+  playerAdapter: T,
   val userCredentials: UserCredentials,
   val credentialsService: CredentialsService,
-) : AuthSession<T>(player) {
+) : AuthSession<T>(playerAdapter) {
 
   override fun getSessionType(): AuthSessionType {
     return AuthSessionType.LOGIN
@@ -45,7 +45,6 @@ open class LoginAuthSession<T : PlayerAdapter>(
 
     if (verified) {
       authenticate()
-      // todo move player to lobby
     }
 
     return verified

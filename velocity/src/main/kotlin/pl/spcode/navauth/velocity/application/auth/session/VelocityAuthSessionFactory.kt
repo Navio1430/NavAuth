@@ -51,14 +51,7 @@ constructor(
           "failed to create a login session: player ${player.username} credentials not found"
         )
 
-    val session =
-      VelocityLoginAuthSession(
-        player,
-        credentials,
-        credentialsService,
-        scheduler,
-        authSessionService,
-      )
+    val session = VelocityLoginAuthSession(player, credentials, credentialsService, scheduler)
     return authSessionService.registerSession(uniqueSessionId, session)
   }
 
@@ -66,7 +59,7 @@ constructor(
     player: Player,
     uniqueSessionId: VelocityUniqueSessionId,
   ): VelocityRegisterAuthSession {
-    val session = VelocityRegisterAuthSession(player, scheduler, authSessionService)
+    val session = VelocityRegisterAuthSession(player, scheduler)
     return authSessionService.registerSession(uniqueSessionId, session)
   }
 }

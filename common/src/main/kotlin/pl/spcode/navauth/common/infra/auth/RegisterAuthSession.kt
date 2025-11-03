@@ -22,7 +22,8 @@ import pl.spcode.navauth.common.domain.auth.session.AuthSession
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 import pl.spcode.navauth.common.domain.player.PlayerAdapter
 
-open class RegisterAuthSession<T : PlayerAdapter>(player: T) : AuthSession<T>(player) {
+open class RegisterAuthSession<T : PlayerAdapter>(playerAdapter: T) :
+  AuthSession<T>(playerAdapter) {
 
   override fun getSessionType(): AuthSessionType {
     return AuthSessionType.REGISTER

@@ -52,7 +52,7 @@ open class AuthSessionService<P : PlayerAdapter> {
   fun closeSession(uniqueSessionId: UniqueSessionId): Boolean {
     val session = sessionsMap.remove(uniqueSessionId)
     if (session != null) {
-      session.player.disconnect(DisconnectReason.AUTH_SESSION_CLOSED)
+      session.playerAdapter.disconnect(DisconnectReason.AUTH_SESSION_CLOSED)
       session.destroy()
       logger.debug(
         "invalidated auth session (type='{}') with ID {}",

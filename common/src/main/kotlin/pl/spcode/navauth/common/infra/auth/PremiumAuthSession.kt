@@ -22,7 +22,7 @@ import pl.spcode.navauth.common.domain.auth.session.AuthSession
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 import pl.spcode.navauth.common.domain.player.PlayerAdapter
 
-class PremiumAuthSession<T : PlayerAdapter>(player: T) : AuthSession<T>(player) {
+class PremiumAuthSession<T : PlayerAdapter>(playerAdapter: T) : AuthSession<T>(playerAdapter) {
 
   override fun getSessionType(): AuthSessionType {
     return AuthSessionType.PREMIUM

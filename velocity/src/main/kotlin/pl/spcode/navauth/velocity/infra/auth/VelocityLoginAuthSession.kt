@@ -22,7 +22,6 @@ import com.velocitypowered.api.proxy.Player
 import com.velocitypowered.api.scheduler.ScheduledTask
 import java.time.Duration
 import net.kyori.adventure.text.Component
-import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.credentials.CredentialsService
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.infra.auth.LoginAuthSession
@@ -31,11 +30,10 @@ import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 import pl.spcode.navauth.velocity.scheduler.NavAuthScheduler
 
 class VelocityLoginAuthSession(
-  player: Player,
+  val player: Player,
   userCredentials: UserCredentials,
   credentialsService: CredentialsService,
   scheduler: NavAuthScheduler,
-  authSessionService: AuthSessionService<VelocityPlayerAdapter>,
 ) :
   LoginAuthSession<VelocityPlayerAdapter>(
     VelocityPlayerAdapter(player),
@@ -44,15 +42,16 @@ class VelocityLoginAuthSession(
   ) {
 
   val notifyMessageTask: ScheduledTask
-  val closeSessionTask: ScheduledTask
+  @Suppress("JoinDeclarationAndAssignment") val disconnectPlayerTask: ScheduledTask
 
   init {
-    closeSessionTask =
+    disconnectPlayerTask =
       scheduler
         .buildTask(
           Runnable {
-            val sessionId = VelocityUniqueSessionId(player)
-            authSessionService.closeSession(sessionId)
+            player.disconnect(
+              Component.text("You've exceeded login time, please try again", TextColors.RED)
+            )
           }
         )
         // todo use config property
@@ -73,8 +72,17 @@ class VelocityLoginAuthSession(
         .schedule()
   }
 
+  override fun onAuthenticated() {
+    cancelTasks()
+    player.sendMessage(Component.text("authenticated"))
+  }
+
   override fun destroy() {
+    cancelTasks()
+  }
+
+  fun cancelTasks() {
     notifyMessageTask.cancel()
-    closeSessionTask.cancel()
+    disconnectPlayerTask.cancel()
   }
 }
