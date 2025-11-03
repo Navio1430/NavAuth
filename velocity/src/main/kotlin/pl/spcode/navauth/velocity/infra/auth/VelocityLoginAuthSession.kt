@@ -22,22 +22,43 @@ import com.velocitypowered.api.proxy.Player
 import com.velocitypowered.api.scheduler.ScheduledTask
 import java.time.Duration
 import net.kyori.adventure.text.Component
+import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.credentials.CredentialsService
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.infra.auth.LoginAuthSession
 import pl.spcode.navauth.velocity.component.TextColors
+import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 import pl.spcode.navauth.velocity.scheduler.NavAuthScheduler
 
 class VelocityLoginAuthSession(
-  val player: Player,
+  player: Player,
   userCredentials: UserCredentials,
   credentialsService: CredentialsService,
   scheduler: NavAuthScheduler,
-) : LoginAuthSession(userCredentials, credentialsService) {
+  authSessionService: AuthSessionService<VelocityPlayerAdapter>,
+) :
+  LoginAuthSession<VelocityPlayerAdapter>(
+    VelocityPlayerAdapter(player),
+    userCredentials,
+    credentialsService,
+  ) {
 
   val notifyMessageTask: ScheduledTask
+  val closeSessionTask: ScheduledTask
 
   init {
+    closeSessionTask =
+      scheduler
+        .buildTask(
+          Runnable {
+            val sessionId = VelocityUniqueSessionId(player)
+            authSessionService.closeSession(sessionId)
+          }
+        )
+        // todo use config property
+        .delay(Duration.ofSeconds(5))
+        .schedule()
+
     notifyMessageTask =
       scheduler
         .buildTask(
@@ -48,10 +69,12 @@ class VelocityLoginAuthSession(
           }
         )
         .delay(Duration.ofSeconds(1))
+        .repeat(Duration.ofSeconds(1))
         .schedule()
   }
 
   override fun destroy() {
     notifyMessageTask.cancel()
+    closeSessionTask.cancel()
   }
 }

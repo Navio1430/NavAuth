@@ -16,17 +16,18 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.auth
+package pl.spcode.navauth.velocity.infra.player
 
-import pl.spcode.navauth.common.domain.auth.session.AuthSession
-import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
+import com.velocitypowered.api.proxy.Player
+import net.kyori.adventure.text.Component
+import pl.spcode.navauth.common.domain.player.DisconnectReason
 import pl.spcode.navauth.common.domain.player.PlayerAdapter
 
-class PremiumAuthSession<T : PlayerAdapter>(player: T) : AuthSession<T>(player) {
-
-  override fun getSessionType(): AuthSessionType {
-    return AuthSessionType.PREMIUM
+class VelocityPlayerAdapter(val velocityPlayer: Player) : PlayerAdapter {
+  override fun disconnect(reason: DisconnectReason) {
+    when (reason) {
+      DisconnectReason.AUTH_SESSION_CLOSED ->
+        velocityPlayer.disconnect(Component.text("Session closed"))
+    }
   }
-
-  override fun destroy() {}
 }

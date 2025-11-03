@@ -39,6 +39,7 @@ import pl.spcode.navauth.common.infra.auth.PremiumAuthSession
 import pl.spcode.navauth.velocity.application.auth.session.VelocityAuthSessionFactory
 import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
+import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 
 class LoginListeners
 @Inject
@@ -47,7 +48,7 @@ constructor(
   val profileService: MojangProfileService,
   val userService: UserService,
   val authHandshakeSessionService: AuthHandshakeSessionService,
-  val authSessionService: AuthSessionService,
+  val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
   val authSessionFactory: VelocityAuthSessionFactory,
 ) {
 
@@ -170,7 +171,11 @@ constructor(
   ) {
     val uniqueSessionId = VelocityUniqueSessionId(player)
     if (handshakeSession.state == AuthHandshakeState.REQUIRES_ONLINE_ENCRYPTION) {
-      val session = authSessionService.registerSession(uniqueSessionId, PremiumAuthSession())
+      val session =
+        authSessionService.registerSession(
+          uniqueSessionId,
+          PremiumAuthSession(VelocityPlayerAdapter(player)),
+        )
       // we are in postLogin event so we can assume
       // that velocity did the verification for us
       session.authenticate()

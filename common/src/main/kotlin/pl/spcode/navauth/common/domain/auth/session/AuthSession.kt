@@ -18,7 +18,9 @@
 
 package pl.spcode.navauth.common.domain.auth.session
 
-abstract class AuthSession {
+import pl.spcode.navauth.common.domain.player.PlayerAdapter
+
+abstract class AuthSession<T : PlayerAdapter>(val player: T) {
 
   abstract fun getSessionType(): AuthSessionType
 

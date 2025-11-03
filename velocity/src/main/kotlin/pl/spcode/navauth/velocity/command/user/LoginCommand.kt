@@ -30,14 +30,19 @@ import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.auth.VelocityLoginAuthSession
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
+import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 
 @Command(name = "login")
-class LoginCommand @Inject constructor(val authSessionService: AuthSessionService) {
+class LoginCommand
+@Inject
+constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
 
   @Execute
   fun login(@Context sender: Player, @Arg(value = "password") password: String) {
+
     val uniqueSessionId = VelocityUniqueSessionId(sender)
     val session = authSessionService.findSession(uniqueSessionId)
+    session?.destroy()
     if (session?.getSessionType() != AuthSessionType.LOGIN) {
       sender.sendMessage(Component.text("Can't use this command right now.", TextColors.RED))
       return

@@ -28,13 +28,14 @@ import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.velocity.infra.auth.VelocityLoginAuthSession
 import pl.spcode.navauth.velocity.infra.auth.VelocityRegisterAuthSession
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
+import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 import pl.spcode.navauth.velocity.scheduler.NavAuthScheduler
 
 @Singleton
 class VelocityAuthSessionFactory
 @Inject
 constructor(
-  val authSessionService: AuthSessionService,
+  val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
   val credentialsService: CredentialsService,
   val scheduler: NavAuthScheduler,
 ) {
@@ -50,7 +51,14 @@ constructor(
           "failed to create a login session: player ${player.username} credentials not found"
         )
 
-    val session = VelocityLoginAuthSession(player, credentials, credentialsService, scheduler)
+    val session =
+      VelocityLoginAuthSession(
+        player,
+        credentials,
+        credentialsService,
+        scheduler,
+        authSessionService,
+      )
     return authSessionService.registerSession(uniqueSessionId, session)
   }
 
@@ -58,7 +66,7 @@ constructor(
     player: Player,
     uniqueSessionId: VelocityUniqueSessionId,
   ): VelocityRegisterAuthSession {
-    val session = VelocityRegisterAuthSession(player, scheduler)
+    val session = VelocityRegisterAuthSession(player, scheduler, authSessionService)
     return authSessionService.registerSession(uniqueSessionId, session)
   }
 }

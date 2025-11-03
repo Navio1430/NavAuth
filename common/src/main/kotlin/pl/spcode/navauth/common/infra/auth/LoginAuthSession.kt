@@ -22,11 +22,13 @@ import pl.spcode.navauth.common.application.credentials.CredentialsService
 import pl.spcode.navauth.common.domain.auth.session.AuthSession
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
+import pl.spcode.navauth.common.domain.player.PlayerAdapter
 
-open class LoginAuthSession(
+open class LoginAuthSession<T : PlayerAdapter>(
+  player: T,
   val userCredentials: UserCredentials,
   val credentialsService: CredentialsService,
-) : AuthSession() {
+) : AuthSession<T>(player) {
 
   override fun getSessionType(): AuthSessionType {
     return AuthSessionType.LOGIN

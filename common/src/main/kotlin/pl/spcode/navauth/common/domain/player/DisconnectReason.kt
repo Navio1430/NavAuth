@@ -16,17 +16,8 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.auth
+package pl.spcode.navauth.common.domain.player
 
-import pl.spcode.navauth.common.domain.auth.session.AuthSession
-import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
-import pl.spcode.navauth.common.domain.player.PlayerAdapter
-
-class PremiumAuthSession<T : PlayerAdapter>(player: T) : AuthSession<T>(player) {
-
-  override fun getSessionType(): AuthSessionType {
-    return AuthSessionType.PREMIUM
-  }
-
-  override fun destroy() {}
+enum class DisconnectReason {
+  AUTH_SESSION_CLOSED
 }

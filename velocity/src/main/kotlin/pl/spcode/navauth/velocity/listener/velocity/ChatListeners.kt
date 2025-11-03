@@ -24,8 +24,11 @@ import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.player.PlayerChatEvent
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
+import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 
-class ChatListeners @Inject constructor(val authSessionService: AuthSessionService) {
+class ChatListeners
+@Inject
+constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
 
   @Subscribe(order = PostOrder.FIRST)
   fun onChat(event: PlayerChatEvent) {

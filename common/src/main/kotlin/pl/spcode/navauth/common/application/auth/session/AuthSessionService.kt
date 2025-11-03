@@ -24,16 +24,18 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.domain.auth.UniqueSessionId
 import pl.spcode.navauth.common.domain.auth.session.AuthSession
+import pl.spcode.navauth.common.domain.player.DisconnectReason
+import pl.spcode.navauth.common.domain.player.PlayerAdapter
 
 /** Maintains user sessions for as long as they are active on the server. */
 @Singleton
-open class AuthSessionService {
+open class AuthSessionService<P : PlayerAdapter> {
 
   private val logger: Logger = LoggerFactory.getLogger(AuthSessionService::class.java)
 
-  private val sessionsMap = ConcurrentHashMap<UniqueSessionId, AuthSession>()
+  private val sessionsMap = ConcurrentHashMap<UniqueSessionId, AuthSession<P>>()
 
-  fun <T : AuthSession> registerSession(uniqueSessionId: UniqueSessionId, session: T): T {
+  fun <T : AuthSession<P>> registerSession(uniqueSessionId: UniqueSessionId, session: T): T {
     sessionsMap[uniqueSessionId] = session
     logger.debug(
       "registered new auth session (type='{}') with ID {}",
@@ -43,13 +45,14 @@ open class AuthSessionService {
     return session
   }
 
-  fun findSession(uniqueSessionId: UniqueSessionId): AuthSession? {
+  fun findSession(uniqueSessionId: UniqueSessionId): AuthSession<P>? {
     return sessionsMap.get(uniqueSessionId)
   }
 
-  fun invalidateSession(uniqueSessionId: UniqueSessionId): Boolean {
+  fun closeSession(uniqueSessionId: UniqueSessionId): Boolean {
     val session = sessionsMap.remove(uniqueSessionId)
     if (session != null) {
+      session.player.disconnect(DisconnectReason.AUTH_SESSION_CLOSED)
       session.destroy()
       logger.debug(
         "invalidated auth session (type='{}') with ID {}",

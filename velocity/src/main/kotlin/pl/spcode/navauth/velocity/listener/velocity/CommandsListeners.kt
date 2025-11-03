@@ -26,8 +26,11 @@ import com.velocitypowered.api.event.command.PlayerAvailableCommandsEvent
 import com.velocitypowered.api.proxy.Player
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
+import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 
-class CommandsListeners @Inject constructor(val authSessionService: AuthSessionService) {
+class CommandsListeners
+@Inject
+constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
 
   val whitelist = listOf("login", "register")
 

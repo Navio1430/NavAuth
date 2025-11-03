@@ -33,11 +33,15 @@ import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.infra.crypto.BCryptCredentialsHasher
 import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
+import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 
 @Command(name = "register")
 class RegisterCommand
 @Inject
-constructor(val authSessionService: AuthSessionService, val userService: UserService) {
+constructor(
+  val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
+  val userService: UserService,
+) {
 
   @Execute
   fun register(

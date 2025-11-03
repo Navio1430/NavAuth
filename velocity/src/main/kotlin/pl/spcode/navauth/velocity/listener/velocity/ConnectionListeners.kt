@@ -32,16 +32,20 @@ import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionState
 import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
+import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 
 class ConnectionListeners
 @Inject
-constructor(val authSessionService: AuthSessionService, val proxyServer: ProxyServer) {
+constructor(
+  val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
+  val proxyServer: ProxyServer,
+) {
 
   val logger: Logger = LoggerFactory.getLogger(ConnectionListeners::class.java)
 
   @Subscribe
   fun onDisconnect(event: DisconnectEvent) {
-    authSessionService.invalidateSession(VelocityUniqueSessionId(event.player))
+    authSessionService.closeSession(VelocityUniqueSessionId(event.player))
   }
 
   @Subscribe(order = PostOrder.FIRST)
