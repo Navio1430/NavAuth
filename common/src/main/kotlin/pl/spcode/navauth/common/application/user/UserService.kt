@@ -50,4 +50,11 @@ constructor(
 
     userRepository.save(user)
   }
+
+  fun migrateToPremium(user: User) {
+    val premiumUser = User.create(user.uuid!!, user.username, true)
+    // todo in transaction
+    userCredentialsService.deleteUserCredentials(user)
+    userRepository.save(premiumUser)
+  }
 }
