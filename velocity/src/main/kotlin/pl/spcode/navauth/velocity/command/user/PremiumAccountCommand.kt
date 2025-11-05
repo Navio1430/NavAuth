@@ -19,6 +19,7 @@
 package pl.spcode.navauth.velocity.command.user
 
 import com.velocitypowered.api.proxy.Player
+import dev.rollczi.litecommands.annotations.async.Async
 import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
@@ -29,6 +30,7 @@ import pl.spcode.navauth.velocity.command.Permissions
 @Permission(Permissions.USER_CHANGE_TO_PREMIUM_ACCOUNT)
 class PremiumAccountCommand {
 
+  @Async
   @Execute
   fun changeToPremiumAccount(@Context sender: Player) {
     // todo impl

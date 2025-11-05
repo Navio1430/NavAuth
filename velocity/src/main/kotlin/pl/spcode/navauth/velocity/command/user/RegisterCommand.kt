@@ -21,6 +21,7 @@ package pl.spcode.navauth.velocity.command.user
 import com.google.inject.Inject
 import com.velocitypowered.api.proxy.Player
 import dev.rollczi.litecommands.annotations.argument.Arg
+import dev.rollczi.litecommands.annotations.async.Async
 import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
@@ -43,6 +44,7 @@ constructor(
   val userService: UserService,
 ) {
 
+  @Async
   @Execute
   fun register(
     @Context sender: Player,

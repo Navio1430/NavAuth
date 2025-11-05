@@ -20,6 +20,7 @@ package pl.spcode.navauth.velocity.command.admin
 
 import com.velocitypowered.api.proxy.Player
 import dev.rollczi.litecommands.annotations.argument.Arg
+import dev.rollczi.litecommands.annotations.async.Async
 import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
@@ -30,6 +31,7 @@ import pl.spcode.navauth.velocity.command.Permissions
 @Permission(Permissions.ADMIN_FORCE_CHANGE_PASSWORD)
 class ForceChangePasswordAdminCommand {
 
+  @Async
   @Execute
   fun forceChangePassword(
     @Context sender: Player,
