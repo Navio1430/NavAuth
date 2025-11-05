@@ -29,7 +29,10 @@ import pl.spcode.navauth.common.infra.crypto.HashedPassword
 @Singleton
 class UserService
 @Inject
-constructor(val userRepository: UserRepository, val userCredentialsService: UserCredentialsService) {
+constructor(
+  val userRepository: UserRepository,
+  val userCredentialsService: UserCredentialsService,
+) {
 
   fun findUserByUsername(username: String, ignoreCase: Boolean): User? {
     // todo impl ignore case option

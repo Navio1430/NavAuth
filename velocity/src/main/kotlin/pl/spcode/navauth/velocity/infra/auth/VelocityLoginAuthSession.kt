@@ -31,11 +31,11 @@ import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 import pl.spcode.navauth.velocity.scheduler.NavAuthScheduler
 
 class VelocityLoginAuthSession(
-    val player: Player,
-    userCredentials: UserCredentials,
-    userCredentialsService: UserCredentialsService,
-    scheduler: NavAuthScheduler,
-    val velocityEventDispatcher: VelocityEventDispatcher,
+  val player: Player,
+  userCredentials: UserCredentials,
+  userCredentialsService: UserCredentialsService,
+  scheduler: NavAuthScheduler,
+  val velocityEventDispatcher: VelocityEventDispatcher,
 ) :
   LoginAuthSession<VelocityPlayerAdapter>(
     VelocityPlayerAdapter(player),

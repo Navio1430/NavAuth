@@ -27,7 +27,9 @@ import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.infra.crypto.BCryptCredentialsHasher
 
 @Singleton
-class UserCredentialsService @Inject constructor(val credentialsRepository: UserCredentialsRepository) {
+class UserCredentialsService
+@Inject
+constructor(val credentialsRepository: UserCredentialsRepository) {
 
   fun findCredentials(user: User): UserCredentials? {
     return credentialsRepository.findById(user.uuid!!)

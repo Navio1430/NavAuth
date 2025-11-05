@@ -25,9 +25,9 @@ import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.player.PlayerAdapter
 
 open class LoginAuthSession<T : PlayerAdapter>(
-    playerAdapter: T,
-    val userCredentials: UserCredentials,
-    val userCredentialsService: UserCredentialsService,
+  playerAdapter: T,
+  val userCredentials: UserCredentials,
+  val userCredentialsService: UserCredentialsService,
 ) : AuthSession<T>(playerAdapter) {
 
   override fun getSessionType(): AuthSessionType {

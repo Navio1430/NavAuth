@@ -37,10 +37,10 @@ import pl.spcode.navauth.velocity.scheduler.NavAuthScheduler
 class VelocityAuthSessionFactory
 @Inject
 constructor(
-    val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
-    val userCredentialsService: UserCredentialsService,
-    val scheduler: NavAuthScheduler,
-    val velocityEventDispatcher: VelocityEventDispatcher,
+  val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
+  val userCredentialsService: UserCredentialsService,
+  val scheduler: NavAuthScheduler,
+  val velocityEventDispatcher: VelocityEventDispatcher,
 ) {
 
   fun createLoginAuthSession(

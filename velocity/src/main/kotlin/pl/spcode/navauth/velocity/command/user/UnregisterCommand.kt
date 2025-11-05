@@ -29,14 +29,14 @@ import dev.rollczi.litecommands.annotations.permission.Permission
 import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.user.UserService
-import pl.spcode.navauth.common.domain.credentials.UserCredentials
-import pl.spcode.navauth.common.infra.crypto.BCryptCredentialsHasher
 import pl.spcode.navauth.velocity.command.Permissions
 import pl.spcode.navauth.velocity.component.TextColors
 
 @Command(name = "unregister")
 @Permission(Permissions.USER_UNREGISTER)
-class UnregisterCommand @Inject constructor(val userService: UserService, val userCredentialsService: UserCredentialsService){
+class UnregisterCommand
+@Inject
+constructor(val userService: UserService, val userCredentialsService: UserCredentialsService) {
 
   @Async
   @Execute
@@ -44,17 +44,22 @@ class UnregisterCommand @Inject constructor(val userService: UserService, val us
     @Context sender: Player,
     @Arg(value = "current_password") currentPassword: String,
   ) {
-    val user = userService.findUserByUsername(sender.username, false)!!;
+    val user = userService.findUserByUsername(sender.username, false)!!
     if (user.isPremium) {
-      sender.sendMessage(Component.text("Can't execute this command right now: your account is set to premium mode.", TextColors.RED))
-      return;
+      sender.sendMessage(
+        Component.text(
+          "Can't execute this command right now: your account is set to premium mode.",
+          TextColors.RED,
+        )
+      )
+      return
     }
 
     val credentials = userCredentialsService.findCredentials(user)!!
     val isCorrectPassword = userCredentialsService.verifyPassword(credentials, currentPassword)
     if (!isCorrectPassword) {
       sender.sendMessage(Component.text("Wrong password!", TextColors.RED))
-      return;
+      return
     }
 
     userCredentialsService.deleteUserCredentials(user)

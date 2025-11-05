@@ -36,7 +36,9 @@ import pl.spcode.navauth.velocity.component.TextColors
 
 @Command(name = "forcesetpassword")
 @Permission(Permissions.ADMIN_FORCE_SET_PASSWORD)
-class ForceChangePasswordAdminCommand @Inject constructor(val userService: UserService, val userCredentialsService: UserCredentialsService) {
+class ForceChangePasswordAdminCommand
+@Inject
+constructor(val userService: UserService, val userCredentialsService: UserCredentialsService) {
 
   @Async
   @Execute
@@ -49,17 +51,24 @@ class ForceChangePasswordAdminCommand @Inject constructor(val userService: UserS
 
     if (user == null) {
       sender.sendMessage(Component.text("User '${playerName}' not found.", TextColors.RED))
-      return;
+      return
     }
 
     if (user.isPremium) {
-      sender.sendMessage(Component.text("Can't execute the command! Account '${user.username}' is set to premium mode.", TextColors.RED))
-      return;
+      sender.sendMessage(
+        Component.text(
+          "Can't execute the command! Account '${user.username}' is set to premium mode.",
+          TextColors.RED,
+        )
+      )
+      return
     }
 
     val newCredentials = UserCredentials.create(user, BCryptCredentialsHasher().hash(password))
     userCredentialsService.storeUserCredentials(newCredentials)
 
-    sender.sendMessage(Component.text("Success! User '${user.username}' credentials set.", TextColors.GREEN))
+    sender.sendMessage(
+      Component.text("Success! User '${user.username}' credentials set.", TextColors.GREEN)
+    )
   }
 }

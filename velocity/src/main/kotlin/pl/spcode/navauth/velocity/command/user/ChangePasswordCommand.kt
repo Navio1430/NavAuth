@@ -36,7 +36,9 @@ import pl.spcode.navauth.velocity.component.TextColors
 
 @Command(name = "changepassword")
 @Permission(Permissions.USER_CHANGE_PASSWORD)
-class ChangePasswordCommand @Inject constructor(val userService: UserService, val userCredentialsService: UserCredentialsService) {
+class ChangePasswordCommand
+@Inject
+constructor(val userService: UserService, val userCredentialsService: UserCredentialsService) {
 
   @Async
   @Execute
@@ -45,16 +47,21 @@ class ChangePasswordCommand @Inject constructor(val userService: UserService, va
     @Arg(value = "current_password") currentPassword: String,
     @Arg(value = "new_password") newPassword: String,
   ) {
-    val user = userService.findUserByUsername(sender.username, false)!!;
+    val user = userService.findUserByUsername(sender.username, false)!!
     if (user.isPremium) {
-      sender.sendMessage(Component.text("Can't execute this command right now: your account is set to premium mode.", TextColors.RED))
-      return;
+      sender.sendMessage(
+        Component.text(
+          "Can't execute this command right now: your account is set to premium mode.",
+          TextColors.RED,
+        )
+      )
+      return
     }
     val credentials = userCredentialsService.findCredentials(user)!!
     val isCorrectPassword = userCredentialsService.verifyPassword(credentials, currentPassword)
     if (!isCorrectPassword) {
       sender.sendMessage(Component.text("Wrong password!", TextColors.RED))
-      return;
+      return
     }
 
     val newCredentials = UserCredentials.create(user, BCryptCredentialsHasher().hash(newPassword))
