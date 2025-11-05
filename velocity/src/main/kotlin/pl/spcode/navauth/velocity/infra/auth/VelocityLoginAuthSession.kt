@@ -22,7 +22,7 @@ import com.velocitypowered.api.proxy.Player
 import com.velocitypowered.api.scheduler.ScheduledTask
 import java.time.Duration
 import net.kyori.adventure.text.Component
-import pl.spcode.navauth.common.application.credentials.CredentialsService
+import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.infra.auth.LoginAuthSession
 import pl.spcode.navauth.velocity.application.event.VelocityEventDispatcher
@@ -31,16 +31,16 @@ import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 import pl.spcode.navauth.velocity.scheduler.NavAuthScheduler
 
 class VelocityLoginAuthSession(
-  val player: Player,
-  userCredentials: UserCredentials,
-  credentialsService: CredentialsService,
-  scheduler: NavAuthScheduler,
-  val velocityEventDispatcher: VelocityEventDispatcher,
+    val player: Player,
+    userCredentials: UserCredentials,
+    userCredentialsService: UserCredentialsService,
+    scheduler: NavAuthScheduler,
+    val velocityEventDispatcher: VelocityEventDispatcher,
 ) :
   LoginAuthSession<VelocityPlayerAdapter>(
     VelocityPlayerAdapter(player),
     userCredentials,
-    credentialsService,
+    userCredentialsService,
   ) {
 
   val notifyMessageTask: ScheduledTask

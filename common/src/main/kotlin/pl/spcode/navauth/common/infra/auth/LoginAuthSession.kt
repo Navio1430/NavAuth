@@ -18,16 +18,16 @@
 
 package pl.spcode.navauth.common.infra.auth
 
-import pl.spcode.navauth.common.application.credentials.CredentialsService
+import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.domain.auth.session.AuthSession
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.player.PlayerAdapter
 
 open class LoginAuthSession<T : PlayerAdapter>(
-  playerAdapter: T,
-  val userCredentials: UserCredentials,
-  val credentialsService: CredentialsService,
+    playerAdapter: T,
+    val userCredentials: UserCredentials,
+    val userCredentialsService: UserCredentialsService,
 ) : AuthSession<T>(playerAdapter) {
 
   override fun getSessionType(): AuthSessionType {
@@ -41,7 +41,7 @@ open class LoginAuthSession<T : PlayerAdapter>(
    * @return true if authenticated, otherwise false
    */
   fun authWithPassword(password: String): Boolean {
-    val verified = credentialsService.verifyPassword(userCredentials, password)
+    val verified = userCredentialsService.verifyPassword(userCredentials, password)
 
     if (verified) {
       authenticate()

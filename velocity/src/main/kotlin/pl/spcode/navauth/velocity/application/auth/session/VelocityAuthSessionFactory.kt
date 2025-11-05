@@ -23,7 +23,7 @@ import com.google.inject.Singleton
 import com.velocitypowered.api.proxy.Player
 import pl.spcode.navauth.common.application.auth.session.AuthSessionException
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
-import pl.spcode.navauth.common.application.credentials.CredentialsService
+import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.velocity.application.event.VelocityEventDispatcher
 import pl.spcode.navauth.velocity.infra.auth.VelocityLoginAuthSession
@@ -37,10 +37,10 @@ import pl.spcode.navauth.velocity.scheduler.NavAuthScheduler
 class VelocityAuthSessionFactory
 @Inject
 constructor(
-  val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
-  val credentialsService: CredentialsService,
-  val scheduler: NavAuthScheduler,
-  val velocityEventDispatcher: VelocityEventDispatcher,
+    val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
+    val userCredentialsService: UserCredentialsService,
+    val scheduler: NavAuthScheduler,
+    val velocityEventDispatcher: VelocityEventDispatcher,
 ) {
 
   fun createLoginAuthSession(
@@ -49,7 +49,7 @@ constructor(
     user: User,
   ): VelocityLoginAuthSession {
     val credentials =
-      credentialsService.findCredentials(user)
+      userCredentialsService.findCredentials(user)
         ?: throw AuthSessionException(
           "failed to create a login session: player ${player.username} credentials not found"
         )
@@ -58,7 +58,7 @@ constructor(
       VelocityLoginAuthSession(
         player,
         credentials,
-        credentialsService,
+        userCredentialsService,
         scheduler,
         velocityEventDispatcher,
       )
