@@ -29,16 +29,15 @@ import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.application.auth.handshake.AuthHandshakeSessionService
-import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeSession
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeState
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionState
+import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.velocity.application.auth.session.VelocityAuthSessionFactory
 import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
-import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 
 class LoginListeners
 @Inject
@@ -47,7 +46,6 @@ constructor(
   val profileService: MojangProfileService,
   val userService: UserService,
   val authHandshakeSessionService: AuthHandshakeSessionService,
-  val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
   val authSessionFactory: VelocityAuthSessionFactory,
 ) {
 
@@ -139,14 +137,15 @@ constructor(
     }
   }
 
-  // event invoked after preLogin event and encryption protocol completion (online only)
+  // event invoked after preLogin event for offline users and after preLogin + encryption protocol
+  // completion for premium users
   @Subscribe(order = PostOrder.FIRST)
   fun onPostLogin(event: PostLoginEvent) {
     val player = event.player
     val username = player.username
     val sessionId = VelocityUniqueSessionId(username, event.player.remoteAddress)
-    val session = authHandshakeSessionService.findSession(sessionId)
-    if (session == null) {
+    val handshakeSession = authHandshakeSessionService.findSession(sessionId)
+    if (handshakeSession == null) {
       logger.warn(
         "Player {}:{} went through preLogin event without auth session",
         username,
@@ -159,7 +158,7 @@ constructor(
       return
     }
 
-    createAuthSession(player, session, username)
+    createAuthSession(player, handshakeSession, username)
     authHandshakeSessionService.closeSession(sessionId)
   }
 
@@ -168,21 +167,21 @@ constructor(
     handshakeSession: AuthHandshakeSession,
     username: String,
   ) {
+    val existingUser = handshakeSession.existingUser
     val uniqueSessionId = VelocityUniqueSessionId(player)
     if (handshakeSession.state == AuthHandshakeState.REQUIRES_ONLINE_ENCRYPTION) {
       val session = authSessionFactory.createPremiumAuthSession(player, uniqueSessionId)
       // we are in postLogin event so we can assume
       // that velocity did the verification for us
+      if (existingUser == null) {
+        createAndStorePremiumUser(player)
+      }
       session.authenticate()
       return
     } else if (handshakeSession.state == AuthHandshakeState.REQUIRES_CREDENTIALS) {
       val session =
-        if (handshakeSession.existingUser != null) {
-          authSessionFactory.createLoginAuthSession(
-            player,
-            uniqueSessionId,
-            handshakeSession.existingUser!!,
-          )
+        if (existingUser != null) {
+          authSessionFactory.createLoginAuthSession(player, uniqueSessionId, existingUser)
         } else {
           authSessionFactory.createRegisterAuthSession(player, uniqueSessionId)
         }
@@ -198,5 +197,10 @@ constructor(
       handshakeSession.state.toString(),
     )
     player.disconnect(Component.text("NavAuth: Bad auth state", TextColors.RED))
+  }
+
+  private fun createAndStorePremiumUser(player: Player) {
+    val premiumUser = User.create(player.uniqueId, player.username, true)
+    userService.storePremiumUser(premiumUser)
   }
 }

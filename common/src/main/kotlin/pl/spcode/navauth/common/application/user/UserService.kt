@@ -44,4 +44,10 @@ constructor(
     userRepository.save(user)
     userCredentialsService.storeUserCredentials(UserCredentials.create(user, password))
   }
+
+  fun storePremiumUser(user: User) {
+    assert(user.isPremium)
+
+    userRepository.save(user)
+  }
 }
