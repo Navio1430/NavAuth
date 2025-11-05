@@ -18,6 +18,9 @@ services:
       - EULA=TRUE
       - JVM_OPTS=-Dlog4j.configurationFile=log4j2.xml
       - JVM_XX_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+      - ENABLE_RCON=TRUE
+      - MINECRAFT_VERSION=1.21.10
+      - MODRINTH_PROJECTS=luckperms:release
 
     volumes:
       - ./run/velocity/plugins:/plugins
