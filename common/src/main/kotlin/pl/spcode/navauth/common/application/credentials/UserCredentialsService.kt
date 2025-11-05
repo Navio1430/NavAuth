@@ -37,6 +37,10 @@ class UserCredentialsService @Inject constructor(val credentialsRepository: User
     credentialsRepository.save(userCredentials)
   }
 
+  fun deleteUserCredentials(user: User) {
+    credentialsRepository.deleteById(user.uuid!!)
+  }
+
   /** @param password the raw (not hashed) password */
   fun verifyPassword(credentials: UserCredentials, password: String): Boolean {
 
