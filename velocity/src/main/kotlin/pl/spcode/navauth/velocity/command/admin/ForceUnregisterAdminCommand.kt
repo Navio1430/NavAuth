@@ -18,6 +18,7 @@
 
 package pl.spcode.navauth.velocity.command.admin
 
+import com.google.inject.Inject
 import com.velocitypowered.api.proxy.Player
 import dev.rollczi.litecommands.annotations.argument.Arg
 import dev.rollczi.litecommands.annotations.async.Async
@@ -25,15 +26,32 @@ import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
+import net.kyori.adventure.text.Component
+import pl.spcode.navauth.common.application.credentials.UserCredentialsService
+import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.velocity.command.Permissions
+import pl.spcode.navauth.velocity.component.TextColors
 
 @Command(name = "forceunregister")
 @Permission(Permissions.ADMIN_FORCE_UNREGISTER)
-class ForceUnregisterAdminCommand {
+class ForceUnregisterAdminCommand @Inject constructor(val userService: UserService, val userCredentialsService: UserCredentialsService) {
 
   @Async
   @Execute
   fun forceUnregister(@Context sender: Player, @Arg(value = "playerName") playerName: String) {
-    // todo impl
+    val user = userService.findUserByUsername(sender.username, true)
+
+    if (user == null) {
+      sender.sendMessage(Component.text("User '${playerName}' not found.", TextColors.RED))
+      return;
+    }
+
+    if (user.isPremium) {
+      sender.sendMessage(Component.text("Can't execute the command! Account '${user.username}' is set to premium mode.", TextColors.RED))
+      return;
+    }
+
+    userCredentialsService.deleteUserCredentials(user)
+    sender.sendMessage(Component.text("Success! User '${user.username}' credentials deleted.", TextColors.GREEN))
   }
 }
