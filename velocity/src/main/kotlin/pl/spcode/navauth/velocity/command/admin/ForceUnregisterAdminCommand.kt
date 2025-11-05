@@ -39,7 +39,7 @@ class ForceUnregisterAdminCommand @Inject constructor(val userService: UserServi
   @Async
   @Execute
   fun forceUnregister(@Context sender: Player, @Arg(value = "playerName") playerName: String) {
-    val user = userService.findUserByUsername(sender.username, true)
+    val user = userService.findUserByUsername(playerName, true)
 
     if (user == null) {
       sender.sendMessage(Component.text("User '${playerName}' not found.", TextColors.RED))
@@ -48,6 +48,12 @@ class ForceUnregisterAdminCommand @Inject constructor(val userService: UserServi
 
     if (user.isPremium) {
       sender.sendMessage(Component.text("Can't execute the command! Account '${user.username}' is set to premium mode.", TextColors.RED))
+      return;
+    }
+
+    val userCredentials = userCredentialsService.findCredentials(user)
+    if (userCredentials == null) {
+      sender.sendMessage(Component.text("User is already unregistered.", TextColors.RED))
       return;
     }
 
