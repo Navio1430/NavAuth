@@ -25,6 +25,7 @@ import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserRepository
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
+import java.util.UUID
 
 @Singleton
 class UserService
@@ -56,5 +57,9 @@ constructor(
     // todo in transaction
     userCredentialsService.deleteUserCredentials(user)
     userRepository.save(premiumUser)
+  }
+
+  fun findUserByMojangUuid(uuid: UUID): User? {
+    TODO()
   }
 }

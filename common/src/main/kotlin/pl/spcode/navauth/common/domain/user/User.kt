@@ -25,6 +25,7 @@ import java.util.UUID
 @DatabaseTable(tableName = "navauth_users")
 class User {
   @DatabaseField(id = true) val uuid: UUID?
+  @DatabaseField(canBeNull = true, index = true) val mojangUuid: UUID? = null
   @DatabaseField(canBeNull = false, index = true) val username: String
   @DatabaseField(canBeNull = false) val isPremium: Boolean
 

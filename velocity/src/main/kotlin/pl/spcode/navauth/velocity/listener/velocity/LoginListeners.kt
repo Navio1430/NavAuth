@@ -56,58 +56,58 @@ constructor(
     if (!event.result.isAllowed) return
 
     // todo check if user nickname matches regex
-
     val connUsername = event.username
 
-    if (proxyServer.configuration.isOnlineMode) {
-      // skip any checks because everyone is premium, proceed to onLogin event
-      // todo make sure to omit checks on other events too
-      return
-    }
-
-    // todo handle situation where player changes its nickname
-
-    val existingUser = userService.findUserByUsername(connUsername, ignoreCase = true)
+    var existingUser = userService.findUserByUsername(connUsername, ignoreCase = true)
+    val userExists = existingUser != null
     val correspondingPremiumProfile = profileService.fetchProfileInfo(connUsername)
+    val isPremiumNickname = correspondingPremiumProfile != null
+
+    if (userExists) {
+      if (existingUser.isPremium) {
+        // todo user could change 1 letter to be uppercased/lowercased in its nickname
+      }
+      // non premium user
+      else {
+        if (isPremiumNickname) {
+          if (correspondingPremiumProfile.name == existingUser.username) {
+            // todo ensure same nickname like in the database but send a message about potential conflict or /premium activation
+          } else {
+            // todo announce conflict
+          }
+        }
+        // not a premium nickname
+        else {
+          // todo ensure same nickname like in the database
+        }
+      }
+    }
+    // user doesn't exist yet
+    else {
+      if (isPremiumNickname) {
+        // todo ensure same nickname like premium nickname
+      }
+    }
 
     val forcePremiumSession: Boolean
 
-    // account already exists
-    if (existingUser != null) {
-      if (!connUsername.equals(existingUser.username)) {
-        // todo add to config
-        // todo if connUsername is premium then announce a conflict
-        event.result =
-          PreLoginEvent.PreLoginComponentResult.denied(
-            Component.text(
-              "There's already a user with the same nickname: ${existingUser.username}. \n\nIf its your account, then please use the same nickname.",
-              TextColors.RED,
-            )
-          )
-        return
-      }
-
-      forcePremiumSession = existingUser.isPremium
-    }
-    // fresh account
-    else {
-      if (correspondingPremiumProfile != null) {
-        if (!connUsername.equals(correspondingPremiumProfile.name)) {
-          // todo add to config
-          event.result =
-            PreLoginEvent.PreLoginComponentResult.denied(
-              Component.text(
-                "Your nickname is already occupied. \n\nIf its your account, then please use the same nickname: ${correspondingPremiumProfile.name}",
-                TextColors.RED,
-              )
-            )
-          return
-        } else {
-          forcePremiumSession = true
-        }
+    if (isPremiumNickname) {
+      if (existingUser?.isPremium == true) {
+        forcePremiumSession = true
       } else {
-        forcePremiumSession = false
+        existingUser = userService.findUserByMojangUuid(correspondingPremiumProfile.uuid)
+        if (existingUser != null) {
+          // username changed
+          // todo send username changed event
+          // todo migrate data
+        }
+        forcePremiumSession = true
       }
+    } else {
+      // even if username is not found in mojang services,
+      // then still it can be an old username with premium status
+      // that's why we do the check here
+      forcePremiumSession = existingUser?.isPremium == true
     }
 
     val state =
