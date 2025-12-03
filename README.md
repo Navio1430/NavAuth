@@ -47,13 +47,6 @@ NavAuth is licensed under the GNU AGPL v3. See the license file for more informa
 
 - readme:
    - add banner
-   - add badges:
-      - github stars
-      - support discord
-      - modrinth
-      - documentation
-      - minecraft versions
-      - license
 - github/gh actions:
    - modrinth CD
    - github CD
@@ -63,12 +56,10 @@ NavAuth is licensed under the GNU AGPL v3. See the license file for more informa
    - github pages CD
 - initialize docs
 - minecraft commands:
-   - /login
-   - /register
    - ...
-- define config structure (yaml/hocon?)
 - commands and messages localization
 - features:
+   - librelogin migration
    - password strength requirement
    - minecraft names validation
    - premium account autologin
