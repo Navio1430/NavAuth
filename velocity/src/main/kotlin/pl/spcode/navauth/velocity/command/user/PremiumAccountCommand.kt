@@ -33,21 +33,28 @@ import pl.spcode.navauth.velocity.component.TextColors
 
 @Command(name = "premium")
 @Permission(Permissions.USER_CHANGE_TO_PREMIUM_ACCOUNT)
-class PremiumAccountCommand @Inject constructor(val userService: UserService, val mojangProfileService: MojangProfileService) {
+class PremiumAccountCommand
+@Inject
+constructor(val userService: UserService, val mojangProfileService: MojangProfileService) {
 
   @Async
   @Execute
   fun changeToPremiumAccount(@Context sender: Player) {
-    val user = userService.findUserByUsername(sender.username, false)!!
+    val user = userService.findUserByUsername(sender.username)!!
     if (user.isPremium) {
       sender.sendMessage(Component.text("Account is already set as a premium one.", TextColors.RED))
-      return;
+      return
     }
 
     val mojangProfile = mojangProfileService.fetchProfileInfo(sender.username)
     if (mojangProfile == null) {
-      sender.sendMessage(Component.text("Can't set this account as premium because there's no premium account with username '${sender.username}'.", TextColors.RED))
-      return;
+      sender.sendMessage(
+        Component.text(
+          "Can't set this account as premium because there's no premium account with username '${sender.username}'.",
+          TextColors.RED,
+        )
+      )
+      return
     }
 
     userService.migrateToPremium(user)

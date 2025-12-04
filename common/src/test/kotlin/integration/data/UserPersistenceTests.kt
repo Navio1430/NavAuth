@@ -47,6 +47,8 @@ class UserPersistenceTests {
     assertNotNull("Persisted user should exist in repository", user!!)
     assertEquals(userToPersist.uuid, user.uuid, "User ID should match")
     assertEquals(userToPersist.username, user.username, "User name should match")
+    assertEquals(userToPersist.usernameLowercase, user.usernameLowercase)
+    assertEquals(user.usernameLowercase, user.username.lowercase())
     assertEquals(false, user.isPremium)
   }
 
@@ -69,6 +71,29 @@ class UserPersistenceTests {
     assertEquals(userToPersist.uuid, user.uuid, "User ID should match")
     assertEquals(userToPersist.username, user.username, "User name should match")
     assertEquals(true, user.isPremium)
+  }
+
+  @Test
+  fun `test findByUsernameLowercased with existing user`() {
+    val id = UUID.randomUUID()
+    val name = generateRandomString(10)
+    val userToPersist = User.create(id, name, true)
+    userRepo.save(userToPersist)
+
+    val userLower = userRepo.findByUsernameLowercase(name.lowercase())
+
+    assertNotNull("User should be found by lowercased username", userLower!!)
+    assertEquals(userToPersist.uuid, userLower.uuid, "User ID should match")
+    assertEquals(userToPersist.username, userLower.username, "User name should match")
+    assertEquals(userToPersist.usernameLowercase, userLower.usernameLowercase)
+    assertEquals(userLower.usernameLowercase, userLower.username.lowercase())
+    assertEquals(true, userLower.isPremium)
+  }
+
+  @Test
+  fun `test findByUsernameLowercased non-existent user returns null`() {
+    val user = userRepo.findByUsernameLowercase("nonexistent")
+    assertNull(user)
   }
 
   @Test

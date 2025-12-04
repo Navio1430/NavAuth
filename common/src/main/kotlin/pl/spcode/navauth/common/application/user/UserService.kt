@@ -20,12 +20,12 @@ package pl.spcode.navauth.common.application.user
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import java.util.UUID
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserRepository
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
-import java.util.UUID
 
 @Singleton
 class UserService
@@ -35,9 +35,12 @@ constructor(
   val userCredentialsService: UserCredentialsService,
 ) {
 
-  fun findUserByUsername(username: String, ignoreCase: Boolean): User? {
-    // todo impl ignore case option
+  fun findUserByUsername(username: String): User? {
     return userRepository.findByUsername(username)
+  }
+
+  fun findUserByUsernameLowercase(usernameLowercase: String): User? {
+    return userRepository.findByUsernameLowercase(usernameLowercase)
   }
 
   fun storeUserWithCredentials(user: User, password: HashedPassword) {

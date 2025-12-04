@@ -47,7 +47,7 @@ constructor(val userService: UserService, val userCredentialsService: UserCreden
     @Arg(value = "playerName") playerName: String,
     @Arg(value = "password") password: String,
   ) {
-    val user = userService.findUserByUsername(playerName, true)
+    val user = userService.findUserByUsernameLowercase(playerName.lowercase())
 
     if (user == null) {
       sender.sendMessage(Component.text("User '${playerName}' not found.", TextColors.RED))

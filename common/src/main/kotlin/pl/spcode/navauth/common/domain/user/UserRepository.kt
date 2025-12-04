@@ -23,4 +23,6 @@ import pl.spcode.navauth.common.shared.data.OrmLiteCrudRepository
 
 interface UserRepository : OrmLiteCrudRepository<User, UUID> {
   fun findByUsername(username: String): User?
+
+  fun findByUsernameLowercase(usernameLowercase: String): User?
 }
