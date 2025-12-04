@@ -37,7 +37,7 @@ class YamlConfigModule<T : OkaeriConfig>(val configClass: KClass<T>, val configF
           opt.bindFile(configFile)
         }
         it.saveDefaults()
-        it.load()
+        it.load(true)
       }
 
     bind(configClass.java).toInstance(configInstance)
