@@ -58,7 +58,7 @@ constructor(
     // todo check if user nickname matches regex
     val connUsername = event.username
 
-    var existingUser = userService.findUserByUsername(connUsername, ignoreCase = true)
+    var existingUser = userService.findUserByUsernameLowercase(connUsername)
     val userExists = existingUser != null
     val correspondingPremiumProfile = profileService.fetchProfileInfo(connUsername)
     val isPremiumNickname = correspondingPremiumProfile != null
@@ -71,7 +71,8 @@ constructor(
       else {
         if (isPremiumNickname) {
           if (correspondingPremiumProfile.name == existingUser.username) {
-            // todo ensure same nickname like in the database but send a message about potential conflict or /premium activation
+            // todo ensure same nickname like in the database but send a message about potential
+            // conflict or /premium activation
           } else {
             // todo announce conflict
           }
@@ -162,6 +163,14 @@ constructor(
     authHandshakeSessionService.closeSession(sessionId)
   }
 
+  // this event is invoked just after online encryption so we can
+  // assume premium player was authenticated at this point
+  //  @Subscribe
+  //  fun onGameProfile(event: GameProfileRequestEvent) {
+  //    val sessionId = VelocityUniqueSessionId(event.username, event.connection.remoteAddress)
+  //    val session = authHandshakeSessionService.findSession(sessionId)!!
+  //  }
+
   private fun createAuthSession(
     player: Player,
     handshakeSession: AuthHandshakeSession,
@@ -203,4 +212,22 @@ constructor(
     val premiumUser = User.create(player.uniqueId, player.username, true)
     userService.storePremiumUser(premiumUser)
   }
+
+  //  private fun ensureSameNickname(
+  //    connUsername: String,
+  //    existingUser: User,
+  //  ): PreLoginEvent.PreLoginComponentResult {
+  //    if (connUsername != existingUser.username) {
+  //      // todo add to config
+  //      return PreLoginEvent.PreLoginComponentResult.denied(
+  //        Component.text(
+  //          "There's already a user with the same nickname: ${existingUser.username}. \n\nIf its
+  // your account, then please use the same nickname.",
+  //          TextColors.RED,
+  //        )
+  //      )
+  //    }
+  //
+  //    return PreLoginEvent.PreLoginComponentResult.allowed()
+  //  }
 }
