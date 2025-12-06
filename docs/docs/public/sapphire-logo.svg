@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><!--
+  - NavAuth
+  - Copyright © 2025 Oliwier Fijas (Navio1430)
+  -
+  - NavAuth is free software; You can redistribute it and/or modify it under the terms of:
+  - the GNU Affero General Public License version 3 as published by the Free Software Foundation.
+  -
+  - NavAuth is distributed in the hope that it will be useful,
+  - but WITHOUT ANY WARRANTY; without even the implied warranty of
+  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  - GNU Affero General Public License for more details.
+  -
+  - You should have received a copy of the GNU Affero General Public License
+  - along with NavAuth. If not, see <https://www.gnu.org/licenses/>
+  - and navigate to version 3 of the GNU Affero General Public License.
+  -
+  -->
+
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg width="100%" height="100%" viewBox="0 0 823 823" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;"><path d="M411.429,621.14l-199.004,-116.454l0,127.448l199.004,119.751l0,-130.746Z" style="fill:#6a01fe;"/><path d="M497.88,461.746l0,108.086l-86.452,51.308l0,130.746l198.511,-118.243l0,-236.847l-112.059,64.95Z" style="fill:url(#_Linear1);"/><path d="M411.429,411.429l0,-130.934l198.511,116.301l-112.059,64.95l-86.452,-50.317Z" style="fill:#6822fe;"/><path d="M212.425,188.663l0,235.818l199.004,117.822l0,-130.874l-85.251,-50.457l0,-106.107l-113.753,-66.201Z" style="fill:#017afd;"/><path d="M411.429,70.971l198.509,118.228l0.001,129.567l-198.511,-116.944l0,-130.851Z" style="fill:#0181fe;"/><path d="M411.429,70.971l-199.004,117.691l113.753,66.201l85.251,-53.041l0,-130.851Z" style="fill:#30aafc;"/><defs><linearGradient id="_Linear1" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-38.021842,226.117244,-226.117244,-38.021842,548.705788,432.287377)"><stop offset="0" style="stop-color:#8641ff;stop-opacity:1"/><stop offset="0.5" style="stop-color:#5910d9;stop-opacity:1"/><stop offset="1" style="stop-color:#4a00cd;stop-opacity:1"/></linearGradient></defs></svg>
