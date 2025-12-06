@@ -1,10 +1,13 @@
-import { defineConfig } from 'vitepress'
+import { withBase, defineConfig } from 'vitepress';
 import { withSidebar } from 'vitepress-sidebar';
+
+let basePath = '/NavAuth/';
 
 // https://vitepress.dev/reference/site-config
 const vitePressOptions = {
-  base: '/NavAuth/',
+  base: basePath,
 
+  head: [['link', { rel: 'icon', href: basePath + 'navauth-logo.svg' }]],
   title: "NavAuth Docs",
   description: "project dcumentation",
   themeConfig: {
