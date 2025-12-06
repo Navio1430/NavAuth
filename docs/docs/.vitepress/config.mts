@@ -1,7 +1,8 @@
 import { defineConfig } from 'vitepress'
+import { withSidebar } from 'vitepress-sidebar';
 
 // https://vitepress.dev/reference/site-config
-export default defineConfig({
+const vitePressOptions = {
   title: "NavAuth Docs",
   description: "project dcumentation",
   themeConfig: {
@@ -10,16 +11,6 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Docs', link: '/markdown-examples' }
-    ],
-
-    sidebar: [
-      {
-        text: 'Examples',
-        items: [
-          { text: 'View documentation', link: '/markdown-examples' },
-          { text: 'Runtime API Examples', link: '/api-examples' }
-        ]
-      }
     ],
 
     footer: {
@@ -33,4 +24,12 @@ export default defineConfig({
       { icon: 'discord', link: 'todo' }
     ]
   }
-})
+};
+
+const vitePressSidebarOptions = {
+  documentRootPath: '/docs',
+  hyphenToSpace: true,
+  capitalizeFirst: true
+};
+
+export default defineConfig(withSidebar(vitePressOptions, vitePressSidebarOptions));
