@@ -29,6 +29,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory
 import com.velocitypowered.api.proxy.ProxyServer
 import dev.rollczi.litecommands.LiteCommands
 import dev.rollczi.litecommands.velocity.LiteVelocityFactory
+import net.kyori.adventure.text.Component
 import java.nio.file.Path
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -60,32 +61,35 @@ constructor(
   lateinit var liteCommands: LiteCommands<CommandSource>
 
   fun init(event: ProxyInitializeEvent, pluginInstance: Bootstrap) {
-    // todo: do not let proxy to start on any errors
+    try {
+      logger.info("Initializing NavAuth plugin...")
+      this.pluginInstance = pluginInstance
 
-    logger.info("Initializing NavAuth plugin...")
-    this.pluginInstance = pluginInstance
+      // register self as listener because of the shutdown event
+      proxyServer.eventManager.register(pluginInstance, this)
 
-    // register self as listener because of the shutdown event
-    proxyServer.eventManager.register(pluginInstance, this)
+      val generalConfigModule =
+          YamlConfigModule(GeneralConfig::class, dataDirectory.resolve("general.yml").toFile())
 
-    val generalConfigModule =
-      YamlConfigModule(GeneralConfig::class, dataDirectory.resolve("general.yml").toFile())
+      injector =
+          parentInjector.createChildInjector(
+              // loading hierarchy here is crucial
+              generalConfigModule,
+              SchedulerModule(pluginInstance, proxyServer.scheduler),
+              HttpClientModule(),
+              DataPersistenceModule(),
+              ServicesModule(),
+              VelocityServicesModule(),
+          )
 
-    injector =
-      parentInjector.createChildInjector(
-        // loading hierarchy here is crucial
-        generalConfigModule,
-        SchedulerModule(pluginInstance, proxyServer.scheduler),
-        HttpClientModule(),
-        DataPersistenceModule(),
-        ServicesModule(),
-        VelocityServicesModule(),
-      )
+      connectAndInitDatabase()
 
-    connectAndInitDatabase()
-
-    registerListeners(injector)
-    registerCommands(injector)
+      registerListeners(injector)
+      registerCommands(injector)
+    } catch (ex: Exception) {
+      logger.error("Could not initialize NavAuth plugin, shutting down the server...", ex)
+      proxyServer.shutdown(Component.text("NavAuth initialization failure"))
+    }
   }
 
   fun connectAndInitDatabase() {
@@ -108,5 +112,7 @@ constructor(
   fun shutdown(proxyShutdownEvent: ProxyShutdownEvent) {
     injector?.getInstance(DatabaseManager::class.java)?.closeConnections()
     liteCommands?.unregister()
+
+    logger.info("Goodbye!")
   }
 }
