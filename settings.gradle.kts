@@ -1,4 +1,4 @@
 rootProject.name = "navauth"
 
-include("common")
-include("velocity")
+include("navauth-common")
+include("navauth-velocity")

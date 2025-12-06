@@ -47,7 +47,7 @@ repositories {
 
 dependencies {
 
-  implementation(project(":common"))
+  implementation(project(":navauth-common"))
 
   implementation("dev.rollczi:litecommands-velocity:3.10.6")
 

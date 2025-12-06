@@ -9,8 +9,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/common" />
-            <option value="$PROJECT_DIR$/velocity" />
+            <option value="$PROJECT_DIR$/navauth-common" />
+            <option value="$PROJECT_DIR$/navauth-velocity" />
           </set>
         </option>
       </GradleProjectSettings>
