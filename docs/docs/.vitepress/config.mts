@@ -9,7 +9,7 @@ const vitePressOptions = {
 
   head: [['link', { rel: 'icon', href: basePath + '/navauth-logo.svg' }]],
   title: "NavAuth Docs",
-  description: "project dcumentation",
+  description: "Official NavAuth auth & auto-login plugin docs.",
   themeConfig: {
     logo: '/navauth-logo.svg',
     // https://vitepress.dev/reference/default-theme-config
