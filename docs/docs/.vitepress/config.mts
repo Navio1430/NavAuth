@@ -3,6 +3,8 @@ import { withSidebar } from 'vitepress-sidebar';
 
 // https://vitepress.dev/reference/site-config
 const vitePressOptions = {
+  base: '/NavAuth/',
+
   title: "NavAuth Docs",
   description: "project dcumentation",
   themeConfig: {
