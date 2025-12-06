@@ -15,7 +15,7 @@ const vitePressOptions = {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Docs', link: '/markdown-examples' }
+      { text: 'Docs', link: '/navauth-release' }
     ],
 
     footer: {
