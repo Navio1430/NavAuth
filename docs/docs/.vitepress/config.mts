@@ -1,13 +1,13 @@
 import { withBase, defineConfig } from 'vitepress';
 import { withSidebar } from 'vitepress-sidebar';
 
-let basePath = '/NavAuth/';
+let basePath = '/NavAuth';
 
 // https://vitepress.dev/reference/site-config
 const vitePressOptions = {
   base: basePath,
 
-  head: [['link', { rel: 'icon', href: basePath + 'navauth-logo.svg' }]],
+  head: [['link', { rel: 'icon', href: basePath + '/navauth-logo.svg' }]],
   title: "NavAuth Docs",
   description: "project dcumentation",
   themeConfig: {
@@ -21,7 +21,7 @@ const vitePressOptions = {
     footer: {
       message: `Made by Navio1430 and Contributors with ❤️`,
       copyright: `Copyright © ${new Date().getFullYear()} Sapphire Code sp. z o.o. & Oliwier Fijas
-        <br>Powered by Sapphire Code <img src='/sapphire-logo.svg' width='16' alt='Sapphire Code' style='vertical-align: middle; display: inline;'>
+        <br>Powered by Sapphire Code <img src='${basePath}/sapphire-logo.svg' width='16' alt='Sapphire Code' style='vertical-align: middle; display: inline;'>
         <br><br>Docs generated with VitePress`,
     },
 
