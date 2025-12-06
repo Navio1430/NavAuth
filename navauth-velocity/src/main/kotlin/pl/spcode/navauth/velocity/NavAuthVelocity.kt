@@ -29,11 +29,12 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory
 import com.velocitypowered.api.proxy.ProxyServer
 import dev.rollczi.litecommands.LiteCommands
 import dev.rollczi.litecommands.velocity.LiteVelocityFactory
-import net.kyori.adventure.text.Component
 import java.nio.file.Path
+import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.config.GeneralConfig
+import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.module.DataPersistenceModule
 import pl.spcode.navauth.common.module.HttpClientModule
@@ -69,18 +70,22 @@ constructor(
       proxyServer.eventManager.register(pluginInstance, this)
 
       val generalConfigModule =
-          YamlConfigModule(GeneralConfig::class, dataDirectory.resolve("general.yml").toFile())
+        YamlConfigModule(GeneralConfig::class, dataDirectory.resolve("general.yml").toFile())
+
+      val messagesConfigModule =
+        YamlConfigModule(MessagesConfig::class, dataDirectory.resolve("messages.yml").toFile())
 
       injector =
-          parentInjector.createChildInjector(
-              // loading hierarchy here is crucial
-              generalConfigModule,
-              SchedulerModule(pluginInstance, proxyServer.scheduler),
-              HttpClientModule(),
-              DataPersistenceModule(),
-              ServicesModule(),
-              VelocityServicesModule(),
-          )
+        parentInjector.createChildInjector(
+          // loading hierarchy here is crucial
+          generalConfigModule,
+          messagesConfigModule,
+          SchedulerModule(pluginInstance, proxyServer.scheduler),
+          HttpClientModule(),
+          DataPersistenceModule(),
+          ServicesModule(),
+          VelocityServicesModule(),
+        )
 
       connectAndInitDatabase()
 
