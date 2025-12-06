@@ -38,6 +38,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
+          cache-dependency-path: docs/pnpm-lock.yaml
           node-version: latest
           cache: pnpm
       - name: Setup Pages
