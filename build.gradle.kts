@@ -31,6 +31,7 @@ subprojects {
       url = uri("https://repo.papermc.io/repository/maven-public/")
     }
     maven("https://storehouse.okaeri.eu/repository/maven-public/")
+    maven("https://repo.eternalcode.pl/releases")
   }
 
   apply {

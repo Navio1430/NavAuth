@@ -29,11 +29,12 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory
 import com.velocitypowered.api.proxy.ProxyServer
 import dev.rollczi.litecommands.LiteCommands
 import dev.rollczi.litecommands.velocity.LiteVelocityFactory
-import net.kyori.adventure.text.Component
 import java.nio.file.Path
+import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.config.GeneralConfig
+import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.module.DataPersistenceModule
 import pl.spcode.navauth.common.module.HttpClientModule
@@ -42,7 +43,10 @@ import pl.spcode.navauth.common.module.YamlConfigModule
 import pl.spcode.navauth.velocity.command.CommandsRegistry
 import pl.spcode.navauth.velocity.listener.VelocityListenersRegistry
 import pl.spcode.navauth.velocity.module.SchedulerModule
+import pl.spcode.navauth.velocity.module.VelocityMultificationsModule
 import pl.spcode.navauth.velocity.module.VelocityServicesModule
+import pl.spcode.navauth.velocity.multification.VelocityMultification
+import pl.spcode.navauth.velocity.multification.VelocityViewerProvider
 
 @Singleton
 class NavAuthVelocity
@@ -69,18 +73,31 @@ constructor(
       proxyServer.eventManager.register(pluginInstance, this)
 
       val generalConfigModule =
-          YamlConfigModule(GeneralConfig::class, dataDirectory.resolve("general.yml").toFile())
+        YamlConfigModule(GeneralConfig::class, dataDirectory.resolve("general.yml").toFile())
+
+      val velocityViewerProvider = VelocityViewerProvider(proxyServer)
+      val velocityMultification = VelocityMultification(MessagesConfig(), velocityViewerProvider)
+      val messagesConfigModule =
+        YamlConfigModule(
+          MessagesConfig::class,
+          dataDirectory.resolve("messages.yml").toFile(),
+          velocityMultification,
+        )
+
+      velocityMultification.create()
 
       injector =
-          parentInjector.createChildInjector(
-              // loading hierarchy here is crucial
-              generalConfigModule,
-              SchedulerModule(pluginInstance, proxyServer.scheduler),
-              HttpClientModule(),
-              DataPersistenceModule(),
-              ServicesModule(),
-              VelocityServicesModule(),
-          )
+        parentInjector.createChildInjector(
+          // loading hierarchy here is crucial
+          generalConfigModule,
+          messagesConfigModule,
+          VelocityMultificationsModule(velocityMultification),
+          SchedulerModule(pluginInstance, proxyServer.scheduler),
+          HttpClientModule(),
+          DataPersistenceModule(),
+          ServicesModule(),
+          VelocityServicesModule(),
+        )
 
       connectAndInitDatabase()
 

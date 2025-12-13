@@ -24,6 +24,7 @@ My main issues were:
 - advanced localization with multi-language support at one time
 - floodgate support
 - minecraft dialogs support for login/register
+- whitelist for offline players
 
 ## 📊 Feature Comparison
 
