@@ -38,7 +38,7 @@ open class GeneralConfig : OkaeriConfig() {
     protected set
 
   @Comment(
-    "The limbo servers players should be sent to while waiting for an authentication.",
+    "The limbo server players should be sent to while waiting for an authentication.",
     "Players are LoadBalanced with 'least conn' by default.",
     "There must be at least 1 properly registered server available.",
   )
