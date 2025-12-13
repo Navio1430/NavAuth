@@ -18,11 +18,20 @@
 
 package pl.spcode.navauth.common.config
 
+import com.eternalcode.multification.notice.Notice
 import eu.okaeri.configs.OkaeriConfig
 import eu.okaeri.configs.annotation.Comment
+import eu.okaeri.configs.annotation.Header
 import eu.okaeri.configs.annotation.Variable
 
+@Header(
+  "For messages/notification we use Multification library.",
+  "Thanks to it, you can use chat messages, action bars, sounds etc. combined.",
+  "To learn more about it please read https://navio1430.github.io/NavAuth/multification.html.",
+)
 open class MessagesConfig : OkaeriConfig() {
+
+  var test: Notice = Notice.chat("<red>Test</red>")
 
   @Variable("CONFIG_VERSION")
   @Comment("Config version. DO NOT CHANGE this property!")

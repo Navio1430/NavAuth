@@ -43,7 +43,10 @@ import pl.spcode.navauth.common.module.YamlConfigModule
 import pl.spcode.navauth.velocity.command.CommandsRegistry
 import pl.spcode.navauth.velocity.listener.VelocityListenersRegistry
 import pl.spcode.navauth.velocity.module.SchedulerModule
+import pl.spcode.navauth.velocity.module.VelocityMultificationsModule
 import pl.spcode.navauth.velocity.module.VelocityServicesModule
+import pl.spcode.navauth.velocity.multification.VelocityMultification
+import pl.spcode.navauth.velocity.multification.VelocityViewerProvider
 
 @Singleton
 class NavAuthVelocity
@@ -72,14 +75,23 @@ constructor(
       val generalConfigModule =
         YamlConfigModule(GeneralConfig::class, dataDirectory.resolve("general.yml").toFile())
 
+      val velocityViewerProvider = VelocityViewerProvider(proxyServer)
+      val velocityMultification = VelocityMultification(MessagesConfig(), velocityViewerProvider)
       val messagesConfigModule =
-        YamlConfigModule(MessagesConfig::class, dataDirectory.resolve("messages.yml").toFile())
+        YamlConfigModule(
+          MessagesConfig::class,
+          dataDirectory.resolve("messages.yml").toFile(),
+          velocityMultification,
+        )
+
+      velocityMultification.create()
 
       injector =
         parentInjector.createChildInjector(
           // loading hierarchy here is crucial
           generalConfigModule,
           messagesConfigModule,
+          VelocityMultificationsModule(velocityMultification),
           SchedulerModule(pluginInstance, proxyServer.scheduler),
           HttpClientModule(),
           DataPersistenceModule(),
