@@ -224,11 +224,11 @@ constructor(
   ): PreLoginEvent.PreLoginComponentResult {
 
     val component =
-        messagesConfig.usernameRequiredMessage
-            .withPlaceholders()
-            .placeholder("USERNAME", connUsername)
-            .placeholder("EXPECTED", requiredUsername)
-            .toComponent()
+      messagesConfig.usernameRequiredMessage
+        .withPlaceholders()
+        .placeholder("USERNAME", connUsername)
+        .placeholder("EXPECTED", requiredUsername)
+        .toComponent()
 
     return PreLoginEvent.PreLoginComponentResult.denied(component)
   }
