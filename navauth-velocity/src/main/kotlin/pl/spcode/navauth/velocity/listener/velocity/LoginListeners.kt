@@ -24,13 +24,13 @@ import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.connection.PostLoginEvent
 import com.velocitypowered.api.event.connection.PreLoginEvent
 import com.velocitypowered.api.proxy.Player
-import com.velocitypowered.api.proxy.ProxyServer
 import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.application.auth.handshake.AuthHandshakeSessionService
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
+import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeSession
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeState
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionState
@@ -42,11 +42,11 @@ import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 class LoginListeners
 @Inject
 constructor(
-  val proxyServer: ProxyServer,
   val profileService: MojangProfileService,
   val userService: UserService,
   val authHandshakeSessionService: AuthHandshakeSessionService,
   val authSessionFactory: VelocityAuthSessionFactory,
+  val messagesConfig: MessagesConfig,
 ) {
 
   val logger: Logger = LoggerFactory.getLogger(LoginListeners::class.java)
@@ -65,14 +65,15 @@ constructor(
 
     if (userExists) {
       if (existingUser.isPremium) {
-        // todo user could change 1 letter to be uppercased/lowercased in its nickname
+        // user could change 1 letter to be uppercased/lowercased in their nickname
+        // todo check if username matches the corresponding premium profile
       }
       // non premium user
       else {
         if (isPremiumNickname) {
           if (correspondingPremiumProfile.name == existingUser.username) {
-            // todo ensure same nickname like in the database but send a message about potential
-            // conflict or /premium activation
+            // todo ensure the same nickname like in the database but send a message about
+            //   potential conflict or /premium activation
           } else {
             // todo announce conflict
           }
@@ -86,7 +87,11 @@ constructor(
     // user doesn't exist yet
     else {
       if (isPremiumNickname) {
-        // todo ensure same nickname like premium nickname
+        if (connUsername != correspondingPremiumProfile.name) {
+          event.result =
+            requiredNicknameDeniedResult(connUsername, correspondingPremiumProfile.name)
+          return
+        }
       }
     }
 
@@ -213,21 +218,18 @@ constructor(
     userService.storePremiumUser(premiumUser)
   }
 
-  //  private fun ensureSameNickname(
-  //    connUsername: String,
-  //    existingUser: User,
-  //  ): PreLoginEvent.PreLoginComponentResult {
-  //    if (connUsername != existingUser.username) {
-  //      // todo add to config
-  //      return PreLoginEvent.PreLoginComponentResult.denied(
-  //        Component.text(
-  //          "There's already a user with the same nickname: ${existingUser.username}. \n\nIf its
-  // your account, then please use the same nickname.",
-  //          TextColors.RED,
-  //        )
-  //      )
-  //    }
-  //
-  //    return PreLoginEvent.PreLoginComponentResult.allowed()
-  //  }
+  private fun requiredNicknameDeniedResult(
+    connUsername: String,
+    requiredUsername: String,
+  ): PreLoginEvent.PreLoginComponentResult {
+
+    val component =
+      messagesConfig.usernameRequiredMessage
+        .withPlaceholders()
+        .placeholder("USERNAME", connUsername)
+        .placeholder("EXPECTED", requiredUsername)
+        .toComponent()
+
+    return PreLoginEvent.PreLoginComponentResult.denied(component)
+  }
 }
