@@ -36,7 +36,8 @@ const vitePressSidebarOptions = {
   documentRootPath: '/docs',
   hyphenToSpace: true,
   capitalizeFirst: true,
-  useTitleFromFileHeading: true
+  useTitleFromFileHeading: true,
+  excludeByGlobPattern: 'generated/**'
 };
 
 export default defineConfig(withSidebar(vitePressOptions, vitePressSidebarOptions));
