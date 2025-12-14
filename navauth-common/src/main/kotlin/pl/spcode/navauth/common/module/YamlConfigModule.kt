@@ -26,6 +26,7 @@ import eu.okaeri.configs.OkaeriConfig
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer
 import java.io.File
 import kotlin.reflect.KClass
+import pl.spcode.navauth.common.config.serdes.TextComponentSerdesPack
 
 class YamlConfigModule<T : OkaeriConfig>(
   val configClass: KClass<T>,
@@ -44,6 +45,7 @@ class YamlConfigModule<T : OkaeriConfig>(
             opt.configurer(
               YamlSnakeYamlConfigurer(),
               MultificationSerdesPack(multification.noticeRegistry),
+              TextComponentSerdesPack(),
             )
           }
           opt.bindFile(configFile)

@@ -10,6 +10,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/navauth-common" />
+            <option value="$PROJECT_DIR$/navauth-docs-gen" />
             <option value="$PROJECT_DIR$/navauth-velocity" />
           </set>
         </option>

@@ -23,6 +23,7 @@ import eu.okaeri.configs.OkaeriConfig
 import eu.okaeri.configs.annotation.Comment
 import eu.okaeri.configs.annotation.Header
 import eu.okaeri.configs.annotation.Variable
+import pl.spcode.navauth.common.component.TextComponent
 
 @Header(
   "For messages/notification we use Multification library.",
@@ -32,6 +33,14 @@ import eu.okaeri.configs.annotation.Variable
 open class MessagesConfig : OkaeriConfig() {
 
   var test: Notice = Notice.chat("<red>Test</red>")
+
+  // todo create support information message for each disconnect reason
+
+  var usernameRequiredMessage =
+    TextComponent(
+      "You're trying to join with the username: '%USERNAME%', but we expect it to be '%EXPECTED%'. " +
+        "\n\nPlease change your username and try again."
+    )
 
   @Variable("CONFIG_VERSION")
   @Comment("Config version. DO NOT CHANGE this property!")
