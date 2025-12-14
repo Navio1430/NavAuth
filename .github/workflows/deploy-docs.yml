@@ -28,6 +28,7 @@ concurrency:
 jobs:
   # Build job
   build:
+    needs: run-generate-docs-task
     runs-on: ubuntu-latest
     defaults:
       run:
