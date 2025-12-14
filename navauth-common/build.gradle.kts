@@ -20,5 +20,7 @@ dependencies {
   // crypto
   implementation("at.favre.lib:bcrypt:0.10.2")
 
+  compileOnly("net.kyori:adventure-text-minimessage:4.25.0")
+
   runtimeOnly("com.h2database:h2:2.4.240")
 }
