@@ -36,11 +36,13 @@ open class MessagesConfig : OkaeriConfig() {
 
   // todo create support information message for each disconnect reason
 
-  var usernameRequiredMessage =
+  var usernameRequiredError =
     TextComponent(
       "You're trying to join with the username: '%USERNAME%', but we expect it to be '%EXPECTED%'. " +
         "\n\nPlease change your username and try again."
     )
+
+  var usernameConflictError = TextComponent("<red>Premium and non-premium username CONFLICT!</red>")
 
   @Variable("CONFIG_VERSION")
   @Comment("Config version. DO NOT CHANGE this property!")

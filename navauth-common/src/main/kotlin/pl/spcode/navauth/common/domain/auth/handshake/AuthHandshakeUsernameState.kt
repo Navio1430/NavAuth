@@ -18,19 +18,9 @@
 
 package pl.spcode.navauth.common.domain.auth.handshake
 
-import pl.spcode.navauth.common.domain.user.User
-
-/**
- * @param existingUser user who already exists in the database
- * @param connUsername username who made the initial connection
- */
-class AuthHandshakeSession(val existingUser: User?, val connUsername: String) {
-
-  /** current state of the handshake session */
-  var state: AuthHandshakeState = AuthHandshakeState.REQUIRES_ONLINE_ENCRYPTION
-  var usernameState: AuthHandshakeUsernameState = AuthHandshakeUsernameState.VALID_USERNAME
-
-  override fun toString(): String {
-    return "AuthHandshakeSession(connUsername='$connUsername', state=$state, usernameState=$usernameState)"
-  }
+enum class AuthHandshakeUsernameState {
+  VALID_USERNAME,
+  PREMIUM_USERNAME_CHANGED,
+  USERNAME_POTENTIAL_CONFLICT,
+  USERNAME_CONFLICT,
 }

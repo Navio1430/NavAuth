@@ -33,6 +33,7 @@ import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeSession
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeState
+import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeUsernameState
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionState
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.velocity.application.auth.session.VelocityAuthSessionFactory
@@ -63,24 +64,38 @@ constructor(
     val correspondingPremiumProfile = profileService.fetchProfileInfo(connUsername)
     val isPremiumNickname = correspondingPremiumProfile != null
 
+    val sessionId = VelocityUniqueSessionId(event.username, event.connection.remoteAddress)
+    val session = authHandshakeSessionService.createSession(sessionId, existingUser, connUsername)
+
     if (userExists) {
       if (existingUser.isPremium) {
         // user could change 1 letter to be uppercased/lowercased in their nickname
-        // todo check if username matches the corresponding premium profile
+        if (connUsername != existingUser.username) {
+          session.usernameState = AuthHandshakeUsernameState.PREMIUM_USERNAME_CHANGED
+          // let them through and make data migration later after auth
+        }
       }
       // non premium user
       else {
         if (isPremiumNickname) {
           if (correspondingPremiumProfile.name == existingUser.username) {
-            // todo ensure the same nickname like in the database but send a message about
-            //   potential conflict or /premium activation
+            session.usernameState = AuthHandshakeUsernameState.USERNAME_POTENTIAL_CONFLICT
+            if (connUsername != correspondingPremiumProfile.name) {
+              event.result =
+                usernameRequiredDeniedResult(connUsername, correspondingPremiumProfile.name)
+              return
+            }
           } else {
-            // todo announce conflict
+            // todo refactor conflicts
+            session.usernameState = AuthHandshakeUsernameState.USERNAME_CONFLICT
+            event.result = usernameConflictDeniedResult(correspondingPremiumProfile.name)
+            return
           }
         }
         // not a premium nickname
         else {
-          // todo ensure same nickname like in the database
+          event.result = usernameRequiredDeniedResult(connUsername, existingUser.username)
+          return
         }
       }
     }
@@ -89,7 +104,7 @@ constructor(
       if (isPremiumNickname) {
         if (connUsername != correspondingPremiumProfile.name) {
           event.result =
-            requiredNicknameDeniedResult(connUsername, correspondingPremiumProfile.name)
+            usernameRequiredDeniedResult(connUsername, correspondingPremiumProfile.name)
           return
         }
       }
@@ -97,15 +112,15 @@ constructor(
 
     val forcePremiumSession: Boolean
 
-    if (isPremiumNickname) {
+    if (session.usernameState == AuthHandshakeUsernameState.PREMIUM_USERNAME_CHANGED) {
+      forcePremiumSession = true
+    } else if (isPremiumNickname) {
       if (existingUser?.isPremium == true) {
         forcePremiumSession = true
       } else {
         existingUser = userService.findUserByMojangUuid(correspondingPremiumProfile.uuid)
         if (existingUser != null) {
-          // username changed
-          // todo send username changed event
-          // todo migrate data
+          session.usernameState = AuthHandshakeUsernameState.PREMIUM_USERNAME_CHANGED
         }
         forcePremiumSession = true
       }
@@ -116,7 +131,7 @@ constructor(
       forcePremiumSession = existingUser?.isPremium == true
     }
 
-    val state =
+    session.state =
       if (forcePremiumSession) {
         // We force velocity to authenticate the player and
         // User won't go any further than this event if not authenticated by velocity
@@ -124,9 +139,6 @@ constructor(
       } else {
         AuthHandshakeState.REQUIRES_CREDENTIALS
       }
-
-    val sessionId = VelocityUniqueSessionId(event.username, event.connection.remoteAddress)
-    authHandshakeSessionService.createSession(sessionId, existingUser, connUsername, state)
 
     // todo create advanced auto resolution strategy
 
@@ -162,6 +174,28 @@ constructor(
         Component.text("NavAuth: Auth session expired, please try again", TextColors.RED)
       )
       return
+    }
+
+    when (handshakeSession.usernameState) {
+      AuthHandshakeUsernameState.VALID_USERNAME -> {}
+      AuthHandshakeUsernameState.PREMIUM_USERNAME_CHANGED -> {
+        // todo do after auth:
+        //   send username changed event
+        //   migrate data
+      }
+      AuthHandshakeUsernameState.USERNAME_POTENTIAL_CONFLICT -> {
+        // todo send message about potential conflict and /premium activation
+      }
+      AuthHandshakeUsernameState.USERNAME_CONFLICT -> {
+        // if somehow player is still here then disconnect them
+        player.disconnect(
+          Component.text(
+            "NavAuth: Bad state. Username conflict in PostLogin event.",
+            TextColors.RED,
+          )
+        )
+        return
+      }
     }
 
     createAuthSession(player, handshakeSession, username)
@@ -218,16 +252,29 @@ constructor(
     userService.storePremiumUser(premiumUser)
   }
 
-  private fun requiredNicknameDeniedResult(
+  private fun usernameRequiredDeniedResult(
     connUsername: String,
     requiredUsername: String,
   ): PreLoginEvent.PreLoginComponentResult {
 
     val component =
-      messagesConfig.usernameRequiredMessage
+      messagesConfig.usernameRequiredError
         .withPlaceholders()
         .placeholder("USERNAME", connUsername)
         .placeholder("EXPECTED", requiredUsername)
+        .toComponent()
+
+    return PreLoginEvent.PreLoginComponentResult.denied(component)
+  }
+
+  private fun usernameConflictDeniedResult(
+    connUsername: String
+  ): PreLoginEvent.PreLoginComponentResult {
+
+    val component =
+      messagesConfig.usernameConflictError
+        .withPlaceholders()
+        .placeholder("USERNAME", connUsername)
         .toComponent()
 
     return PreLoginEvent.PreLoginComponentResult.denied(component)
