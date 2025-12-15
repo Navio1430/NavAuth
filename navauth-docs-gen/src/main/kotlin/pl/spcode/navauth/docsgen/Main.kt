@@ -21,7 +21,7 @@ package pl.spcode.navauth.docsgen
 import java.io.FileWriter
 import kotlin.io.path.Path
 import kotlin.system.exitProcess
-import pl.spcode.navauth.docsgen.generator.EventsGenerator
+import pl.spcode.navauth.docsgen.generator.velocity.EventsGenerator
 
 val generatorsRegistry = listOf(EventsGenerator())
 

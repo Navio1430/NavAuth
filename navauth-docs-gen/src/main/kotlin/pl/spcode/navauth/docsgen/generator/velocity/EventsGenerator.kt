@@ -16,15 +16,16 @@
  *
  */
 
-package pl.spcode.navauth.docsgen.generator
+package pl.spcode.navauth.docsgen.generator.velocity
 
 import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
+import net.steppschuh.markdowngenerator.table.Table
+import pl.spcode.navauth.docsgen.generator.Generator
+import pl.spcode.navauth.velocity.listener.VelocityListenersRegistry
 import kotlin.reflect.KClass
 import kotlin.reflect.full.declaredMemberFunctions
 import kotlin.reflect.full.findAnnotation
-import net.steppschuh.markdowngenerator.table.Table
-import pl.spcode.navauth.velocity.listener.VelocityListenersRegistry
 
 class EventsGenerator : Generator {
 
@@ -34,7 +35,7 @@ class EventsGenerator : Generator {
         .withAlignments(Table.ALIGN_LEFT, Table.ALIGN_LEFT)
         .addRow("Event name", "Priority order")
 
-    VelocityListenersRegistry.listenersClasses.forEach { kClass ->
+    VelocityListenersRegistry.Companion.listenersClasses.forEach { kClass ->
       kClass.declaredMemberFunctions.forEach { fn ->
         val firstParam = fn.parameters.getOrNull(1) ?: return@forEach // 0 is "this"
         val paramType = firstParam.type
