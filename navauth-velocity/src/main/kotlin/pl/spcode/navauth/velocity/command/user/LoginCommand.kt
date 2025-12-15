@@ -25,16 +25,19 @@ import dev.rollczi.litecommands.annotations.async.Async
 import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
+import dev.rollczi.litecommands.annotations.permission.Permission
 import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
+import pl.spcode.navauth.velocity.command.Permissions
 import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.auth.VelocityLoginAuthSession
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 
 @Command(name = "login")
+@Permission(Permissions.USER_LOGIN)
 class LoginCommand
 @Inject
 constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {

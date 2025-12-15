@@ -25,6 +25,7 @@ import dev.rollczi.litecommands.annotations.async.Async
 import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
+import dev.rollczi.litecommands.annotations.permission.Permission
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
@@ -32,11 +33,13 @@ import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.infra.crypto.BCryptCredentialsHasher
+import pl.spcode.navauth.velocity.command.Permissions
 import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 
 @Command(name = "register")
+@Permission(Permissions.USER_REGISTER)
 class RegisterCommand
 @Inject
 constructor(
