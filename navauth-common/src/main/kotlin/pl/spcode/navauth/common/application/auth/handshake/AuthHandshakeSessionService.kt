@@ -26,7 +26,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.domain.auth.UniqueSessionId
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeSession
-import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeState
 import pl.spcode.navauth.common.domain.user.User
 
 @Singleton
@@ -48,9 +47,8 @@ class AuthHandshakeSessionService {
     sessionId: UniqueSessionId,
     existingUser: User?,
     connUsername: String,
-    state: AuthHandshakeState,
   ): AuthHandshakeSession {
-    val session = AuthHandshakeSession(existingUser, connUsername, state)
+    val session = AuthHandshakeSession(existingUser, connUsername)
     sessionsCache.put(sessionId, session)
     logger.debug(
       "created auth handshake session (id='{}') for user {}: {}",
