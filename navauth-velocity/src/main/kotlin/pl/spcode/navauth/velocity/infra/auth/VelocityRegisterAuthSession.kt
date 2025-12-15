@@ -35,7 +35,7 @@ class VelocityRegisterAuthSession(
 ) : RegisterAuthSession<VelocityPlayerAdapter>(VelocityPlayerAdapter(player)) {
 
   val notifyMessageTask: ScheduledTask
-  @Suppress("JoinDeclarationAndAssignment") val disconnectPlayerTask: ScheduledTask
+  val disconnectPlayerTask: ScheduledTask
 
   init {
     player.sendMessage(Component.text("Please register using /register command.", TextColors.GREEN))
