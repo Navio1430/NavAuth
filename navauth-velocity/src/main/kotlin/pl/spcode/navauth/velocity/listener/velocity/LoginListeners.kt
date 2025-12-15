@@ -94,8 +94,10 @@ constructor(
         }
         // not a premium nickname
         else {
-          event.result = usernameRequiredDeniedResult(connUsername, existingUser.username)
-          return
+          if (connUsername != existingUser.username) {
+            event.result = usernameRequiredDeniedResult(connUsername, existingUser.username)
+            return
+          }
         }
       }
     }

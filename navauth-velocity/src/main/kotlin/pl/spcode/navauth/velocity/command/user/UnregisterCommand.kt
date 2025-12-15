@@ -41,7 +41,10 @@ constructor(val userService: UserService, val userCredentialsService: UserCreden
 
   @Async
   @Execute
-  @Description("Unregister your account.", "**NOTE**: someone will be able to acquire and register the account after.")
+  @Description(
+    "Unregister your account.",
+    "**NOTE**: someone will be able to acquire and register the account after.",
+  )
   fun unregister(
     @Context sender: Player,
     @Arg(value = "current_password") currentPassword: String,

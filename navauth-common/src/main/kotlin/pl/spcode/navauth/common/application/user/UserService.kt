@@ -39,8 +39,8 @@ constructor(
     return userRepository.findByUsername(username)
   }
 
-  fun findUserByUsernameLowercase(usernameLowercase: String): User? {
-    return userRepository.findByUsernameLowercase(usernameLowercase)
+  fun findUserByUsernameLowercase(username: String): User? {
+    return userRepository.findByUsernameLowercase(username.lowercase())
   }
 
   fun storeUserWithCredentials(user: User, password: HashedPassword) {
