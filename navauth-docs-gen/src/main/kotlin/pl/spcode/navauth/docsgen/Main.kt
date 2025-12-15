@@ -18,12 +18,13 @@
 
 package pl.spcode.navauth.docsgen
 
+import pl.spcode.navauth.docsgen.generator.velocity.CommandsGenerator
 import java.io.FileWriter
 import kotlin.io.path.Path
 import kotlin.system.exitProcess
 import pl.spcode.navauth.docsgen.generator.velocity.EventsGenerator
 
-val generatorsRegistry = listOf(EventsGenerator())
+val generatorsRegistry = listOf(EventsGenerator(), CommandsGenerator())
 
 fun generateFiles() {
   val path = System.getenv("TARGET_PATH")

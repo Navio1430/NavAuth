@@ -26,6 +26,7 @@ import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import net.kyori.adventure.text.Component
+import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 import pl.spcode.navauth.velocity.component.TextColors
@@ -40,6 +41,7 @@ constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
 
   @Async
   @Execute
+  @Description("Manual login command for non-premium players")
   fun login(@Context sender: Player, @Arg(value = "password") password: String) {
 
     val uniqueSessionId = VelocityUniqueSessionId(sender)
