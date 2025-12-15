@@ -12,8 +12,12 @@ repositories {
 
 dependencies {
   implementation(project(":navauth-velocity"))
+  implementation(project(":navauth-common"))
   implementation(kotlin("reflect"))
+
+  // navauth-velocity module
   implementation("com.github.Steppschuh:Java-Markdown-Generator:1.3.2")
+  implementation("dev.rollczi:litecommands-velocity:3.10.6")
 
   implementation(libs.velocitypowered.velocity.api)
 }
