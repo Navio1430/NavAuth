@@ -18,7 +18,6 @@
 
 package pl.spcode.navauth.common.config
 
-import com.eternalcode.multification.notice.Notice
 import eu.okaeri.configs.OkaeriConfig
 import eu.okaeri.configs.annotation.Comment
 import eu.okaeri.configs.annotation.Header
