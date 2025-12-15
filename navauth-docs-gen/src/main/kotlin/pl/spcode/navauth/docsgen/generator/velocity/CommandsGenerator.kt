@@ -54,7 +54,7 @@ class CommandsGenerator : Generator {
         val permission = functionPermissionAnnotation?.value?.joinToString(" ") ?: basePermission
 
         val descriptionAnnotation = function.findAnnotation<Description>()
-        val description = descriptionAnnotation?.value?.joinToString("\n") ?: "No description"
+        val description = descriptionAnnotation?.value?.joinToString(" ") ?: "No description"
 
         commands.add(CommandInfo(fullCommandName, permission, description))
       }
