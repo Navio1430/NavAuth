@@ -18,9 +18,7 @@
 
 package pl.spcode.navauth.common.annotation
 
-/**
- * Used for docs generated description.
- */
+/** Used for docs generated description. */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class Description(vararg val value: String)

@@ -21,14 +21,14 @@ package pl.spcode.navauth.docsgen.generator.velocity
 import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.functions
 import net.steppschuh.markdowngenerator.table.Table
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.docsgen.generator.Generator
 import pl.spcode.navauth.velocity.command.CommandsRegistry
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.functions
 
-class CommandsGenerator: Generator {
+class CommandsGenerator : Generator {
 
   override fun generate(): String {
     val commands = mutableListOf<CommandInfo>()
@@ -44,14 +44,14 @@ class CommandsGenerator: Generator {
         val executeAnnotation = function.findAnnotation<Execute>() ?: return@forEach
         val functionPermissionAnnotation = function.findAnnotation<Permission>()
 
-        val fullCommandName = if (executeAnnotation.name.startsWith(baseCommandName)) {
-          executeAnnotation.name.trimStart('/')
-        } else {
-          "$baseCommandName ${executeAnnotation.name.trimStart('/')}".trim()
-        }
+        val fullCommandName =
+          if (executeAnnotation.name.startsWith(baseCommandName)) {
+            executeAnnotation.name.trimStart('/')
+          } else {
+            "$baseCommandName ${executeAnnotation.name.trimStart('/')}".trim()
+          }
 
-        val permission = functionPermissionAnnotation?.value?.joinToString(" ")
-            ?: basePermission
+        val permission = functionPermissionAnnotation?.value?.joinToString(" ") ?: basePermission
 
         val descriptionAnnotation = function.findAnnotation<Description>()
         val description = descriptionAnnotation?.value?.joinToString("\n") ?: "No description"
@@ -62,12 +62,11 @@ class CommandsGenerator: Generator {
 
     val md: StringBuilder = StringBuilder()
 
-    val tableBuilder = Table.Builder()
+    val tableBuilder =
+      Table.Builder()
         .withAlignments(Table.ALIGN_LEFT, Table.ALIGN_LEFT)
         .addRow("Command name", "Permission", "Description")
-    commands.forEach {
-      tableBuilder.addRow(it.name, it.perm, it.desc)
-    }
+    commands.forEach { tableBuilder.addRow(it.name, it.perm, it.desc) }
     md.appendLine(tableBuilder.build())
 
     commands.forEach {
