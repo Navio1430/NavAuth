@@ -106,7 +106,7 @@ constructor(
       if (isPremiumNickname) {
         if (connUsername != correspondingPremiumProfile.name) {
           event.result =
-            usernameRequiredDeniedResult(connUsername, correspondingPremiumProfile.name)
+            premiumUsernameRequiredDeniedResult(connUsername, correspondingPremiumProfile.name)
           return
         }
       }
@@ -261,6 +261,21 @@ constructor(
 
     val component =
       messagesConfig.usernameRequiredError
+        .withPlaceholders()
+        .placeholder("USERNAME", connUsername)
+        .placeholder("EXPECTED", requiredUsername)
+        .toComponent()
+
+    return PreLoginEvent.PreLoginComponentResult.denied(component)
+  }
+
+  private fun premiumUsernameRequiredDeniedResult(
+    connUsername: String,
+    requiredUsername: String,
+  ): PreLoginEvent.PreLoginComponentResult {
+
+    val component =
+      messagesConfig.premiumUsernameRequiredError
         .withPlaceholders()
         .placeholder("USERNAME", connUsername)
         .placeholder("EXPECTED", requiredUsername)

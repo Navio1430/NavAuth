@@ -32,13 +32,17 @@ import pl.spcode.navauth.common.component.TextComponent
 )
 open class MessagesConfig : OkaeriConfig() {
 
-  var test: Notice = Notice.chat("<red>Test</red>")
-
   // todo create support information message for each disconnect reason
 
   var usernameRequiredError =
     TextComponent(
-      "You're trying to join with the username: '%USERNAME%', but we expect it to be '%EXPECTED%'. " +
+      "<red>You're trying to join with the username: '%USERNAME%', but we expect it to be '%EXPECTED%'. " +
+        "\n\nPlease change your username and try again."
+    )
+
+  var premiumUsernameRequiredError =
+    TextComponent(
+      "<red>You're trying to join with a premium username. Your current username is '%USERNAME%', but it must be '%EXPECTED%'. " +
         "\n\nPlease change your username and try again."
     )
 
