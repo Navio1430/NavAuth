@@ -26,6 +26,7 @@ import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
 import net.kyori.adventure.text.Component
+import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.velocity.command.Permissions
@@ -39,6 +40,11 @@ constructor(val userService: UserService, val mojangProfileService: MojangProfil
 
   @Async
   @Execute
+  @Description(
+    "Change your account to premium account.",
+    "Applicable for non-premium players.",
+    "Enables auto-login and migrates to premium.",
+  )
   fun changeToPremiumAccount(@Context sender: Player) {
     val user = userService.findUserByUsername(sender.username)!!
     if (user.isPremium) {

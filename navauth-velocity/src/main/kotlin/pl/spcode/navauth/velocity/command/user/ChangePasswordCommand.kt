@@ -27,6 +27,7 @@ import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
 import net.kyori.adventure.text.Component
+import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
@@ -42,6 +43,7 @@ constructor(val userService: UserService, val userCredentialsService: UserCreden
 
   @Async
   @Execute
+  @Description("Change your account password")
   fun changePassword(
     @Context sender: Player,
     @Arg(value = "current_password") currentPassword: String,

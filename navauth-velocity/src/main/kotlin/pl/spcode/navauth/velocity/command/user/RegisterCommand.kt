@@ -28,6 +28,7 @@ import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
+import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
@@ -49,6 +50,7 @@ constructor(
 
   @Async
   @Execute
+  @Description("Create a new account with a password", "Applicable for non-premium players")
   fun register(
     @Context sender: Player,
     @Arg(value = "password") password: String,

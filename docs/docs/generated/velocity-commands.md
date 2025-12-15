@@ -1,37 +1,45 @@
-| Command name     | Permission                     | Description                                  |
-| ---------------- | ------------------------------ | -------------------------------------------- |
-| login            | navauth.user.login             | Manual login command for non-premium players |
-| register         | navauth.user.register          | No description                               |
-| unregister       | navauth.user.unregister        | No description                               |
-| changepassword   | navauth.user.changepassword    | No description                               |
-| premium          | navauth.user.premium           | No description                               |
-| forceunregister  | navauth.admin.forceunregister  | No description                               |
-| forcesetpassword | navauth.admin.forcesetpassword | No description                               |
+| Command name     | Permission                     | Description                                                                                                             |
+| ---------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| login            | navauth.user.login             | Manual login command for non-premium players                                                                            |
+| register         | navauth.user.register          | Create a new account with a password
+Applicable for non-premium players                                                 |
+| unregister       | navauth.user.unregister        | Unregister your account
+NOTE: someone will be able to acquire the account                                               |
+| changepassword   | navauth.user.changepassword    | Change your account password                                                                                            |
+| premium          | navauth.user.premium           | Change your account to premium account.
+Applicable for non-premium players.
+Enables auto-login and migrates to premium. |
+| forceunregister  | navauth.admin.forceunregister  | Force unregister specified user. Works like unregister command, but doesn't require password.                           |
+| forcesetpassword | navauth.admin.forcesetpassword | Force set password for specified user. Works like register command, but doesn't require password.                       |
 ## /login
 Manual login command for non-premium players
 
 **PERM**: navauth.user.login
 ## /register
-No description
+Create a new account with a password
+Applicable for non-premium players
 
 **PERM**: navauth.user.register
 ## /unregister
-No description
+Unregister your account
+NOTE: someone will be able to acquire the account
 
 **PERM**: navauth.user.unregister
 ## /changepassword
-No description
+Change your account password
 
 **PERM**: navauth.user.changepassword
 ## /premium
-No description
+Change your account to premium account.
+Applicable for non-premium players.
+Enables auto-login and migrates to premium.
 
 **PERM**: navauth.user.premium
 ## /forceunregister
-No description
+Force unregister specified user. Works like unregister command, but doesn't require password.
 
 **PERM**: navauth.admin.forceunregister
 ## /forcesetpassword
-No description
+Force set password for specified user. Works like register command, but doesn't require password.
 
 **PERM**: navauth.admin.forcesetpassword
