@@ -50,6 +50,11 @@ jobs:
         run: chmod +x ./gradlew
       - name: Execute Gradle build
         run: ./gradlew task navauth-docs-gen:generate
+      - name: Upload generated docs
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-docs
+          path: docs/docs/generated
 
   # Build job
   build:
@@ -72,6 +77,11 @@ jobs:
           cache-dependency-path: docs/pnpm-lock.yaml
           node-version: latest
           cache: pnpm
+      - name: Download generated docs
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-docs
+          path: docs/docs/generated
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Install dependencies
