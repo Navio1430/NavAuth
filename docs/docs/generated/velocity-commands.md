@@ -1,25 +1,20 @@
-| Command name     | Permission                     | Description     |
-| ---------------- | ------------------------------ | --------------- |
-| login            | no perm                        | Lets user login |
-| login test       | no perm                        | test desc       |
-| register         | no perm                        | No description  |
-| unregister       | navauth.user.unregister        | No description  |
-| changepassword   | navauth.user.changepassword    | No description  |
-| premium          | navauth.user.premium           | No description  |
-| forceunregister  | navauth.admin.forceunregister  | No description  |
-| forcesetpassword | navauth.admin.forcesetpassword | No description  |
+| Command name     | Permission                     | Description                                  |
+| ---------------- | ------------------------------ | -------------------------------------------- |
+| login            | navauth.user.login             | Manual login command for non-premium players |
+| register         | navauth.user.register          | No description                               |
+| unregister       | navauth.user.unregister        | No description                               |
+| changepassword   | navauth.user.changepassword    | No description                               |
+| premium          | navauth.user.premium           | No description                               |
+| forceunregister  | navauth.admin.forceunregister  | No description                               |
+| forcesetpassword | navauth.admin.forcesetpassword | No description                               |
 ## /login
-Lets user login
+Manual login command for non-premium players
 
-**PERM**: no perm
-## /login test
-test desc
-
-**PERM**: no perm
+**PERM**: navauth.user.login
 ## /register
 No description
 
-**PERM**: no perm
+**PERM**: navauth.user.register
 ## /unregister
 No description
 
