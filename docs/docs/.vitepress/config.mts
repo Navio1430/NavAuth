@@ -27,7 +27,7 @@ const vitePressOptions = {
 
     socialLinks: [
       { icon: 'github', link: 'https://github.com/Navio1430' },
-      { icon: 'discord', link: 'todo' }
+      { icon: 'discord', link: 'https://discord.gg/kREwg5Drnn' }
     ]
   }
 };
