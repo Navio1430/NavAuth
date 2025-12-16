@@ -44,7 +44,7 @@ NavAuth is licensed under the GNU AGPL v3. See the license file for more informa
 [![GNU AGPL Logo](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/agpl-3.0.en.html)
 
 ## 💡 TODO List
-
+More planned features are available in [Documentation](https://navio1430.github.io/NavAuth/offer.html#%F0%9F%9A%80-planned-features)
 - readme:
    - add banner
 - github/gh actions:
@@ -53,17 +53,7 @@ NavAuth is licensed under the GNU AGPL v3. See the license file for more informa
    - issue template:
       - bug report
       - feature request
-   - github pages CD
-- initialize docs
-- minecraft commands:
-   - ...
 - commands and messages localization
-- features:
-   - librelogin migration
-   - password strength requirement
-   - minecraft names validation
-   - premium account autologin
-   - forwarding skin and uuid info to backend servers
 
 ### Potential TODO's
 - 2FA (e.g., required for certain permissions)
