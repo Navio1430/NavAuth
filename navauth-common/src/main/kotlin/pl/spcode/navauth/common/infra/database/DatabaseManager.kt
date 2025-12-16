@@ -57,9 +57,29 @@ constructor(val generalConfig: GeneralConfig, val entitiesRegistrar: EntitiesReg
 
     dataSource.driverClassName = config.driverType.driverClassName
 
+    val driverType = config.driverType
+    val driverJdbcFormat = config.driverType.jdbcUrlFormat
     val jdbcUrl: String =
-      when (config.driverType) {
-        DatabaseDriverType.H2_MEM -> config.driverType.jdbcUrlFormat.format(config.database)
+      when (driverType) {
+        DatabaseDriverType.H2_MEM,
+        DatabaseDriverType.SQLITE -> driverJdbcFormat.format(config.database)
+        DatabaseDriverType.MYSQL,
+        DatabaseDriverType.MARIADB -> {
+          config.driverType.jdbcUrlFormat.format(
+            config.hostname,
+            config.port,
+            config.database,
+            DatabaseDriverType.sslParamForMySQL(config.ssl),
+          )
+        }
+        DatabaseDriverType.POSTGRESQL -> {
+          config.driverType.jdbcUrlFormat.format(
+            config.hostname,
+            config.port,
+            config.database,
+            DatabaseDriverType.sslParamForPostgreSQL(config.ssl),
+          )
+        }
       }
 
     dataSource.jdbcUrl = jdbcUrl

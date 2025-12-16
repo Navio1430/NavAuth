@@ -21,5 +21,21 @@ package pl.spcode.navauth.common.infra.database
 enum class DatabaseDriverType(val driverClassName: String, val jdbcUrlFormat: String) {
 
   /** in-memory database, jdbc:h2:mem:database_name */
-  H2_MEM("org.h2.Driver", "jdbc:h2:mem:%s")
+  H2_MEM("org.h2.Driver", "jdbc:h2:mem:%s"),
+
+  /** works for both mysql and mariadb */
+  MYSQL("com.mysql.cj.jdbc.Driver", "jdbc:mysql://%s:%s/%s?sslMode=%s"),
+  MARIADB(MYSQL.driverClassName, MYSQL.jdbcUrlFormat),
+  SQLITE("org.sqlite.JDBC", "jdbc:sqlite:%s/database.db"),
+  POSTGRESQL("org.postgresql.Driver", "jdbc:postgresql://%s:%s/%s?sslmode=%s");
+
+  companion object {
+    fun sslParamForMySQL(enabled: Boolean): String {
+      return if (enabled) "REQUIRED" else "DISABLED"
+    }
+
+    fun sslParamForPostgreSQL(enabled: Boolean): String {
+      return if (enabled) "require" else "disable"
+    }
+  }
 }
