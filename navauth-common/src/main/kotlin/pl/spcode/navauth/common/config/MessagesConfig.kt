@@ -18,6 +18,7 @@
 
 package pl.spcode.navauth.common.config
 
+import com.eternalcode.multification.notice.Notice
 import eu.okaeri.configs.OkaeriConfig
 import eu.okaeri.configs.annotation.Comment
 import eu.okaeri.configs.annotation.Header
@@ -46,6 +47,14 @@ open class MessagesConfig : OkaeriConfig() {
     )
 
   var usernameConflictError = TextComponent("<red>Premium and non-premium username CONFLICT!</red>")
+
+  var loginTimeExceededError =
+    TextComponent("<red>You've exceeded login time, please try again</red>")
+
+  var loginNotice: Notice = Notice.chat("<green>Please login using /login command.</green>")
+
+  var authenticatedNotice: Notice =
+    Notice.chat("<green>You have been authenticated successfully.</green>")
 
   @Variable("CONFIG_VERSION")
   @Comment("Config version. DO NOT CHANGE this property!")
