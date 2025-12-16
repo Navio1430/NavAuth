@@ -61,7 +61,7 @@ class VelocityLoginAuthSession(
       scheduler
         .buildTask(
           Runnable {
-            multification.create().notice(messagesConfig.loginNotice).player(player.uniqueId).send()
+            multification.create().notice(messagesConfig.notices.loginInstruction).player(player.uniqueId).send()
           }
         )
         .delay(Duration.ofSeconds(1))
@@ -71,7 +71,7 @@ class VelocityLoginAuthSession(
 
   override fun onAuthenticated() {
     cancelTasks()
-    multification.create().notice(messagesConfig.authenticatedNotice).player(player.uniqueId).send()
+    multification.create().notice(messagesConfig.notices.loginSuccess).player(player.uniqueId).send()
     velocityEventDispatcher.fireVelocityChooseInitialServerEventAsync(player)
   }
 

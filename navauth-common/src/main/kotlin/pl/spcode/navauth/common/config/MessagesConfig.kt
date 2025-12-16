@@ -26,9 +26,9 @@ import eu.okaeri.configs.annotation.Variable
 import pl.spcode.navauth.common.component.TextComponent
 
 @Header(
-  "For messages/notification we use Multification library.",
-  "Thanks to it, you can use chat messages, action bars, sounds etc. combined.",
-  "To learn more about it please read https://navio1430.github.io/NavAuth/multification.html.",
+    "NavAuth messages configuration",
+    "This file contains all configurable messages and " +
+    "notifications that are used in NavAuth."
 )
 open class MessagesConfig : OkaeriConfig() {
 
@@ -54,17 +54,24 @@ open class MessagesConfig : OkaeriConfig() {
   var registerTimeExceededError =
     TextComponent("<red>You've exceeded register time, please try again</red>")
 
-  var loginNotice: Notice = Notice.chat("<green>Please login using /login command.</green>")
+  @Comment("Notices that use multification library.",
+      "Here you can use chat messages, action bars, sounds etc. combined.",
+      "To learn more about multification please read https://navio1430.github.io/NavAuth/multification.html.")
+  val notices = Notices()
 
-  var registerNotice: Notice =
-    Notice.chat("<green>Please register using /register command.</green>")
+  class Notices {
+    var loginInstruction: Notice = Notice.chat("<green>Please login using /login command.</green>")
 
-  var authenticatedNotice: Notice =
-    Notice.chat("<green>You have been authenticated successfully.</green>")
+    var registerInstruction: Notice =
+        Notice.chat("<green>Please register using /register command.</green>")
 
-  var registeredNotice: Notice = Notice.chat("<green>Successfully registered</green>")
+    var loginSuccess: Notice =
+        Notice.chat("<green>You have been authenticated successfully.</green>")
 
-  var premiumAuthenticatedNotice: Notice = Notice.chat("<green>Auto-logged in</green>")
+    var registerSuccess: Notice = Notice.chat("<green>Successfully registered</green>")
+
+    var premiumAuthSuccess: Notice = Notice.chat("<green>Auto-logged in</green>")
+  }
 
   @Variable("CONFIG_VERSION")
   @Comment("Config version. DO NOT CHANGE this property!")
