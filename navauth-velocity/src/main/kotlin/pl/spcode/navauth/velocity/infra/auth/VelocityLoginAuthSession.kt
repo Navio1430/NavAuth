@@ -21,13 +21,13 @@ package pl.spcode.navauth.velocity.infra.auth
 import com.velocitypowered.api.proxy.Player
 import com.velocitypowered.api.scheduler.ScheduledTask
 import java.time.Duration
-import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
+import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.infra.auth.LoginAuthSession
 import pl.spcode.navauth.velocity.application.event.VelocityEventDispatcher
-import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
+import pl.spcode.navauth.velocity.multification.VelocityMultification
 import pl.spcode.navauth.velocity.scheduler.NavAuthScheduler
 
 class VelocityLoginAuthSession(
@@ -36,6 +36,8 @@ class VelocityLoginAuthSession(
   userCredentialsService: UserCredentialsService,
   scheduler: NavAuthScheduler,
   val velocityEventDispatcher: VelocityEventDispatcher,
+  val multification: VelocityMultification,
+  val messagesConfig: MessagesConfig,
 ) :
   LoginAuthSession<VelocityPlayerAdapter>(
     VelocityPlayerAdapter(player),
@@ -50,13 +52,8 @@ class VelocityLoginAuthSession(
     disconnectPlayerTask =
       scheduler
         .buildTask(
-          Runnable {
-            player.disconnect(
-              Component.text("You've exceeded login time, please try again", TextColors.RED)
-            )
-          }
+          Runnable { player.disconnect(messagesConfig.loginTimeExceededError.toComponent()) }
         )
-        // todo use config property
         .delay(Duration.ofSeconds(5))
         .schedule()
 
@@ -64,9 +61,11 @@ class VelocityLoginAuthSession(
       scheduler
         .buildTask(
           Runnable {
-            player.sendMessage(
-              Component.text("Please login using /login command.", TextColors.GREEN)
-            )
+            multification
+              .create()
+              .notice(messagesConfig.multification.loginInstruction)
+              .player(player.uniqueId)
+              .send()
           }
         )
         .delay(Duration.ofSeconds(1))
@@ -76,7 +75,11 @@ class VelocityLoginAuthSession(
 
   override fun onAuthenticated() {
     cancelTasks()
-    player.sendMessage(Component.text("authenticated"))
+    multification
+      .create()
+      .notice(messagesConfig.multification.loginSuccess)
+      .player(player.uniqueId)
+      .send()
     velocityEventDispatcher.fireVelocityChooseInitialServerEventAsync(player)
   }
 

@@ -19,16 +19,39 @@
 package pl.spcode.navauth.velocity.infra.auth
 
 import com.velocitypowered.api.proxy.Player
+import java.time.Duration
+import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.domain.auth.session.AuthSession
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
+import pl.spcode.navauth.velocity.multification.VelocityMultification
+import pl.spcode.navauth.velocity.scheduler.NavAuthScheduler
 
-class VelocityPremiumAuthSession(val player: Player) :
-  AuthSession<VelocityPlayerAdapter>(VelocityPlayerAdapter(player)) {
+class VelocityPremiumAuthSession(
+  val player: Player,
+  val scheduler: NavAuthScheduler,
+  val multification: VelocityMultification,
+  val messagesConfig: MessagesConfig,
+) : AuthSession<VelocityPlayerAdapter>(VelocityPlayerAdapter(player)) {
 
   override fun getSessionType(): AuthSessionType {
     return AuthSessionType.PREMIUM
   }
 
   override fun onInvalidate() {}
+
+  override fun onAuthenticated() {
+    scheduler
+      .buildTask(
+        Runnable {
+          multification
+            .create()
+            .player(player.uniqueId)
+            .notice(messagesConfig.multification.premiumAuthSuccess)
+            .send()
+        }
+      )
+      .delay(Duration.ofSeconds(1))
+      .schedule()
+  }
 }
