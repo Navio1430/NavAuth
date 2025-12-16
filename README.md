@@ -15,6 +15,8 @@
 </div>
 <br>
 
+## Join our Discord server
+[![discord](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/social/discord-plural_vector.svg)](https://discord.gg/kREwg5Drnn)
 
 ## 🧱 Main principles
 - be an auth/login plugin not an anti-vpn plugin
