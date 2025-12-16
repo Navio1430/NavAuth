@@ -32,7 +32,7 @@ open class GeneralConfig : OkaeriConfig() {
   @Comment(
     "The backend servers players should be sent to after successful authentication.",
     "Players are LoadBalanced with 'least conn' by default.",
-    "If no servers are defined then we won't do anything on initial server event.",
+    "If no servers are defined, then we won't do anything on the initial server event.",
   )
   var initialServers: List<String> = listOf("paper")
     protected set
