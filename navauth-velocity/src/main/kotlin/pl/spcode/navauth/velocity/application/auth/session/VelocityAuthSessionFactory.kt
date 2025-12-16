@@ -83,7 +83,7 @@ constructor(
     player: Player,
     uniqueSessionId: VelocityUniqueSessionId,
   ): VelocityPremiumAuthSession {
-    val session = VelocityPremiumAuthSession(player)
+    val session = VelocityPremiumAuthSession(player, scheduler, multification, messagesConfig)
     return authSessionService.registerSession(uniqueSessionId, session)
   }
 }

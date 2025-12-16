@@ -56,6 +56,8 @@ open class MessagesConfig : OkaeriConfig() {
   var authenticatedNotice: Notice =
     Notice.chat("<green>You have been authenticated successfully.</green>")
 
+  var premiumAuthenticatedNotice: Notice = Notice.chat("<green>Auto-logged in</green>")
+
   @Variable("CONFIG_VERSION")
   @Comment("Config version. DO NOT CHANGE this property!")
   var configVersion: Int = 0
