@@ -24,8 +24,12 @@ import eu.okaeri.configs.annotation.Comment
 open class DatabaseConfig : OkaeriConfig() {
 
   @Comment(
-    "Database driver type. Available drivers:" +
-      " - H2_MEM (H2 memory based database, ONLY FOR TESTING)"
+    "Database driver type. Available drivers:",
+    " - H2_MEM (H2 memory-based database, ONLY FOR TESTING)",
+    " - SQLITE (File-based database, ONLY FOR TESTING OR SMALL ENVIRONMENTS)",
+    " - MYSQL",
+    " - MARIADB (We use the same driver as for MYSQL. Both should be protocol compatible)",
+    " - POSTGRESQL",
   )
   var driverType: DatabaseDriverType = DatabaseDriverType.H2_MEM
     protected set
@@ -45,7 +49,7 @@ open class DatabaseConfig : OkaeriConfig() {
   var username: String = "root"
     protected set
 
-  @Comment("Password to authenticate with provided username.")
+  @Comment("Password to authenticate with the provided username.")
   var password: String = "password"
     protected set
 
@@ -56,9 +60,16 @@ open class DatabaseConfig : OkaeriConfig() {
   @Comment(
     "Port number of the database server. Common ports:",
     " - H2_MEM: Not applicable (memory based)",
+    " - SQLITE: Not applicable",
+    " - MYSQL: 3306",
+    " - MARIADB: 3306",
+    " - POSTGRESQL: 5432",
   )
   var port: Int = 0
     protected set
+
+  @Comment("Should SSL be enabled? Applicable types:", " - MYSQL", " - MARIADB", " - POSTGRESQL")
+  var ssl: Boolean = false
 
   @Comment("Database name")
   var database: String = "default"
