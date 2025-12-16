@@ -26,9 +26,8 @@ import eu.okaeri.configs.annotation.Variable
 import pl.spcode.navauth.common.component.TextComponent
 
 @Header(
-    "NavAuth messages configuration",
-    "This file contains all configurable messages and " +
-    "notifications that are used in NavAuth."
+  "NavAuth messages configuration",
+  "This file contains all configurable messages and " + "notifications that are used in NavAuth.",
 )
 open class MessagesConfig : OkaeriConfig() {
 
@@ -54,19 +53,21 @@ open class MessagesConfig : OkaeriConfig() {
   var registerTimeExceededError =
     TextComponent("<red>You've exceeded register time, please try again</red>")
 
-  @Comment("Notices that use multification library.",
-      "Here you can use chat messages, action bars, sounds etc. combined.",
-      "To learn more about multification please read https://navio1430.github.io/NavAuth/multification.html.")
+  @Comment(
+    "Notices that use multification library.",
+    "Here you can use chat messages, action bars, sounds etc. combined.",
+    "To learn more about multification please read https://navio1430.github.io/NavAuth/multification.html.",
+  )
   var multification = NoticesConfig()
 
-  class NoticesConfig: OkaeriConfig() {
+  class NoticesConfig : OkaeriConfig() {
     var loginInstruction: Notice = Notice.chat("<green>Please login using /login command.</green>")
 
     var registerInstruction: Notice =
-        Notice.chat("<green>Please register using /register command.</green>")
+      Notice.chat("<green>Please register using /register command.</green>")
 
     var loginSuccess: Notice =
-        Notice.chat("<green>You have been authenticated successfully.</green>")
+      Notice.chat("<green>You have been authenticated successfully.</green>")
 
     var registerSuccess: Notice = Notice.chat("<green>Successfully registered</green>")
 
