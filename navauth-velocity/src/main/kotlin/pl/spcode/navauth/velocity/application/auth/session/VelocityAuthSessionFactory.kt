@@ -75,7 +75,7 @@ constructor(
     player: Player,
     uniqueSessionId: VelocityUniqueSessionId,
   ): VelocityRegisterAuthSession {
-    val session = VelocityRegisterAuthSession(player, scheduler, velocityEventDispatcher)
+    val session = VelocityRegisterAuthSession(player, scheduler, velocityEventDispatcher, multification, messagesConfig)
     return authSessionService.registerSession(uniqueSessionId, session)
   }
 

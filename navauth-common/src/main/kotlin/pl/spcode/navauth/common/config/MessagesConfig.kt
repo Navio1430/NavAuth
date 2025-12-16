@@ -51,10 +51,18 @@ open class MessagesConfig : OkaeriConfig() {
   var loginTimeExceededError =
     TextComponent("<red>You've exceeded login time, please try again</red>")
 
+  var registerTimeExceededError =
+    TextComponent("<red>You've exceeded register time, please try again</red>")
+
   var loginNotice: Notice = Notice.chat("<green>Please login using /login command.</green>")
+
+  var registerNotice: Notice =
+    Notice.chat("<green>Please register using /register command.</green>")
 
   var authenticatedNotice: Notice =
     Notice.chat("<green>You have been authenticated successfully.</green>")
+
+  var registeredNotice: Notice = Notice.chat("<green>Successfully registered</green>")
 
   var premiumAuthenticatedNotice: Notice = Notice.chat("<green>Auto-logged in</green>")
 

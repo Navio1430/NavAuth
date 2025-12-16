@@ -21,35 +21,30 @@ package pl.spcode.navauth.velocity.infra.auth
 import com.velocitypowered.api.proxy.Player
 import com.velocitypowered.api.scheduler.ScheduledTask
 import java.time.Duration
-import net.kyori.adventure.text.Component
+import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.infra.auth.RegisterAuthSession
 import pl.spcode.navauth.velocity.application.event.VelocityEventDispatcher
-import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
+import pl.spcode.navauth.velocity.multification.VelocityMultification
 import pl.spcode.navauth.velocity.scheduler.NavAuthScheduler
 
 class VelocityRegisterAuthSession(
   val player: Player,
   scheduler: NavAuthScheduler,
   val velocityEventDispatcher: VelocityEventDispatcher,
+  val multification: VelocityMultification,
+  val messagesConfig: MessagesConfig,
 ) : RegisterAuthSession<VelocityPlayerAdapter>(VelocityPlayerAdapter(player)) {
 
   val notifyMessageTask: ScheduledTask
   val disconnectPlayerTask: ScheduledTask
 
   init {
-    player.sendMessage(Component.text("Please register using /register command.", TextColors.GREEN))
-
     disconnectPlayerTask =
       scheduler
         .buildTask(
-          Runnable {
-            player.disconnect(
-              Component.text("You've exceeded register time, please try again", TextColors.RED)
-            )
-          }
+          Runnable { player.disconnect(messagesConfig.registerTimeExceededError.toComponent()) }
         )
-        // todo use config property
         .delay(Duration.ofSeconds(5))
         .schedule()
 
@@ -57,9 +52,11 @@ class VelocityRegisterAuthSession(
       scheduler
         .buildTask(
           Runnable {
-            player.sendMessage(
-              Component.text("Please register using /register command.", TextColors.GREEN)
-            )
+            multification
+              .create()
+              .notice(messagesConfig.registerNotice)
+              .player(player.uniqueId)
+              .send()
           }
         )
         .repeat(Duration.ofSeconds(3))
@@ -68,7 +65,7 @@ class VelocityRegisterAuthSession(
 
   override fun onAuthenticated() {
     cancelTasks()
-    player.sendMessage(Component.text("authenticated"))
+    multification.create().notice(messagesConfig.registeredNotice).player(player.uniqueId).send()
     velocityEventDispatcher.fireVelocityChooseInitialServerEventAsync(player)
   }
 
