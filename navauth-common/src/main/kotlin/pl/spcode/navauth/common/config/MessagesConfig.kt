@@ -57,9 +57,9 @@ open class MessagesConfig : OkaeriConfig() {
   @Comment("Notices that use multification library.",
       "Here you can use chat messages, action bars, sounds etc. combined.",
       "To learn more about multification please read https://navio1430.github.io/NavAuth/multification.html.")
-  val notices = Notices()
+  var multification = NoticesConfig()
 
-  class Notices {
+  class NoticesConfig: OkaeriConfig() {
     var loginInstruction: Notice = Notice.chat("<green>Please login using /login command.</green>")
 
     var registerInstruction: Notice =

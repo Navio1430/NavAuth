@@ -54,7 +54,7 @@ class VelocityRegisterAuthSession(
           Runnable {
             multification
               .create()
-              .notice(messagesConfig.notices.registerInstruction)
+              .notice(messagesConfig.multification.registerInstruction)
               .player(player.uniqueId)
               .send()
           }
@@ -65,7 +65,7 @@ class VelocityRegisterAuthSession(
 
   override fun onAuthenticated() {
     cancelTasks()
-    multification.create().notice(messagesConfig.notices.registerSuccess).player(player.uniqueId).send()
+    multification.create().notice(messagesConfig.multification.registerSuccess).player(player.uniqueId).send()
     velocityEventDispatcher.fireVelocityChooseInitialServerEventAsync(player)
   }
 

@@ -47,7 +47,7 @@ class VelocityPremiumAuthSession(
           multification
             .create()
             .player(player.uniqueId)
-            .notice(messagesConfig.notices.premiumAuthSuccess)
+            .notice(messagesConfig.multification.premiumAuthSuccess)
             .send()
         }
       )
