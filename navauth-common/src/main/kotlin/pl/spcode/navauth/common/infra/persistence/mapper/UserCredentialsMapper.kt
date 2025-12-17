@@ -16,15 +16,23 @@
  *
  */
 
-package pl.spcode.navauth.common.domain.credentials
+package pl.spcode.navauth.common.infra.persistence.mapper
 
-import com.j256.ormlite.dao.Dao
-import pl.spcode.navauth.common.domain.user.User
-import java.util.UUID
-import pl.spcode.navauth.common.shared.data.OrmLiteCrudRepository
+import pl.spcode.navauth.common.domain.credentials.UserCredentials
+import pl.spcode.navauth.common.domain.user.UserId
+import pl.spcode.navauth.common.infra.crypto.PasswordHash
+import pl.spcode.navauth.common.infra.persistence.ormlite.credentials.UserCredentialsRecord
 
-interface UserCredentialsRepository {
-
-  fun save(userCredentials: UserCredentials): Dao.CreateOrUpdateStatus
-  fun findByUser(user: User): UserCredentials?
+fun UserCredentialsRecord.toDomain(): UserCredentials {
+  return UserCredentials.fromExisting(
+      userId = UserId(uuid),
+      hash = PasswordHash(passwordHash),
+      algo = algo
+  )
 }
+
+fun UserCredentials.toRecord(): UserCredentialsRecord = UserCredentialsRecord(
+    uuid = userId.value,
+    passwordHash = passwordHash.value,
+    algo = hashingAlgo
+)

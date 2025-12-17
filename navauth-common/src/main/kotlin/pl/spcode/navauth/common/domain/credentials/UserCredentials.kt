@@ -18,25 +18,29 @@
 
 package pl.spcode.navauth.common.domain.credentials
 
-import com.j256.ormlite.field.DatabaseField
-import com.j256.ormlite.table.DatabaseTable
-import java.util.UUID
 import pl.spcode.navauth.common.domain.user.User
+import pl.spcode.navauth.common.domain.user.UserId
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
+import pl.spcode.navauth.common.infra.crypto.PasswordHash
 
-@DatabaseTable(tableName = "navauth_credentials")
-class UserCredentials(
-  // one-to-one relationship with user entity
-  @DatabaseField(id = true) var uuid: UUID? = null,
-  @DatabaseField val passwordHash: String,
-  @DatabaseField val algo: HashingAlgorithm,
+@ConsistentCopyVisibility
+data class UserCredentials private constructor(
+    val userId: UserId,
+    val passwordHash: PasswordHash,
+    val hashingAlgo: HashingAlgorithm
 ) {
 
-  @Suppress("unused") private constructor() : this(null, "", HashingAlgorithm.BCRYPT)
-
-  companion object {
+  companion object Factory {
     fun create(user: User, password: HashedPassword): UserCredentials {
-      return UserCredentials(user.uuid!!, password.hash, password.algo)
+      return UserCredentials(
+        userId = user.id,
+        passwordHash = password.hash,
+        hashingAlgo = password.algo
+      )
+    }
+
+    fun fromExisting(userId: UserId, hash: PasswordHash, algo: HashingAlgorithm): UserCredentials {
+      return UserCredentials(userId, hash, algo)
     }
   }
 }

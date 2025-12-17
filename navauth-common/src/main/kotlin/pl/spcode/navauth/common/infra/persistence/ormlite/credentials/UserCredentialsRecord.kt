@@ -16,15 +16,19 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.repository
+package pl.spcode.navauth.common.infra.persistence.ormlite.credentials
 
-import com.google.inject.Inject
+import com.j256.ormlite.field.DatabaseField
+import com.j256.ormlite.table.DatabaseTable
+import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 import java.util.UUID
-import pl.spcode.navauth.common.domain.credentials.UserCredentials
-import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
-import pl.spcode.navauth.common.infra.database.DatabaseManager
-import pl.spcode.navauth.common.shared.data.OrmLiteCrudRepositoryImpl
 
-class UserCredentialsRepositoryImpl @Inject constructor(databaseManager: DatabaseManager) :
-  OrmLiteCrudRepositoryImpl<UserCredentials, UUID>(databaseManager, UserCredentials::class),
-  UserCredentialsRepository {}
+@DatabaseTable(tableName = "navauth_credentials")
+class UserCredentialsRecord(
+    // one-to-one relationship with a user entity
+    @DatabaseField(id = true) var uuid: UUID = UUID.randomUUID(),
+    @DatabaseField val passwordHash: String = "",
+    @DatabaseField val algo: HashingAlgorithm = HashingAlgorithm.BCRYPT,
+    @DatabaseField val twoFactorSecret: String = "",
+    @DatabaseField val twoFactorEnabled: Boolean = false
+)

@@ -26,9 +26,10 @@ import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
 import pl.spcode.navauth.common.domain.user.UserRepository
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.infra.database.EntitiesRegistrar
+import pl.spcode.navauth.common.infra.persistence.ormlite.credentials.UserCredentialsRecord
 import pl.spcode.navauth.common.infra.persistence.ormlite.user.UserRecord
 import pl.spcode.navauth.common.infra.persistence.ormlite.user.UserRepositoryImpl
-import pl.spcode.navauth.common.infra.repository.UserCredentialsRepositoryImpl
+import pl.spcode.navauth.common.infra.persistence.ormlite.credentials.UserCredentialsRepositoryImpl
 
 class DataPersistenceModule : AbstractModule() {
 
@@ -38,7 +39,7 @@ class DataPersistenceModule : AbstractModule() {
     listOf(
       Binding(UserRecord::class, UserRepository::class.java, UserRepositoryImpl::class.java),
       Binding(
-        UserCredentials::class,
+        UserCredentialsRecord::class,
         UserCredentialsRepository::class.java,
         UserCredentialsRepositoryImpl::class.java,
       ),
