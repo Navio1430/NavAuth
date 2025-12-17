@@ -18,10 +18,11 @@
 
 package pl.spcode.navauth.common.domain.user
 
-import java.util.UUID
-import pl.spcode.navauth.common.shared.data.OrmLiteCrudRepository
+import com.j256.ormlite.dao.Dao
 
-interface UserRepository : OrmLiteCrudRepository<User, UUID> {
+interface UserRepository {
+  fun save(user: User): Dao.CreateOrUpdateStatus
+
   fun findByUsername(username: String): User?
 
   fun findByUsernameLowercase(usernameLowercase: String): User?

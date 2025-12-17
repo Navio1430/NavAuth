@@ -21,15 +21,14 @@ package pl.spcode.navauth.common.module
 import com.google.inject.AbstractModule
 import com.google.inject.Singleton
 import kotlin.reflect.KClass
-import kotlin.to
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
-import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserRepository
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.infra.database.EntitiesRegistrar
+import pl.spcode.navauth.common.infra.persistence.ormlite.user.UserRecord
+import pl.spcode.navauth.common.infra.persistence.ormlite.user.UserRepositoryImpl
 import pl.spcode.navauth.common.infra.repository.UserCredentialsRepositoryImpl
-import pl.spcode.navauth.common.infra.repository.UserRepositoryImpl
 
 class DataPersistenceModule : AbstractModule() {
 
@@ -37,7 +36,7 @@ class DataPersistenceModule : AbstractModule() {
 
   private val bindings =
     listOf(
-      Binding(User::class, UserRepository::class.java, UserRepositoryImpl::class.java),
+      Binding(UserRecord::class, UserRepository::class.java, UserRepositoryImpl::class.java),
       Binding(
         UserCredentials::class,
         UserCredentialsRepository::class.java,

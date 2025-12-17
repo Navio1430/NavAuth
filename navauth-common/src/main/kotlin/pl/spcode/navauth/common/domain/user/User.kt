@@ -18,34 +18,38 @@
 
 package pl.spcode.navauth.common.domain.user
 
-import com.j256.ormlite.field.DatabaseField
-import com.j256.ormlite.table.DatabaseTable
 import java.util.UUID
 
-@DatabaseTable(tableName = "navauth_users")
-class User {
-  @DatabaseField(id = true) val uuid: UUID?
-  @DatabaseField(canBeNull = true, index = true) val mojangUuid: UUID? = null
-  @DatabaseField(canBeNull = false, index = true) val username: String
-  // we use another field for username lowercased, because it is easier than creating a separate
-  // index
-  @DatabaseField(canBeNull = false, index = true) val usernameLowercase: String
-  @DatabaseField(canBeNull = false) val isPremium: Boolean
+@JvmInline value class UserId(val value: UUID)
 
-  @Suppress("unused") private constructor() : this(null, "", false)
+@JvmInline value class MojangId(val value: UUID)
 
-  private constructor(uuid: UUID?, username: String, isPremium: Boolean) {
-    this.uuid = uuid
-    this.username = username
-    this.usernameLowercase = username.lowercase()
-    this.isPremium = isPremium
+@JvmInline
+value class Username(val value: String) {
+  init {
+    // todo check regex
   }
+}
 
-  companion object {
-    fun create(uuid: UUID, username: String, isPremium: Boolean): User {
-      // todo: check username with regex
+@ConsistentCopyVisibility
+data class User
+private constructor(
+  val id: UserId,
+  val username: Username,
+  val credentialsRequired: Boolean,
+  val mojangUuid: MojangId? = null, // null = non-premium
+) {
+  val isPremium: Boolean
+    get() = mojangUuid != null
 
-      return User(uuid, username, isPremium)
-    }
+  companion object Factory {
+    fun nonPremium(id: UserId, username: Username): User = User(id, username, true)
+
+    fun premium(
+      id: UserId,
+      username: Username,
+      mojangUuid: MojangId,
+      needsCreds: Boolean = false,
+    ): User = User(id, username, needsCreds, mojangUuid)
   }
 }
