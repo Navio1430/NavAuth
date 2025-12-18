@@ -25,5 +25,5 @@ interface UserRepository {
 
   fun findByUsername(username: String): User?
 
-  fun findByUsernameLowercase(usernameLowercase: String): User?
+  fun findByUsernameLowercase(username: String): User?
 }

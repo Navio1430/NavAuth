@@ -40,8 +40,8 @@ class UserRepositoryImpl @Inject constructor(databaseManager: DatabaseManager) :
     return dao().queryForFirst(query.prepare())?.toDomain()
   }
 
-  override fun findByUsernameLowercase(usernameLowercase: String): User? {
-    val query = queryBuilder().where().eq("usernameLowercase", usernameLowercase)
+  override fun findByUsernameLowercase(username: String): User? {
+    val query = queryBuilder().where().eq("usernameLowercase", username.lowercase())
     return dao().queryForFirst(query.prepare())?.toDomain()
   }
 }
