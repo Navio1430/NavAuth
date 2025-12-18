@@ -1,4 +1,7 @@
 
+# ❗❗❗ NAVAUTH IS NOT RELEASED YET ❗❗❗
+NavAuth is an **upcoming** plugin and is not released yet. Star the repo, join our discord and stay tuned until first release. 
+
 <div align="center">
 
   <h1>NavAuth 🔐 - autologin plugin</h1>
