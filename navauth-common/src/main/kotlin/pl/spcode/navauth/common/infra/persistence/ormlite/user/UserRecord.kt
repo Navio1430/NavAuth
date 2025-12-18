@@ -33,7 +33,6 @@ data class UserRecord(
   @DatabaseField(canBeNull = false) val credentialsRequired: Boolean = true,
 ) {
   init {
-    require(username.isNotBlank()) { "username cannot be blank" }
     require(usernameLowercase == username.lowercase()) { "usernameLowercase must be lowercase" }
   }
 }
