@@ -20,6 +20,7 @@ package pl.spcode.navauth.common.infra.persistence.ormlite.credentials
 
 import com.google.inject.Inject
 import com.j256.ormlite.dao.Dao
+import java.util.UUID
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
 import pl.spcode.navauth.common.domain.user.User
@@ -27,11 +28,13 @@ import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.infra.persistence.mapper.toDomain
 import pl.spcode.navauth.common.infra.persistence.mapper.toRecord
 import pl.spcode.navauth.common.shared.data.OrmLiteCrudRepositoryImpl
-import java.util.UUID
 
 class UserCredentialsRepositoryImpl @Inject constructor(databaseManager: DatabaseManager) :
-  OrmLiteCrudRepositoryImpl<UserCredentialsRecord, UUID>(databaseManager, UserCredentialsRecord::class),
-    UserCredentialsRepository {
+  OrmLiteCrudRepositoryImpl<UserCredentialsRecord, UUID>(
+    databaseManager,
+    UserCredentialsRecord::class,
+  ),
+  UserCredentialsRepository {
 
   override fun save(userCredentials: UserCredentials): Dao.CreateOrUpdateStatus {
     return save(userCredentials.toRecord())

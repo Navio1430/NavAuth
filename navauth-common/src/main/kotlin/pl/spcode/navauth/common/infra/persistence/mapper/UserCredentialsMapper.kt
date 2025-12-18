@@ -25,14 +25,11 @@ import pl.spcode.navauth.common.infra.persistence.ormlite.credentials.UserCreden
 
 fun UserCredentialsRecord.toDomain(): UserCredentials {
   return UserCredentials.fromExisting(
-      userId = UserId(uuid),
-      hash = PasswordHash(passwordHash),
-      algo = algo
+    userId = UserId(uuid),
+    hash = PasswordHash(passwordHash),
+    algo = algo,
   )
 }
 
-fun UserCredentials.toRecord(): UserCredentialsRecord = UserCredentialsRecord(
-    uuid = userId.value,
-    passwordHash = passwordHash.value,
-    algo = hashingAlgo
-)
+fun UserCredentials.toRecord(): UserCredentialsRecord =
+  UserCredentialsRecord(uuid = userId.value, passwordHash = passwordHash.value, algo = hashingAlgo)

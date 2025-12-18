@@ -24,10 +24,11 @@ import pl.spcode.navauth.common.infra.crypto.HashedPassword
 import pl.spcode.navauth.common.infra.crypto.PasswordHash
 
 @ConsistentCopyVisibility
-data class UserCredentials private constructor(
-    val userId: UserId,
-    val passwordHash: PasswordHash,
-    val hashingAlgo: HashingAlgorithm
+data class UserCredentials
+private constructor(
+  val userId: UserId,
+  val passwordHash: PasswordHash,
+  val hashingAlgo: HashingAlgorithm,
 ) {
 
   companion object Factory {
@@ -35,7 +36,7 @@ data class UserCredentials private constructor(
       return UserCredentials(
         userId = user.id,
         passwordHash = password.hash,
-        hashingAlgo = password.algo
+        hashingAlgo = password.algo,
       )
     }
 

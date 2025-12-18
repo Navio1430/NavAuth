@@ -20,12 +20,10 @@ package pl.spcode.navauth.common.application.user
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
-import java.util.UUID
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.User
-import pl.spcode.navauth.common.domain.user.UserId
 import pl.spcode.navauth.common.domain.user.UserRepository
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
 
@@ -61,7 +59,7 @@ constructor(
     val premiumUser = User.premium(user.id, user.username, mojangId, false)
     // todo in transaction
     // todo (in the future) do not delete credentials if there's 2FA enabled
-//    userCredentialsService.deleteUserCredentials(user)
+    //    userCredentialsService.deleteUserCredentials(user)
     userRepository.save(premiumUser)
   }
 

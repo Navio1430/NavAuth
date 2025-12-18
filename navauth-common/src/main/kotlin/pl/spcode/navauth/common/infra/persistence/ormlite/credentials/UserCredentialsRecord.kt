@@ -20,15 +20,15 @@ package pl.spcode.navauth.common.infra.persistence.ormlite.credentials
 
 import com.j256.ormlite.field.DatabaseField
 import com.j256.ormlite.table.DatabaseTable
-import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 import java.util.UUID
+import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 
 @DatabaseTable(tableName = "navauth_credentials")
 class UserCredentialsRecord(
-    // one-to-one relationship with a user entity
-    @DatabaseField(id = true) var uuid: UUID = UUID.randomUUID(),
-    @DatabaseField val passwordHash: String = "",
-    @DatabaseField val algo: HashingAlgorithm = HashingAlgorithm.BCRYPT,
-    @DatabaseField val twoFactorSecret: String = "",
-    @DatabaseField val twoFactorEnabled: Boolean = false
+  // one-to-one relationship with a user entity
+  @DatabaseField(id = true) var uuid: UUID = UUID.randomUUID(),
+  @DatabaseField val passwordHash: String = "",
+  @DatabaseField val algo: HashingAlgorithm = HashingAlgorithm.BCRYPT,
+  @DatabaseField val twoFactorSecret: String = "",
+  @DatabaseField val twoFactorEnabled: Boolean = false,
 )

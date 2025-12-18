@@ -20,12 +20,12 @@ package pl.spcode.navauth.common.domain.credentials
 
 import com.j256.ormlite.dao.Dao
 import pl.spcode.navauth.common.domain.user.User
-import java.util.UUID
-import pl.spcode.navauth.common.shared.data.OrmLiteCrudRepository
 
 interface UserCredentialsRepository {
 
   fun save(userCredentials: UserCredentials): Dao.CreateOrUpdateStatus
+
   fun findByUser(user: User): UserCredentials?
+
   fun deleteByUser(user: User)
 }

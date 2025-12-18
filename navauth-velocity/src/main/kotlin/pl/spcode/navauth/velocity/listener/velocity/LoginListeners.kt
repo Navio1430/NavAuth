@@ -253,7 +253,8 @@ constructor(
   }
 
   private fun createAndStorePremiumUser(player: Player) {
-    val premiumUser = User.premium(UserId(player.uniqueId), Username(player.username), MojangId(player.uniqueId))
+    val premiumUser =
+      User.premium(UserId(player.uniqueId), Username(player.username), MojangId(player.uniqueId))
     userService.storePremiumUser(premiumUser)
   }
 
