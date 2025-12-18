@@ -35,7 +35,10 @@ import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeSession
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeState
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeUsernameState
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionState
+import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.User
+import pl.spcode.navauth.common.domain.user.UserId
+import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.velocity.application.auth.session.VelocityAuthSessionFactory
 import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
@@ -70,7 +73,7 @@ constructor(
     if (userExists) {
       if (existingUser.isPremium) {
         // user could change 1 letter to be uppercased/lowercased in their nickname
-        if (connUsername != existingUser.username) {
+        if (connUsername != existingUser.username.value) {
           session.usernameState = AuthHandshakeUsernameState.PREMIUM_USERNAME_CHANGED
           // let them through and make data migration later after auth
         }
@@ -78,7 +81,7 @@ constructor(
       // non premium user
       else {
         if (isPremiumNickname) {
-          if (correspondingPremiumProfile.name == existingUser.username) {
+          if (correspondingPremiumProfile.name == existingUser.username.value) {
             session.usernameState = AuthHandshakeUsernameState.USERNAME_POTENTIAL_CONFLICT
             if (connUsername != correspondingPremiumProfile.name) {
               event.result =
@@ -94,8 +97,8 @@ constructor(
         }
         // not a premium nickname
         else {
-          if (connUsername != existingUser.username) {
-            event.result = usernameRequiredDeniedResult(connUsername, existingUser.username)
+          if (connUsername != existingUser.username.value) {
+            event.result = usernameRequiredDeniedResult(connUsername, existingUser.username.value)
             return
           }
         }
@@ -250,7 +253,7 @@ constructor(
   }
 
   private fun createAndStorePremiumUser(player: Player) {
-    val premiumUser = User.create(player.uniqueId, player.username, true)
+    val premiumUser = User.premium(UserId(player.uniqueId), Username(player.username), MojangId(player.uniqueId))
     userService.storePremiumUser(premiumUser)
   }
 

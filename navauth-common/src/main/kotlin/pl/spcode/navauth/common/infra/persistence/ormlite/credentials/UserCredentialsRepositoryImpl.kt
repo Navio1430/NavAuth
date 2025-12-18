@@ -41,4 +41,8 @@ class UserCredentialsRepositoryImpl @Inject constructor(databaseManager: Databas
     val query = queryBuilder().where().eq("uuid", user.id.value)
     return dao().queryForFirst(query.prepare())?.toDomain()
   }
+
+  override fun deleteByUser(user: User) {
+    dao().deleteById(user.id.value)
+  }
 }

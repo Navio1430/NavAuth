@@ -27,4 +27,5 @@ interface UserCredentialsRepository {
 
   fun save(userCredentials: UserCredentials): Dao.CreateOrUpdateStatus
   fun findByUser(user: User): UserCredentials?
+  fun deleteByUser(user: User)
 }

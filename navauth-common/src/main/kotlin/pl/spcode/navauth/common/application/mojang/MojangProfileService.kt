@@ -27,6 +27,7 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import pl.spcode.navauth.common.domain.mojang.MojangProfile
+import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.shared.http.HttpStatusCodes
 import pl.spcode.navauth.common.shared.utils.UuidUtils
 
@@ -41,7 +42,7 @@ class MojangProfileService @Inject constructor(val httpClient: HttpClient) {
   ) {
 
     fun toMojangProfile(): MojangProfile {
-      return MojangProfile(UuidUtils.from32(uuidWithoutDashes), name)
+      return MojangProfile(MojangId(UuidUtils.from32(uuidWithoutDashes)), name)
     }
   }
 

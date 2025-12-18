@@ -22,5 +22,5 @@ interface CredentialsHasher {
 
   fun hash(password: String): HashedPassword
 
-  fun verify(password: String, hashed: String): Boolean
+  fun verify(password: String, passwordHash: PasswordHash): Boolean
 }
