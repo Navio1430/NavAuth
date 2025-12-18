@@ -28,7 +28,10 @@ import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
 import pl.spcode.navauth.common.domain.user.User
+import pl.spcode.navauth.common.domain.user.UserId
+import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
+import pl.spcode.navauth.common.infra.crypto.PasswordHash
 import utils.generateRandomString
 
 @ExtendWith(DataPersistenceTestExtension::class)
@@ -38,16 +41,17 @@ class UserCredentialsPersistenceTests {
 
   @Test
   fun `create user credentials from user and hashed password`() {
-    val uuid = UUID.randomUUID()
-    val user = User.create(uuid, generateRandomString(10), false)
-    val hashedPassword = HashedPassword("hashed_pw", HashingAlgorithm.BCRYPT)
+    val id = UserId(UUID.randomUUID())
+    val username = Username(generateRandomString(10))
+    val user = User.nonPremium(id, username)
+    val hashedPassword = HashedPassword(PasswordHash("hashed_pw"), HashingAlgorithm.BCRYPT)
 
     val credentials = UserCredentials.create(user, hashedPassword)
     userCredentialsRepository.save(credentials)
-    val savedCredentials = userCredentialsRepository.findById(uuid)!!
+    val savedCredentials = userCredentialsRepository.findByUser(user)!!
 
-    assertEquals(uuid, savedCredentials.uuid)
+    assertEquals(id, savedCredentials.userId)
     assertEquals(hashedPassword.hash, savedCredentials.passwordHash)
-    assertEquals(hashedPassword.algo, savedCredentials.algo)
+    assertEquals(hashedPassword.algo, savedCredentials.hashingAlgo)
   }
 }

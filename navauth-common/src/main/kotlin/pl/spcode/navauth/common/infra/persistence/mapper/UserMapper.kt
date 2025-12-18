@@ -16,32 +16,31 @@
  *
  */
 
-package pl.spcode.navauth.common.domain.credentials
+package pl.spcode.navauth.common.infra.persistence.mapper
 
+import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserId
-import pl.spcode.navauth.common.infra.crypto.HashedPassword
-import pl.spcode.navauth.common.infra.crypto.PasswordHash
+import pl.spcode.navauth.common.domain.user.Username
+import pl.spcode.navauth.common.infra.persistence.ormlite.user.UserRecord
 
-@ConsistentCopyVisibility
-data class UserCredentials
-private constructor(
-  val userId: UserId,
-  val passwordHash: PasswordHash,
-  val hashingAlgo: HashingAlgorithm,
-) {
+fun User.toRecord(): UserRecord =
+  UserRecord(
+    uuid = id.value,
+    mojangUuid = mojangUuid?.value,
+    username = username.value,
+    usernameLowercase = username.value.lowercase(),
+    credentialsRequired = credentialsRequired,
+  )
 
-  companion object Factory {
-    fun create(user: User, password: HashedPassword): UserCredentials {
-      return UserCredentials(
-        userId = user.id,
-        passwordHash = password.hash,
-        hashingAlgo = password.algo,
-      )
-    }
-
-    fun fromExisting(userId: UserId, hash: PasswordHash, algo: HashingAlgorithm): UserCredentials {
-      return UserCredentials(userId, hash, algo)
-    }
+fun UserRecord.toDomain(): User =
+  if (mojangUuid != null) {
+    User.premium(
+      id = UserId(uuid),
+      username = Username(username),
+      mojangUuid = MojangId(mojangUuid),
+      needsCreds = credentialsRequired,
+    )
+  } else {
+    User.nonPremium(id = UserId(uuid), username = Username(username))
   }
-}

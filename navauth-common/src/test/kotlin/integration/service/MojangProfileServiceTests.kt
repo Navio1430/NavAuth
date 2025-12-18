@@ -29,6 +29,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import org.junit.jupiter.api.extension.ExtendWith
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
+import pl.spcode.navauth.common.domain.user.MojangId
 import utils.generateRandomString
 
 @ExtendWith(ApplicationTestExtension::class)
@@ -42,7 +43,7 @@ class MojangProfileServiceTests {
 
     assertNotNull(profile)
     assertEquals(profile.name, "Notch")
-    assertEquals(profile.uuid, UUID.fromString("069a79f4-44e9-4726-a5be-fca90e38aaf5"))
+    assertEquals(profile.uuid, MojangId(UUID.fromString("069a79f4-44e9-4726-a5be-fca90e38aaf5")))
   }
 
   @ExtendWith(RetryExtension::class)

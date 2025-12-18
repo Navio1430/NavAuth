@@ -16,14 +16,19 @@
  *
  */
 
-package pl.spcode.navauth.common.domain.user
+package pl.spcode.navauth.common.infra.persistence.ormlite.credentials
 
-import com.j256.ormlite.dao.Dao
+import com.j256.ormlite.field.DatabaseField
+import com.j256.ormlite.table.DatabaseTable
+import java.util.UUID
+import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 
-interface UserRepository {
-  fun save(user: User): Dao.CreateOrUpdateStatus
-
-  fun findByUsername(username: String): User?
-
-  fun findByUsernameLowercase(username: String): User?
-}
+@DatabaseTable(tableName = "navauth_credentials")
+class UserCredentialsRecord(
+  // one-to-one relationship with a user entity
+  @DatabaseField(id = true) var uuid: UUID = UUID.randomUUID(),
+  @DatabaseField val passwordHash: String = "",
+  @DatabaseField val algo: HashingAlgorithm = HashingAlgorithm.BCRYPT,
+  @DatabaseField val twoFactorSecret: String = "",
+  @DatabaseField val twoFactorEnabled: Boolean = false,
+)

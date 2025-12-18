@@ -63,7 +63,7 @@ constructor(val userService: UserService, val mojangProfileService: MojangProfil
       return
     }
 
-    userService.migrateToPremium(user)
+    userService.migrateToPremium(user, mojangProfile.uuid)
     sender.sendMessage(Component.text("Account migrated successfully!", TextColors.GREEN))
   }
 }

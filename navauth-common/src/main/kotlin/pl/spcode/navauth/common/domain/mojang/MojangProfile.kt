@@ -18,6 +18,6 @@
 
 package pl.spcode.navauth.common.domain.mojang
 
-import java.util.UUID
+import pl.spcode.navauth.common.domain.user.MojangId
 
-data class MojangProfile(val uuid: UUID, val name: String)
+data class MojangProfile(val uuid: MojangId, val name: String)

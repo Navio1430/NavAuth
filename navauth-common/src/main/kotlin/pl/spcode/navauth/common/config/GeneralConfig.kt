@@ -45,6 +45,9 @@ open class GeneralConfig : OkaeriConfig() {
   var limboServers: List<String> = listOf("limbo")
     protected set
 
+  @Comment("Maximum number of login retries before kicking the player.")
+  var maxLoginRetries: Int = 3
+
   @Variable("CONFIG_VERSION")
   @Comment("Config version. DO NOT CHANGE this property!")
   var configVersion: Int = 0

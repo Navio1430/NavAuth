@@ -16,25 +16,32 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.repository
+package pl.spcode.navauth.common.infra.persistence.ormlite.user
 
 import com.google.inject.Inject
+import com.j256.ormlite.dao.Dao
 import java.util.UUID
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserRepository
 import pl.spcode.navauth.common.infra.database.DatabaseManager
+import pl.spcode.navauth.common.infra.persistence.mapper.toDomain
+import pl.spcode.navauth.common.infra.persistence.mapper.toRecord
 import pl.spcode.navauth.common.shared.data.OrmLiteCrudRepositoryImpl
 
 class UserRepositoryImpl @Inject constructor(databaseManager: DatabaseManager) :
-  OrmLiteCrudRepositoryImpl<User, UUID>(databaseManager, User::class), UserRepository {
+  OrmLiteCrudRepositoryImpl<UserRecord, UUID>(databaseManager, UserRecord::class), UserRepository {
+
+  override fun save(user: User): Dao.CreateOrUpdateStatus {
+    return save(user.toRecord())
+  }
 
   override fun findByUsername(username: String): User? {
     val query = queryBuilder().where().eq("username", username)
-    return dao().queryForFirst(query.prepare())
+    return dao().queryForFirst(query.prepare())?.toDomain()
   }
 
-  override fun findByUsernameLowercase(usernameLowercase: String): User? {
-    val query = queryBuilder().where().eq("usernameLowercase", usernameLowercase)
-    return dao().queryForFirst(query.prepare())
+  override fun findByUsernameLowercase(username: String): User? {
+    val query = queryBuilder().where().eq("usernameLowercase", username.lowercase())
+    return dao().queryForFirst(query.prepare())?.toDomain()
   }
 }

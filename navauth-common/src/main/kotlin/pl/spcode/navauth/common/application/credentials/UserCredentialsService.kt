@@ -32,7 +32,7 @@ class UserCredentialsService
 constructor(val credentialsRepository: UserCredentialsRepository) {
 
   fun findCredentials(user: User): UserCredentials? {
-    return credentialsRepository.findById(user.uuid!!)
+    return credentialsRepository.findByUser(user)
   }
 
   fun storeUserCredentials(userCredentials: UserCredentials) {
@@ -40,14 +40,14 @@ constructor(val credentialsRepository: UserCredentialsRepository) {
   }
 
   fun deleteUserCredentials(user: User) {
-    credentialsRepository.deleteById(user.uuid!!)
+    credentialsRepository.deleteByUser(user)
   }
 
   /** @param password the raw (not hashed) password */
   fun verifyPassword(credentials: UserCredentials, password: String): Boolean {
 
     val verified =
-      when (credentials.algo) {
+      when (credentials.hashingAlgo) {
         HashingAlgorithm.BCRYPT -> {
           BCryptCredentialsHasher().verify(password, credentials.passwordHash)
         }

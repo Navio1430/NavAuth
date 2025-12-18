@@ -20,4 +20,6 @@ package pl.spcode.navauth.common.infra.crypto
 
 import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 
-data class HashedPassword(val hash: String, val algo: HashingAlgorithm)
+@JvmInline value class PasswordHash(val value: String)
+
+data class HashedPassword(val hash: PasswordHash, val algo: HashingAlgorithm)

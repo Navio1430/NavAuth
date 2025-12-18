@@ -16,15 +16,20 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.repository
+package pl.spcode.navauth.common.infra.persistence.mapper
 
-import com.google.inject.Inject
-import java.util.UUID
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
-import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
-import pl.spcode.navauth.common.infra.database.DatabaseManager
-import pl.spcode.navauth.common.shared.data.OrmLiteCrudRepositoryImpl
+import pl.spcode.navauth.common.domain.user.UserId
+import pl.spcode.navauth.common.infra.crypto.PasswordHash
+import pl.spcode.navauth.common.infra.persistence.ormlite.credentials.UserCredentialsRecord
 
-class UserCredentialsRepositoryImpl @Inject constructor(databaseManager: DatabaseManager) :
-  OrmLiteCrudRepositoryImpl<UserCredentials, UUID>(databaseManager, UserCredentials::class),
-  UserCredentialsRepository {}
+fun UserCredentialsRecord.toDomain(): UserCredentials {
+  return UserCredentials.fromExisting(
+    userId = UserId(uuid),
+    hash = PasswordHash(passwordHash),
+    algo = algo,
+  )
+}
+
+fun UserCredentials.toRecord(): UserCredentialsRecord =
+  UserCredentialsRecord(uuid = userId.value, passwordHash = passwordHash.value, algo = hashingAlgo)

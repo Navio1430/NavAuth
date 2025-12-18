@@ -30,10 +30,10 @@ class BCryptCredentialsHasher : CredentialsHasher {
 
   override fun hash(password: String): HashedPassword {
     val hash: String = hasher.hashToString(10, password.toCharArray())
-    return HashedPassword(hash, HashingAlgorithm.BCRYPT)
+    return HashedPassword(PasswordHash(hash), HashingAlgorithm.BCRYPT)
   }
 
-  override fun verify(password: String, hashed: String): Boolean {
-    return verifier.verify(password.toByteArray(), hashed.toByteArray()).verified
+  override fun verify(password: String, passwordHash: PasswordHash): Boolean {
+    return verifier.verify(password.toByteArray(), passwordHash.value.toByteArray()).verified
   }
 }
