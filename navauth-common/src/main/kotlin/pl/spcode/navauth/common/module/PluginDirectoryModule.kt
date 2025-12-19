@@ -19,14 +19,12 @@
 package pl.spcode.navauth.common.module
 
 import com.google.inject.AbstractModule
-import pl.spcode.navauth.common.shared.PluginDirectory
 import java.nio.file.Path
+import pl.spcode.navauth.common.shared.PluginDirectory
 
-class PluginDirectoryModule(val directory: Path): AbstractModule() {
+class PluginDirectoryModule(val directory: Path) : AbstractModule() {
 
   override fun configure() {
-    bind(PluginDirectory::class.java).toInstance(
-      PluginDirectory(directory)
-    )
+    bind(PluginDirectory::class.java).toInstance(PluginDirectory(directory))
   }
 }

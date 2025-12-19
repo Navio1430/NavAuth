@@ -28,22 +28,24 @@ import com.j256.ormlite.table.TableUtils
 import com.zaxxer.hikari.HikariDataSource
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
-import pl.spcode.navauth.common.config.GeneralConfig
+import pl.spcode.navauth.common.shared.PluginDirectory
 
 @Singleton
 class DatabaseManager
 @Inject
-constructor(val generalConfig: GeneralConfig, val entitiesRegistrar: EntitiesRegistrar) {
-
-  val config: DatabaseConfig = generalConfig.databaseConfig
+constructor(
+  val config: DatabaseConfig,
+  val entitiesRegistrar: EntitiesRegistrar,
+  val pluginDirectory: PluginDirectory,
+) {
 
   private val dataSource: HikariDataSource = HikariDataSource()
   lateinit var connectionSource: ConnectionSource
 
   private val daoMap = ConcurrentHashMap<Class<*>, Dao<*, *>>()
 
-  fun connectAndInit() {
-    dataSource.poolName = "NavAuthPool"
+  fun connect(poolName: String = "NavAuth-pool") {
+    dataSource.poolName = poolName
 
     dataSource.addDataSourceProperty("cachePrepStmts", "true")
     dataSource.addDataSourceProperty("prepStmtCacheSize", "250")
@@ -62,7 +64,20 @@ constructor(val generalConfig: GeneralConfig, val entitiesRegistrar: EntitiesReg
     val jdbcUrl: String =
       when (driverType) {
         DatabaseDriverType.H2_MEM,
-        DatabaseDriverType.SQLITE -> driverJdbcFormat.format(config.database)
+        DatabaseDriverType.SQLITE -> {
+          val dbFilename = pluginDirectory.path.resolve(config.database).toAbsolutePath().toString()
+
+          val supportedExtensions = listOf(".sqlite", ".sqlite3", ".db", ".db3", ".s3db", ".sl3")
+
+          val finalFilename =
+            if (supportedExtensions.any { dbFilename.endsWith(it, ignoreCase = true) }) {
+              dbFilename
+            } else {
+              "$dbFilename.db"
+            }
+
+          driverJdbcFormat.format(finalFilename)
+        }
         DatabaseDriverType.MYSQL,
         DatabaseDriverType.MARIADB -> {
           config.driverType.jdbcUrlFormat.format(
@@ -85,7 +100,10 @@ constructor(val generalConfig: GeneralConfig, val entitiesRegistrar: EntitiesReg
     dataSource.jdbcUrl = jdbcUrl
 
     connectionSource = DataSourceConnectionSource(dataSource, jdbcUrl)
+  }
 
+  fun connectAndInit(poolName: String = "NavAuth-pool") {
+    connect(poolName)
     initDatabase(entitiesRegistrar)
   }
 

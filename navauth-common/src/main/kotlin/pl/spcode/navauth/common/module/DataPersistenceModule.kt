@@ -45,8 +45,6 @@ class DataPersistenceModule : AbstractModule() {
     )
 
   override fun configure() {
-    bind(DatabaseManager::class.java).`in`(Singleton::class.java)
-
     val entitiesRegistrar = EntitiesRegistrar()
 
     for ((entity, repo, impl) in bindings) {
@@ -56,5 +54,6 @@ class DataPersistenceModule : AbstractModule() {
     }
 
     bind(EntitiesRegistrar::class.java).toInstance(entitiesRegistrar)
+    bind(DatabaseManager::class.java).`in`(Singleton::class.java)
   }
 }

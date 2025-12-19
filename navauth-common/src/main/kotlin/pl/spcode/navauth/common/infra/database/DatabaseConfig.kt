@@ -71,7 +71,11 @@ open class DatabaseConfig : OkaeriConfig() {
   @Comment("Should SSL be enabled? Applicable types:", " - MYSQL", " - MARIADB", " - POSTGRESQL")
   var ssl: Boolean = false
 
-  @Comment("Database name")
+  @Comment(
+    "Database name.",
+    " - SQLITE: If you're using SQLite, this property",
+    "   specifies the database filename e.g., database.db",
+  )
   var database: String = "default"
     protected set
 }

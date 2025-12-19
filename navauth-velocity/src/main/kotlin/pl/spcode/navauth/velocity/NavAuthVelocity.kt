@@ -90,10 +90,8 @@ constructor(
           velocityMultification,
         )
 
-      val migrationConfigModule = YamlConfigModule(
-          MigrationConfig::class,
-          dataDirectory.resolve("migration.yml").toFile()
-      )
+      val migrationConfigModule =
+        YamlConfigModule(MigrationConfig::class, dataDirectory.resolve("migration.yml").toFile())
 
       injector =
         parentInjector.createChildInjector(

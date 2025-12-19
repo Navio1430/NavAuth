@@ -24,8 +24,9 @@ class EntitiesRegistrar {
 
   private val entityTypes = mutableListOf<KClass<*>>()
 
-  fun registerEntity(clazz: KClass<*>) {
+  fun registerEntity(clazz: KClass<*>): EntitiesRegistrar {
     entityTypes.add(clazz)
+    return this
   }
 
   fun getTypes(): List<KClass<*>> {
