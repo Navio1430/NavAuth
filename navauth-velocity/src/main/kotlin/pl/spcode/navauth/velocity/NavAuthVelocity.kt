@@ -35,9 +35,11 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.config.MessagesConfig
+import pl.spcode.navauth.common.config.MigrationConfig
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.module.DataPersistenceModule
 import pl.spcode.navauth.common.module.HttpClientModule
+import pl.spcode.navauth.common.module.PluginDirectoryModule
 import pl.spcode.navauth.common.module.ServicesModule
 import pl.spcode.navauth.common.module.YamlConfigModule
 import pl.spcode.navauth.velocity.command.CommandsRegistry
@@ -73,7 +75,11 @@ constructor(
       proxyServer.eventManager.register(pluginInstance, this)
 
       val generalConfigModule =
-        YamlConfigModule(GeneralConfig::class, dataDirectory.resolve("general.yml").toFile())
+        YamlConfigModule(
+          GeneralConfig::class,
+          dataDirectory.resolve("general.yml").toFile(),
+          autoBindSubconfigs = true,
+        )
 
       val velocityViewerProvider = VelocityViewerProvider(proxyServer)
       val velocityMultification = VelocityMultification(MessagesConfig(), velocityViewerProvider)
@@ -84,13 +90,18 @@ constructor(
           velocityMultification,
         )
 
-      velocityMultification.create()
+      val migrationConfigModule = YamlConfigModule(
+          MigrationConfig::class,
+          dataDirectory.resolve("migration.yml").toFile()
+      )
 
       injector =
         parentInjector.createChildInjector(
+          PluginDirectoryModule(dataDirectory),
           // loading hierarchy here is crucial
           generalConfigModule,
           messagesConfigModule,
+          migrationConfigModule,
           VelocityMultificationsModule(velocityMultification),
           SchedulerModule(pluginInstance, proxyServer.scheduler),
           HttpClientModule(),

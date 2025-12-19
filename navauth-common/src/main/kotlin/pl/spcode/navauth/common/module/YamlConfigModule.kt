@@ -32,6 +32,7 @@ class YamlConfigModule<T : OkaeriConfig>(
   val configClass: KClass<T>,
   val configFile: File,
   val multification: Multification<*, *>? = null,
+  val autoBindSubconfigs: Boolean = false,
 ) : AbstractModule() {
 
   override fun configure() {
@@ -55,5 +56,22 @@ class YamlConfigModule<T : OkaeriConfig>(
       }
 
     bind(configClass.java).toInstance(configInstance)
+
+    // Auto-bind subconfigs globally if enabled
+    if (autoBindSubconfigs) {
+      bindSubconfigsRecursively(configInstance)
+    }
+  }
+
+  private fun bindSubconfigsRecursively(parentConfig: Any) {
+    parentConfig.javaClass.declaredFields.forEach { field ->
+      field.isAccessible = true
+      val value = field.get(parentConfig)
+      if (value is OkaeriConfig && value != parentConfig) {
+        // Bind by exact class, suppress unchecked cast
+        @Suppress("UNCHECKED_CAST") bind(field.type as Class<OkaeriConfig>).toInstance(value)
+        bindSubconfigsRecursively(value)
+      }
+    }
   }
 }
