@@ -38,19 +38,19 @@ import pl.spcode.navauth.common.infra.crypto.PasswordHash
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.infra.database.EntitiesRegistrar
 import pl.spcode.navauth.common.migrate.MigrationManager
-import pl.spcode.navauth.common.migrate.migrator.Migrator
 import pl.spcode.navauth.common.migrate.error.SourceDatabaseConnectException
 import pl.spcode.navauth.common.migrate.error.SourceTableNotFoundException
+import pl.spcode.navauth.common.migrate.migrator.Migrator
 import pl.spcode.navauth.common.shared.PluginDirectory
 
 class LibreLoginMigrator
 @Inject
 constructor(
-    val userRepository: UserRepository,
-    val userCredentialsRepository: UserCredentialsRepository,
-    migrationConfig: MigrationConfig,
-    pluginDirectory: PluginDirectory,
-): Migrator {
+  val userRepository: UserRepository,
+  val userCredentialsRepository: UserCredentialsRepository,
+  migrationConfig: MigrationConfig,
+  pluginDirectory: PluginDirectory,
+) : Migrator {
 
   val logger: Logger = LoggerFactory.getLogger(LibreLoginMigrator::class.java)
 
@@ -79,11 +79,7 @@ constructor(
   }
 
   override fun migrateNext(offset: Long, limit: Long): Long {
-    val qb = sourceDao.queryBuilder()
-        .orderBy("uuid", true)
-        .offset(offset)
-        .limit(limit)
-        .prepare()
+    val qb = sourceDao.queryBuilder().orderBy("uuid", true).offset(offset).limit(limit).prepare()
 
     val libreUsers = sourceDao.query(qb)
     libreUsers.forEach { lUser ->
@@ -93,19 +89,28 @@ constructor(
       val username = Username(lUser.lastNickname!!)
       val userId = UserId(lUser.uuid!!)
 
-      val targetUser = if (isPremium) {
-        User.premium(userId, username, MojangId(lUser.premiumUuid!!), twoFactorEnabled)
-      } else {
-        User.nonPremium(userId, username)
-      }
+      val targetUser =
+        if (isPremium) {
+          User.premium(userId, username, MojangId(lUser.premiumUuid!!), twoFactorEnabled)
+        } else {
+          User.nonPremium(userId, username)
+        }
 
       val hashedPassword = getHashedPassword(lUser)
       if (!isPremium && hashedPassword == null) {
-        logger.info("Non-Premium user ${lUser.lastNickname}:${lUser.uuid} has no password which is an invalid record. Skipping record...")
+        logger.info(
+          "Non-Premium user ${lUser.lastNickname}:${lUser.uuid} has no password which is an invalid record. Skipping record..."
+        )
         return@forEach
       } else {
         val twoFactorSecret = lUser.secret?.let { TwoFactorSecret(it) }
-        val credentials = UserCredentials.create(userId, hashedPassword!!.hash, hashedPassword.algo, twoFactorSecret)
+        val credentials =
+          UserCredentials.create(
+            userId,
+            hashedPassword!!.hash,
+            hashedPassword.algo,
+            twoFactorSecret,
+          )
         userCredentialsRepository.save(credentials)
       }
 
@@ -121,32 +126,36 @@ constructor(
     val saltRaw = libreUser.passwordSalt ?: return null
     val algoRaw = libreUser.passwordAlgo ?: return null
 
-    val algo: HashingAlgorithm = if (algoRaw.startsWith("BCrypt-")) {
-      HashingAlgorithm.BCRYPT
-    } else when (algoRaw) {
-      "Argon-2ID" -> HashingAlgorithm.ARGON2ID
-      "LOGIT-SHA-256" -> HashingAlgorithm.LOGITSHA256
-      "SHA-256" -> HashingAlgorithm.SHA256
-      "SHA-512" -> HashingAlgorithm.SHA512
-      else -> throw IllegalStateException("Unknown hashing algorithm: $algoRaw for user ${libreUser.lastNickname}:${libreUser.uuid}")
-    }
+    val algo: HashingAlgorithm =
+      if (algoRaw.startsWith("BCrypt-")) {
+        HashingAlgorithm.BCRYPT
+      } else
+        when (algoRaw) {
+          "Argon-2ID" -> HashingAlgorithm.ARGON2ID
+          "LOGIT-SHA-256" -> HashingAlgorithm.LOGITSHA256
+          "SHA-256" -> HashingAlgorithm.SHA256
+          "SHA-512" -> HashingAlgorithm.SHA512
+          else ->
+            throw IllegalStateException(
+              "Unknown hashing algorithm: $algoRaw for user ${libreUser.lastNickname}:${libreUser.uuid}"
+            )
+        }
 
-    val passwordHash = when (algo) {
-      HashingAlgorithm.BCRYPT -> {
-        PasswordHash(convertToBCryptFull(hashRaw, saltRaw, algoRaw))
+    val passwordHash =
+      when (algo) {
+        HashingAlgorithm.BCRYPT -> {
+          PasswordHash(convertToBCryptFull(hashRaw, saltRaw, algoRaw))
+        }
+        HashingAlgorithm.ARGON2ID -> TODO()
+        HashingAlgorithm.SHA256 -> TODO()
+        HashingAlgorithm.SHA512 -> TODO()
+        HashingAlgorithm.LOGITSHA256 -> TODO()
       }
-      HashingAlgorithm.ARGON2ID -> TODO()
-      HashingAlgorithm.SHA256 -> TODO()
-      HashingAlgorithm.SHA512 -> TODO()
-      HashingAlgorithm.LOGITSHA256 -> TODO()
-    }
 
     return HashedPassword(passwordHash, algo)
   }
 
-  /**
-   * Converts to BCrypt full hash from LibreLogin password values
-   */
+  /** Converts to BCrypt full hash from LibreLogin password values */
   private fun convertToBCryptFull(hash: String, salt: String, algo: String): String {
     require(algo.startsWith("BCrypt-")) { "Only BCrypt algo supported" }
 

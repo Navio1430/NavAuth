@@ -22,7 +22,7 @@ import com.google.inject.AbstractModule
 import pl.spcode.navauth.common.migrate.MigrationManager
 import pl.spcode.navauth.common.migrate.MigratorFactory
 
-class MigrationModule: AbstractModule() {
+class MigrationModule : AbstractModule() {
 
   override fun configure() {
     bind(MigratorFactory::class.java)

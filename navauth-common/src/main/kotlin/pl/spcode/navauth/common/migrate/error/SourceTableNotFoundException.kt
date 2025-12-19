@@ -19,4 +19,6 @@
 package pl.spcode.navauth.common.migrate.error
 
 class SourceTableNotFoundException(tableName: String) :
-    MigrationException("Can't find the source table $tableName. Please check your migration config and provide proper source info.")
+  MigrationException(
+    "Can't find the source table $tableName. Please check your migration config and provide proper source info."
+  )

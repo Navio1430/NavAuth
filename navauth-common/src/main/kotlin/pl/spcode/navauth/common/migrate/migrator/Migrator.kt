@@ -21,15 +21,12 @@ package pl.spcode.navauth.common.migrate.migrator
 interface Migrator {
 
   /**
-   * Prepares the migrator for the migration process.
-   * This function is called to initialize any required resources or perform
-   * setup operations before the migration can begin.
+   * Prepares the migrator for the migration process. This function is called to initialize any
+   * required resources or perform setup operations before the migration can begin.
    */
   fun init()
 
-  /**
-   * @return the total number of user records in the source database
-   */
+  /** @return the total number of user records in the source database */
   fun getSourceRecordsCount(): Long
 
   /**

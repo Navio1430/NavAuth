@@ -23,5 +23,5 @@ enum class HashingAlgorithm {
   ARGON2ID,
   SHA256,
   SHA512,
-  LOGITSHA256
+  LOGITSHA256,
 }

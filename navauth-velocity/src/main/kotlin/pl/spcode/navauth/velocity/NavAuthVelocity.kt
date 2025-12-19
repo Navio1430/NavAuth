@@ -108,7 +108,7 @@ constructor(
           DataPersistenceModule(),
           ServicesModule(),
           VelocityServicesModule(),
-          MigrationModule()
+          MigrationModule(),
         )
 
       connectAndInitDatabase()

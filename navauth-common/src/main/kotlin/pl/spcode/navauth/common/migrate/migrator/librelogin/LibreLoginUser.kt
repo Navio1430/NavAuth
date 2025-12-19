@@ -27,16 +27,19 @@ import java.util.UUID
 @DatabaseTable(tableName = "librepremium_data")
 class LibreLoginUser(
   @DatabaseField(id = true, dataType = DataType.UUID, columnName = "uuid") var uuid: UUID? = null,
-  @DatabaseField(dataType = DataType.UUID, canBeNull = true, columnName = "premium_uuid") var premiumUuid: UUID? = null,
+  @DatabaseField(dataType = DataType.UUID, canBeNull = true, columnName = "premium_uuid")
+  var premiumUuid: UUID? = null,
   @DatabaseField(canBeNull = true, columnName = "hashed_password") var passwordHash: String? = null,
   @DatabaseField(canBeNull = true, columnName = "salt") var passwordSalt: String? = null,
   @DatabaseField(canBeNull = true, columnName = "algo") var passwordAlgo: String? = null,
   @DatabaseField(canBeNull = false, columnName = "last_nickname") var lastNickname: String? = null,
   @DatabaseField(dataType = DataType.DATE_LONG, columnName = "joined") var joinDate: Date? = null,
-  @DatabaseField(dataType = DataType.DATE_LONG, columnName = "last_seen") var lastSeen: Date? = null,
+  @DatabaseField(dataType = DataType.DATE_LONG, columnName = "last_seen")
+  var lastSeen: Date? = null,
   @DatabaseField(canBeNull = true, columnName = "secret") var secret: String? = null,
   @DatabaseField(canBeNull = true, columnName = "ip") var ip: String? = null,
-  @DatabaseField(dataType = DataType.DATE_LONG, columnName = "last_authentication") var lastAuthentication: Date? = null,
+  @DatabaseField(dataType = DataType.DATE_LONG, columnName = "last_authentication")
+  var lastAuthentication: Date? = null,
   @DatabaseField(canBeNull = true, columnName = "last_server") var lastServer: String? = null,
-  @DatabaseField(canBeNull = true, columnName = "email") var email: String? = null
+  @DatabaseField(canBeNull = true, columnName = "email") var email: String? = null,
 )

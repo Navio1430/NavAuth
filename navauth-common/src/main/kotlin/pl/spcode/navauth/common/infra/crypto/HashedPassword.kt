@@ -23,11 +23,11 @@ import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 /**
  * Represents a hashed password.
  *
- * Always includes a salted hash to ensure enhanced security and resistance
- * against common dictionary or brute-force attacks.
+ * Always includes a salted hash to ensure enhanced security and resistance against common
+ * dictionary or brute-force attacks.
  *
- * @property value The hashed password string with applied salt.
- * Format may differ between implementations.
+ * @property value The hashed password string with applied salt. Format may differ between
+ *   implementations.
  */
 @JvmInline value class PasswordHash(val value: String)
 

@@ -20,12 +20,10 @@ package pl.spcode.navauth.common.migrate
 
 import com.google.inject.Inject
 import com.google.inject.Injector
-import pl.spcode.navauth.common.migrate.migrator.librelogin.LibreLoginMigrator
 import pl.spcode.navauth.common.migrate.migrator.Migrator
+import pl.spcode.navauth.common.migrate.migrator.librelogin.LibreLoginMigrator
 
-class MigratorFactory
-@Inject
-constructor(val injector: Injector) {
+class MigratorFactory @Inject constructor(val injector: Injector) {
 
   fun getMigrator(plugin: MigratedPluginType): Migrator {
     return when (plugin) {

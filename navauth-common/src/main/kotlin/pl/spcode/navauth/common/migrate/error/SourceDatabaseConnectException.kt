@@ -18,5 +18,8 @@
 
 package pl.spcode.navauth.common.migrate.error
 
-class SourceDatabaseConnectException(e: Throwable):
-    MigrationException("Can't connect to the source database. Please check your migration config.", e)
+class SourceDatabaseConnectException(e: Throwable) :
+  MigrationException(
+    "Can't connect to the source database. Please check your migration config.",
+    e,
+  )

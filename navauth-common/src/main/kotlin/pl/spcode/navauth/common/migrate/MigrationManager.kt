@@ -25,8 +25,7 @@ import pl.spcode.navauth.common.config.MigrationConfig
 
 class MigrationManager
 @Inject
-constructor(private val migrationConfig: MigrationConfig,
-    val migratorFactory: MigratorFactory) {
+constructor(private val migrationConfig: MigrationConfig, val migratorFactory: MigratorFactory) {
 
   @Volatile
   var isMigrating: Boolean = false
@@ -68,5 +67,4 @@ constructor(private val migrationConfig: MigrationConfig,
       isMigrating = false
     }
   }
-
 }
