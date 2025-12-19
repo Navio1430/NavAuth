@@ -16,20 +16,16 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.persistence.mapper
+package pl.spcode.navauth.common.module
 
-import pl.spcode.navauth.common.domain.credentials.UserCredentials
-import pl.spcode.navauth.common.domain.user.UserId
-import pl.spcode.navauth.common.infra.crypto.PasswordHash
-import pl.spcode.navauth.common.infra.persistence.ormlite.credentials.UserCredentialsRecord
+import com.google.inject.AbstractModule
+import pl.spcode.navauth.common.migrate.MigrationManager
+import pl.spcode.navauth.common.migrate.MigratorFactory
 
-fun UserCredentialsRecord.toDomain(): UserCredentials {
-  return UserCredentials.create(
-    userId = UserId(uuid),
-    hash = PasswordHash(passwordHash),
-    algo = algo,
-  )
+class MigrationModule: AbstractModule() {
+
+  override fun configure() {
+    bind(MigratorFactory::class.java)
+    bind(MigrationManager::class.java)
+  }
 }
-
-fun UserCredentials.toRecord(): UserCredentialsRecord =
-  UserCredentialsRecord(uuid = userId.value, passwordHash = passwordHash.value, algo = hashingAlgo)

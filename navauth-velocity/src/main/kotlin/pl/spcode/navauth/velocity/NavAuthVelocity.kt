@@ -37,8 +37,10 @@ import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.config.MigrationConfig
 import pl.spcode.navauth.common.infra.database.DatabaseManager
+import pl.spcode.navauth.common.migrate.MigrationManager
 import pl.spcode.navauth.common.module.DataPersistenceModule
 import pl.spcode.navauth.common.module.HttpClientModule
+import pl.spcode.navauth.common.module.MigrationModule
 import pl.spcode.navauth.common.module.PluginDirectoryModule
 import pl.spcode.navauth.common.module.ServicesModule
 import pl.spcode.navauth.common.module.YamlConfigModule
@@ -106,9 +108,13 @@ constructor(
           DataPersistenceModule(),
           ServicesModule(),
           VelocityServicesModule(),
+          MigrationModule()
         )
 
       connectAndInitDatabase()
+
+      // todo move this to a command
+      injector.getInstance(MigrationManager::class.java).startMigration()
 
       registerListeners(injector)
       registerCommands(injector)

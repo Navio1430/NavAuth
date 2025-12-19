@@ -32,7 +32,7 @@ class MigrationConfig : OkaeriConfig() {
     "This is the number of records that will be migrated at once.",
     "Higher chunk size means more memory usage but faster migration.",
   )
-  var chunkSize = 200
+  var chunkSize: Long = 200
 
   @Comment(
     "Source database connection config",
