@@ -27,5 +27,9 @@ class HashingAlgorithmTests {
   @Test
   fun `test enum naming integrity`() {
     assertEquals(HashingAlgorithm.valueOf("BCRYPT"), HashingAlgorithm.BCRYPT)
+    assertEquals(HashingAlgorithm.valueOf("ARGON2ID"), HashingAlgorithm.ARGON2ID)
+    assertEquals(HashingAlgorithm.valueOf("SHA256"), HashingAlgorithm.SHA256)
+    assertEquals(HashingAlgorithm.valueOf("SHA512"), HashingAlgorithm.SHA512)
+    assertEquals(HashingAlgorithm.valueOf("LOGITSHA256"), HashingAlgorithm.LOGITSHA256)
   }
 }
