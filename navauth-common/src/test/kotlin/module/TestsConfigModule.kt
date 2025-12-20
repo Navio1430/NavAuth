@@ -21,10 +21,14 @@ package module
 import com.google.inject.AbstractModule
 import config.TestConfig
 import pl.spcode.navauth.common.config.GeneralConfig
+import pl.spcode.navauth.common.module.PluginDirectoryModule
+import kotlin.io.path.Path
 
 class TestsConfigModule : AbstractModule() {
 
   override fun configure() {
     bind(GeneralConfig::class.java).toInstance(TestConfig())
+
+    install(PluginDirectoryModule(Path("")))
   }
 }
