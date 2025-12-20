@@ -63,6 +63,7 @@ constructor(private val migrationConfig: MigrationConfig, val migratorFactory: M
       logger.info("Migration finished, migrated $offset records in total")
     } catch (e: Exception) {
       logger.error("Migration failed", e)
+      throw e
     } finally {
       isMigrating = false
     }
