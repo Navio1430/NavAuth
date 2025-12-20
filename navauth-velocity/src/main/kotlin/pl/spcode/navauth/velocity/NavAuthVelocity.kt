@@ -113,9 +113,6 @@ constructor(
 
       connectAndInitDatabase()
 
-      // todo move this to a command
-      injector.getInstance(MigrationManager::class.java).startMigration()
-
       registerListeners(injector)
       registerCommands(injector)
     } catch (ex: Exception) {
