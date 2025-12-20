@@ -16,25 +16,10 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.crypto
+package pl.spcode.navauth.common.migrate.error
 
-import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
-
-/**
- * Represents a hashed password.
- *
- * Always includes a salted hash to ensure enhanced security and resistance against common
- * dictionary or brute-force attacks.
- *
- * @property value The hashed password string with applied salt. Format may differ between
- *   implementations.
- */
-@JvmInline value class PasswordHash(val value: String)
-
-/**
- * Represents a hashed password and the algorithm used to hash it.
- *
- * @property hash The hashed password value.
- * @property algo The algorithm used to generate the hash.
- */
-data class HashedPassword(val hash: PasswordHash, val algo: HashingAlgorithm)
+class SourceDatabaseConnectException(e: Throwable) :
+  MigrationException(
+    "Can't connect to the source database. Please check your migration config.",
+    e,
+  )

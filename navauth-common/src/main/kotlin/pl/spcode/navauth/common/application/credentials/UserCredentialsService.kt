@@ -51,6 +51,7 @@ constructor(val credentialsRepository: UserCredentialsRepository) {
         HashingAlgorithm.BCRYPT -> {
           BCryptCredentialsHasher().verify(password, credentials.passwordHash)
         }
+        else -> TODO()
       }
 
     return verified

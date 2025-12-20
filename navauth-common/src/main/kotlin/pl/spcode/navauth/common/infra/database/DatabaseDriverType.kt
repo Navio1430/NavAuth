@@ -26,7 +26,7 @@ enum class DatabaseDriverType(val driverClassName: String, val jdbcUrlFormat: St
   /** works for both mysql and mariadb */
   MYSQL("com.mysql.cj.jdbc.Driver", "jdbc:mysql://%s:%s/%s?sslMode=%s"),
   MARIADB(MYSQL.driverClassName, MYSQL.jdbcUrlFormat),
-  SQLITE("org.sqlite.JDBC", "jdbc:sqlite:%s/database.db"),
+  SQLITE("org.sqlite.JDBC", "jdbc:sqlite:%s"),
   POSTGRESQL("org.postgresql.Driver", "jdbc:postgresql://%s:%s/%s?sslmode=%s");
 
   companion object {

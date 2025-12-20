@@ -19,5 +19,9 @@
 package pl.spcode.navauth.common.domain.credentials
 
 enum class HashingAlgorithm {
-  BCRYPT
+  BCRYPT,
+  ARGON2ID,
+  SHA256,
+  SHA512,
+  LOGITSHA256,
 }

@@ -16,25 +16,25 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.crypto
+package pl.spcode.navauth.common.migrate.migrator
 
-import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
+interface Migrator {
 
-/**
- * Represents a hashed password.
- *
- * Always includes a salted hash to ensure enhanced security and resistance against common
- * dictionary or brute-force attacks.
- *
- * @property value The hashed password string with applied salt. Format may differ between
- *   implementations.
- */
-@JvmInline value class PasswordHash(val value: String)
+  /**
+   * Prepares the migrator for the migration process. This function is called to initialize any
+   * required resources or perform setup operations before the migration can begin.
+   */
+  fun init()
 
-/**
- * Represents a hashed password and the algorithm used to hash it.
- *
- * @property hash The hashed password value.
- * @property algo The algorithm used to generate the hash.
- */
-data class HashedPassword(val hash: PasswordHash, val algo: HashingAlgorithm)
+  /** @return the total number of user records in the source database */
+  fun getSourceRecordsCount(): Long
+
+  /**
+   * Migrates a chunk of records starting from the specified offset.
+   *
+   * @param offset the starting position of records to migrate
+   * @param limit the maximum number of records to migrate in this operation
+   * @return the number of records successfully migrated
+   */
+  fun migrateNext(offset: Long, limit: Long): Long
+}

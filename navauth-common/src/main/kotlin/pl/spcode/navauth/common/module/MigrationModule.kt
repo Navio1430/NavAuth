@@ -16,25 +16,16 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.crypto
+package pl.spcode.navauth.common.module
 
-import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
+import com.google.inject.AbstractModule
+import pl.spcode.navauth.common.migrate.MigrationManager
+import pl.spcode.navauth.common.migrate.MigratorFactory
 
-/**
- * Represents a hashed password.
- *
- * Always includes a salted hash to ensure enhanced security and resistance against common
- * dictionary or brute-force attacks.
- *
- * @property value The hashed password string with applied salt. Format may differ between
- *   implementations.
- */
-@JvmInline value class PasswordHash(val value: String)
+class MigrationModule : AbstractModule() {
 
-/**
- * Represents a hashed password and the algorithm used to hash it.
- *
- * @property hash The hashed password value.
- * @property algo The algorithm used to generate the hash.
- */
-data class HashedPassword(val hash: PasswordHash, val algo: HashingAlgorithm)
+  override fun configure() {
+    bind(MigratorFactory::class.java)
+    bind(MigrationManager::class.java)
+  }
+}

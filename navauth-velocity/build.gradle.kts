@@ -43,6 +43,7 @@ blossom {
 
 repositories {
   maven { url = uri("https://repo.panda-lang.org/releases") }
+  maven { url = uri("https://mvn.tribufu.com/releases") }
 }
 
 dependencies {
@@ -53,4 +54,7 @@ dependencies {
 
   compileOnly(libs.velocitypowered.velocity.api)
   annotationProcessor(libs.velocitypowered.velocity.api)
+
+  // Tribufu-Rcon used for containers
+  compileOnly("com.tribufu:Tribufu-VelocityRcon:1.2.0")
 }
