@@ -21,7 +21,7 @@ package unit.crypto
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import pl.spcode.navauth.common.infra.crypto.BCryptCredentialsHasher
+import pl.spcode.navauth.common.infra.crypto.hasher.BCryptCredentialsHasher
 
 class BCryptCredentialsHasherTests {
 
