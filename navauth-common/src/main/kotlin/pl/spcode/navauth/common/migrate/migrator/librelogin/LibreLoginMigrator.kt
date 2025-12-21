@@ -20,7 +20,6 @@ package pl.spcode.navauth.common.migrate.migrator.librelogin
 
 import com.google.inject.Inject
 import com.j256.ormlite.dao.Dao
-import java.util.UUID
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.config.MigrationConfig
@@ -28,11 +27,7 @@ import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 import pl.spcode.navauth.common.domain.credentials.TwoFactorSecret
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
-import pl.spcode.navauth.common.domain.user.MojangId
-import pl.spcode.navauth.common.domain.user.User
-import pl.spcode.navauth.common.domain.user.UserId
-import pl.spcode.navauth.common.domain.user.UserRepository
-import pl.spcode.navauth.common.domain.user.Username
+import pl.spcode.navauth.common.domain.user.*
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
 import pl.spcode.navauth.common.infra.crypto.PasswordHash
 import pl.spcode.navauth.common.infra.database.DatabaseManager
@@ -42,6 +37,7 @@ import pl.spcode.navauth.common.migrate.error.SourceDatabaseConnectException
 import pl.spcode.navauth.common.migrate.error.SourceTableNotFoundException
 import pl.spcode.navauth.common.migrate.migrator.Migrator
 import pl.spcode.navauth.common.shared.PluginDirectory
+import java.util.UUID
 
 class LibreLoginMigrator
 @Inject
@@ -146,7 +142,9 @@ constructor(
         HashingAlgorithm.BCRYPT -> {
           PasswordHash(convertToBCryptFull(hashRaw, saltRaw, algoRaw))
         }
-        HashingAlgorithm.ARGON2 -> TODO()
+        HashingAlgorithm.ARGON2 -> {
+          PasswordHash(convertToArgon2Full(hashRaw, saltRaw, algoRaw))
+        }
         HashingAlgorithm.SHA256 -> TODO()
         HashingAlgorithm.SHA512 -> TODO()
         HashingAlgorithm.LOGITSHA256 -> TODO()
@@ -155,7 +153,6 @@ constructor(
     return HashedPassword(passwordHash, algo)
   }
 
-  /** Converts to BCrypt full hash from LibreLogin password values */
   private fun convertToBCryptFull(hash: String, salt: String, algo: String): String {
     require(algo.startsWith("BCrypt-")) { "Only BCrypt algo supported" }
 
@@ -163,5 +160,28 @@ constructor(
     val algoVersion = algo.drop(7).lowercase() // "BCrypt-2A" -> "2a"
 
     return "$$algoVersion$$cost$${salt}$hashPart"
+  }
+
+  private fun convertToArgon2Full(hash: String, salt: String, algo: String): String {
+    if (algo != "Argon-2ID") {
+      throw IllegalArgumentException("Only Argon-2ID algorithm is supported")
+    }
+
+    val (parameters, hashBase64) = hash.split("$")
+
+    val split = parameters.split(",")
+
+    val version = split[0].toInt()
+    val iterations = split[1].toInt()
+    val memory = split[2].toInt()
+
+    // not provided by librelogin
+    val parallelism = 1
+
+    // trim base64 if needed
+    val hashTrimmed = hashBase64.trimEnd('=')
+    val saltTrimmed = salt.trimEnd('=')
+
+    return $$"$argon2id$v=$$version$m=$$memory,t=$$iterations,p=$$parallelism$$$saltTrimmed$$$hashTrimmed"
   }
 }
