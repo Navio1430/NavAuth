@@ -16,20 +16,23 @@
  *
  */
 
-package unit
+package pl.spcode.navauth.common.infra.crypto
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
+import java.util.Base64
 
-class HashingAlgorithmTests {
+class CryptoUtils {
 
-  @Test
-  fun `test enum naming integrity`() {
-    assertEquals(HashingAlgorithm.valueOf("BCRYPT"), HashingAlgorithm.BCRYPT)
-    assertEquals(HashingAlgorithm.valueOf("ARGON2"), HashingAlgorithm.ARGON2)
-    assertEquals(HashingAlgorithm.valueOf("SHA256"), HashingAlgorithm.SHA256)
-    assertEquals(HashingAlgorithm.valueOf("SHA512"), HashingAlgorithm.SHA512)
-    assertEquals(HashingAlgorithm.valueOf("LOGITSHA256"), HashingAlgorithm.LOGITSHA256)
+  companion object {
+    /** Encode bytes to Base64 without trailing '=' padding. */
+    fun base64EncodeToString(data: ByteArray?): String {
+      val encoded: String = Base64.getEncoder().encodeToString(data)
+
+      return encoded.trimEnd('=')
+    }
+
+    /** Decode Base64 string that may omit trailing '='. */
+    fun base64DecodeFromString(s: String?): ByteArray {
+      return Base64.getDecoder().decode(s)
+    }
   }
 }

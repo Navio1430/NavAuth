@@ -131,7 +131,7 @@ constructor(
         HashingAlgorithm.BCRYPT
       } else
         when (algoRaw) {
-          "Argon-2ID" -> HashingAlgorithm.ARGON2ID
+          "Argon-2ID" -> HashingAlgorithm.ARGON2
           "LOGIT-SHA-256" -> HashingAlgorithm.LOGITSHA256
           "SHA-256" -> HashingAlgorithm.SHA256
           "SHA-512" -> HashingAlgorithm.SHA512
@@ -146,7 +146,7 @@ constructor(
         HashingAlgorithm.BCRYPT -> {
           PasswordHash(convertToBCryptFull(hashRaw, saltRaw, algoRaw))
         }
-        HashingAlgorithm.ARGON2ID -> TODO()
+        HashingAlgorithm.ARGON2 -> TODO()
         HashingAlgorithm.SHA256 -> TODO()
         HashingAlgorithm.SHA512 -> TODO()
         HashingAlgorithm.LOGITSHA256 -> TODO()
