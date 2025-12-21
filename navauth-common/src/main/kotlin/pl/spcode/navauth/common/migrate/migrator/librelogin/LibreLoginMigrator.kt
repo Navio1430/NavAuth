@@ -20,6 +20,7 @@ package pl.spcode.navauth.common.migrate.migrator.librelogin
 
 import com.google.inject.Inject
 import com.j256.ormlite.dao.Dao
+import java.util.UUID
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.config.MigrationConfig
@@ -37,7 +38,6 @@ import pl.spcode.navauth.common.migrate.error.SourceDatabaseConnectException
 import pl.spcode.navauth.common.migrate.error.SourceTableNotFoundException
 import pl.spcode.navauth.common.migrate.migrator.Migrator
 import pl.spcode.navauth.common.shared.PluginDirectory
-import java.util.UUID
 
 class LibreLoginMigrator
 @Inject

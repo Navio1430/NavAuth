@@ -39,8 +39,9 @@ open class LoginAuthSession<T : PlayerAdapter>(
   /**
    * @param password raw (not hashed) password
    *
-   * note: we don't use CharArray, which is then zeroed because
-   * platform command parameters are in the heap anyway.
+   * note: we don't use CharArray, which is then zeroed because platform command parameters are in
+   * the heap anyway.
+   *
    * @return true if authenticated, otherwise false
    */
   fun authWithPassword(password: String): Boolean {
