@@ -20,9 +20,9 @@ package module
 
 import com.google.inject.AbstractModule
 import config.TestConfig
+import kotlin.io.path.Path
 import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.module.PluginDirectoryModule
-import kotlin.io.path.Path
 
 class TestsConfigModule : AbstractModule() {
 
