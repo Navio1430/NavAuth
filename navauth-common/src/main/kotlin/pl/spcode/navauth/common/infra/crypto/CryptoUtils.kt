@@ -37,7 +37,7 @@ class CryptoUtils {
       return Base64.getDecoder().decode(s)
     }
 
-    fun generateSalt(saltLength: Int): ByteArray =
+    fun generateBytes(saltLength: Int): ByteArray =
       ByteArray(saltLength).apply { secureRandom.nextBytes(this) }
   }
 }

@@ -40,7 +40,7 @@ class Argon2CredentialsHasher : CredentialsHasher {
   }
 
   override fun hash(password: String): HashedPassword {
-    val salt = CryptoUtils.generateSalt(SALT_LENGTH)
+    val salt = CryptoUtils.generateBytes(SALT_LENGTH)
     val params =
       Argon2Parameters.Builder(Argon2Parameters.ARGON2_id)
         .withSalt(salt)

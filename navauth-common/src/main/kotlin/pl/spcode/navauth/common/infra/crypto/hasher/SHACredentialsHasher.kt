@@ -48,7 +48,7 @@ class SHACredentialsHasher : CredentialsHasher {
    *   algorithm identifier.
    */
   override fun hash(password: String): HashedPassword {
-    val saltBytes = CryptoUtils.generateSalt(SALT_LENGTH)
+    val saltBytes = CryptoUtils.generateBytes(SALT_LENGTH)
     val defaultAlgo = HashingAlgorithm.SHA512
 
     val hashBytes = generatePBKDF2Hash(password.toCharArray(), saltBytes, defaultAlgo)
