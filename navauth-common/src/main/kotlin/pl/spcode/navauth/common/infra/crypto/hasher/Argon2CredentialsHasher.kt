@@ -37,12 +37,10 @@ class Argon2CredentialsHasher : CredentialsHasher {
     private const val MEMORY_KB = 65536 // 64MiB
     private const val ITERATIONS = 3
     private const val PARALLELISM = 4
-
-    private fun generateSalt(): ByteArray = ByteArray(SALT_LENGTH).apply { random.nextBytes(this) }
   }
 
   override fun hash(password: String): HashedPassword {
-    val salt = generateSalt()
+    val salt = CryptoUtils.generateSalt(SALT_LENGTH)
     val params =
       Argon2Parameters.Builder(Argon2Parameters.ARGON2_id)
         .withSalt(salt)

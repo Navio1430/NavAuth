@@ -23,6 +23,8 @@ import java.util.Base64
 class CryptoUtils {
 
   companion object {
+    private val secureRandom = java.security.SecureRandom()
+
     /** Encode bytes to Base64 without trailing '=' padding. */
     fun base64EncodeToString(data: ByteArray?): String {
       val encoded: String = Base64.getEncoder().encodeToString(data)
@@ -34,5 +36,8 @@ class CryptoUtils {
     fun base64DecodeFromString(s: String?): ByteArray {
       return Base64.getDecoder().decode(s)
     }
+
+    fun generateSalt(saltLength: Int): ByteArray =
+      ByteArray(saltLength).apply { secureRandom.nextBytes(this) }
   }
 }
