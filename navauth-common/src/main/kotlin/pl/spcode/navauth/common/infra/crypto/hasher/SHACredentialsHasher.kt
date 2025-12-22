@@ -48,6 +48,8 @@ class SHACredentialsHasher : CredentialsHasher {
    *   algorithm identifier.
    */
   override fun hash(password: String): HashedPassword {
+    require(password.isNotEmpty()) { "Password cannot be empty" }
+
     val saltBytes = CryptoUtils.generateBytes(SALT_LENGTH)
     val defaultAlgo = HashingAlgorithm.SHA512
 
