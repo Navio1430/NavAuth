@@ -71,7 +71,7 @@ class SHACredentialsHasher : CredentialsHasher {
    * @return true if the password matches the hash, false otherwise
    */
   override fun verify(password: String, passwordHash: PasswordHash): Boolean {
-    val shaHash = decodeSHAHash(password)
+    val shaHash = decodeSHAHash(passwordHash)
 
     val recomputedHash =
       generatePBKDF2Hash(password.toCharArray(), shaHash.saltBytes, shaHash.algorithm)
@@ -106,8 +106,8 @@ class SHACredentialsHasher : CredentialsHasher {
     return $$"$$identifier$$$encodedSalt$$$encodedHash"
   }
 
-  private fun decodeSHAHash(encoded: String): SHAHash {
-    val parts = encoded.split("$", limit = 3)
+  fun decodeSHAHash(passwordHash: PasswordHash): SHAHash {
+    val parts = passwordHash.value.split("$", limit = 3)
     require(parts.size == 3) { "Invalid hash format" }
 
     val algoRaw = parts[0]

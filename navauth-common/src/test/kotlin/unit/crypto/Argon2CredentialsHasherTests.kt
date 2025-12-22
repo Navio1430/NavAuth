@@ -34,7 +34,7 @@ class Argon2CredentialsHasherTests {
 
     val hashed = hasher.hash(password)
 
-    val result = hasher.verify(password, hashed.hash)
+    val result = hasher.verify(password, hashed.passwordHash)
 
     assertTrue(result)
   }

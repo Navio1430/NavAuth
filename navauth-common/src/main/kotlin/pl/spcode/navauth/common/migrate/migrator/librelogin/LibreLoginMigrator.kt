@@ -103,7 +103,7 @@ constructor(
         val credentials =
           UserCredentials.create(
             userId,
-            hashedPassword!!.hash,
+            hashedPassword!!.passwordHash,
             hashedPassword.algo,
             twoFactorSecret,
           )

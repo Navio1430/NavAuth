@@ -32,7 +32,7 @@ class BCryptCredentialsHasherTests {
     val password = "correctPassword"
     val hashedPassword = hasher.hash(password)
 
-    val result = hasher.verify(password, hashedPassword.hash)
+    val result = hasher.verify(password, hashedPassword.passwordHash)
 
     assertTrue(result)
   }
@@ -43,7 +43,7 @@ class BCryptCredentialsHasherTests {
     val wrongPassword = "wrongPassword"
     val hashedPassword = hasher.hash(password)
 
-    val result = hasher.verify(wrongPassword, hashedPassword.hash)
+    val result = hasher.verify(wrongPassword, hashedPassword.passwordHash)
 
     assertFalse(result)
   }
