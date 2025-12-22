@@ -15,7 +15,7 @@ dependencies {
   api("com.j256.ormlite:ormlite-jdbc:6.1")
 
   // config
-  api("eu.okaeri:okaeri-configs-yaml-snakeyaml:6.0.0-beta.3")
+  api("eu.okaeri:okaeri-configs-yaml-snakeyaml:6.0.0-beta.27")
 
   // crypto
   implementation("at.favre.lib:bcrypt:0.10.2")
