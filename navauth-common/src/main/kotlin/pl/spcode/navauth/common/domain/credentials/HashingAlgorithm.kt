@@ -20,8 +20,10 @@ package pl.spcode.navauth.common.domain.credentials
 
 enum class HashingAlgorithm {
   BCRYPT,
-  ARGON2ID,
+  ARGON2,
   SHA256,
   SHA512,
-  LOGITSHA256,
+  // LibreLogin's hashes are doubly hashed
+  LIBRELOGIN_SHA256,
+  LIBRELOGIN_SHA512,
 }

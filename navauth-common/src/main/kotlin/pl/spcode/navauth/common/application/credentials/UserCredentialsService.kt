@@ -24,7 +24,7 @@ import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
 import pl.spcode.navauth.common.domain.user.User
-import pl.spcode.navauth.common.infra.crypto.BCryptCredentialsHasher
+import pl.spcode.navauth.common.infra.crypto.hasher.BCryptCredentialsHasher
 
 @Singleton
 class UserCredentialsService

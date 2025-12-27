@@ -16,21 +16,26 @@
  *
  */
 
-package unit
+package pl.spcode.navauth.common.infra.crypto.hasher
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import at.favre.lib.crypto.bcrypt.BCrypt
 import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
+import pl.spcode.navauth.common.infra.crypto.HashedPassword
+import pl.spcode.navauth.common.infra.crypto.PasswordHash
 
-class HashingAlgorithmTests {
+class BCryptCredentialsHasher : CredentialsHasher {
 
-  @Test
-  fun `test enum naming integrity`() {
-    assertEquals(HashingAlgorithm.valueOf("BCRYPT"), HashingAlgorithm.BCRYPT)
-    assertEquals(HashingAlgorithm.valueOf("ARGON2"), HashingAlgorithm.ARGON2)
-    assertEquals(HashingAlgorithm.valueOf("SHA256"), HashingAlgorithm.SHA256)
-    assertEquals(HashingAlgorithm.valueOf("SHA512"), HashingAlgorithm.SHA512)
-    assertEquals(HashingAlgorithm.valueOf("LIBRELOGIN_SHA256"), HashingAlgorithm.LIBRELOGIN_SHA256)
-    assertEquals(HashingAlgorithm.valueOf("LIBRELOGIN_SHA512"), HashingAlgorithm.LIBRELOGIN_SHA512)
+  companion object {
+    private val hasher: BCrypt.Hasher = BCrypt.withDefaults()
+    private val verifier: BCrypt.Verifyer = BCrypt.verifyer()
+  }
+
+  override fun hash(password: String): HashedPassword {
+    val hash: String = hasher.hashToString(10, password.toCharArray())
+    return HashedPassword(PasswordHash(hash), HashingAlgorithm.BCRYPT)
+  }
+
+  override fun verify(password: String, passwordHash: PasswordHash): Boolean {
+    return verifier.verify(password.toByteArray(), passwordHash.value.toByteArray()).verified
   }
 }

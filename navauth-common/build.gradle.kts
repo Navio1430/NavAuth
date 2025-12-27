@@ -19,6 +19,8 @@ dependencies {
 
   // crypto
   implementation("at.favre.lib:bcrypt:0.10.2")
+  implementation("org.bouncycastle:bcprov-jdk18on:1.83")
+  implementation("org.bouncycastle:bcutil-jdk18on:1.83")
 
   compileOnly("net.kyori:adventure-text-minimessage:4.25.0")
 

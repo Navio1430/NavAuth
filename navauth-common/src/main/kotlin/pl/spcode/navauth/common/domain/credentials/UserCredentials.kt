@@ -50,7 +50,7 @@ private constructor(
     ): UserCredentials {
       return UserCredentials(
         userId = user.id,
-        passwordHash = password.hash,
+        passwordHash = password.passwordHash,
         hashingAlgo = password.algo,
         twoFactorSecret = twoFactorSecret,
       )

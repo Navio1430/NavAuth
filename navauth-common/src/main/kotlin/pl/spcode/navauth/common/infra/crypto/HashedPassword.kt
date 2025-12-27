@@ -34,7 +34,7 @@ import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 /**
  * Represents a hashed password and the algorithm used to hash it.
  *
- * @property hash The hashed password value.
+ * @property passwordHash The hashed password value.
  * @property algo The algorithm used to generate the hash.
  */
-data class HashedPassword(val hash: PasswordHash, val algo: HashingAlgorithm)
+data class HashedPassword(val passwordHash: PasswordHash, val algo: HashingAlgorithm)

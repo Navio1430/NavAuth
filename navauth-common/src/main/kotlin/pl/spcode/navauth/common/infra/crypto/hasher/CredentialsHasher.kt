@@ -16,7 +16,10 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.crypto
+package pl.spcode.navauth.common.infra.crypto.hasher
+
+import pl.spcode.navauth.common.infra.crypto.HashedPassword
+import pl.spcode.navauth.common.infra.crypto.PasswordHash
 
 interface CredentialsHasher {
 

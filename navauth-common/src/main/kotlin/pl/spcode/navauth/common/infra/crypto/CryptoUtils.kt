@@ -18,22 +18,26 @@
 
 package pl.spcode.navauth.common.infra.crypto
 
-import at.favre.lib.crypto.bcrypt.BCrypt
-import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
+import java.util.Base64
 
-class BCryptCredentialsHasher : CredentialsHasher {
+class CryptoUtils {
 
   companion object {
-    private val hasher: BCrypt.Hasher = BCrypt.withDefaults()
-    private val verifier: BCrypt.Verifyer = BCrypt.verifyer()
-  }
+    private val secureRandom = java.security.SecureRandom()
 
-  override fun hash(password: String): HashedPassword {
-    val hash: String = hasher.hashToString(10, password.toCharArray())
-    return HashedPassword(PasswordHash(hash), HashingAlgorithm.BCRYPT)
-  }
+    /** Encode bytes to Base64 without trailing '=' padding. */
+    fun base64EncodeToString(data: ByteArray?): String {
+      val encoded: String = Base64.getEncoder().encodeToString(data)
 
-  override fun verify(password: String, passwordHash: PasswordHash): Boolean {
-    return verifier.verify(password.toByteArray(), passwordHash.value.toByteArray()).verified
+      return encoded.trimEnd('=')
+    }
+
+    /** Decode Base64 string that may omit trailing '='. */
+    fun base64DecodeFromString(s: String?): ByteArray {
+      return Base64.getDecoder().decode(s)
+    }
+
+    fun generateBytes(saltLength: Int): ByteArray =
+      ByteArray(saltLength).apply { secureRandom.nextBytes(this) }
   }
 }

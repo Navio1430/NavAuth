@@ -51,7 +51,7 @@ class UserCredentialsPersistenceTests {
     val savedCredentials = userCredentialsRepository.findByUser(user)!!
 
     assertEquals(id, savedCredentials.userId)
-    assertEquals(hashedPassword.hash, savedCredentials.passwordHash)
+    assertEquals(hashedPassword.passwordHash, savedCredentials.passwordHash)
     assertEquals(hashedPassword.algo, savedCredentials.hashingAlgo)
   }
 }
