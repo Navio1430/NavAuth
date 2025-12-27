@@ -25,6 +25,7 @@ My main issues were:
 - floodgate support
 - minecraft dialogs support for login/register
 - whitelist for offline players
+- password hashing algorithm auto-migration
 
 ## 📊 Feature Comparison
 
