@@ -23,5 +23,7 @@ enum class HashingAlgorithm {
   ARGON2,
   SHA256,
   SHA512,
-  LOGITSHA256,
+  // LibreLogin's hashes are doubly hashed
+  LIBRELOGIN_SHA256,
+  LIBRELOGIN_SHA512,
 }

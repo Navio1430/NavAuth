@@ -29,15 +29,34 @@ import pl.spcode.navauth.common.infra.crypto.CryptoUtils
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
 import pl.spcode.navauth.common.infra.crypto.PasswordHash
 
-class SHACredentialsHasher : CredentialsHasher {
+open class SHACredentialsHasher : CredentialsHasher {
 
-  private companion object {
-    const val ITERATIONS = 100_000
-    const val SALT_LENGTH = 16
-    const val HASH_LENGTH_256 = 32
-    const val HASH_LENGTH_512 = 64
+  companion object {
+    private const val ITERATIONS = 100_000
+    private const val SALT_LENGTH = 16
+    private const val HASH_LENGTH_256 = 32
+    private const val HASH_LENGTH_512 = 64
     const val PBKDF2_SHA256 = "pbkdf2-sha256"
     const val PBKDF2_SHA512 = "pbkdf2-sha512"
+
+    fun generatePBKDF2Hash(
+      password: CharArray,
+      salt: ByteArray,
+      algo: HashingAlgorithm,
+    ): ByteArray {
+      val (targetLength, digest) =
+        when (algo) {
+          HashingAlgorithm.SHA256 -> Pair(HASH_LENGTH_256, SHA256Digest())
+          HashingAlgorithm.SHA512 -> Pair(HASH_LENGTH_512, SHA512Digest())
+          else -> throw IllegalArgumentException("Unsupported SHA algorithm: $algo")
+        }
+
+      val generator = PKCS5S2ParametersGenerator(digest)
+      generator.init(PBEParametersGenerator.PKCS5PasswordToBytes(password), salt, ITERATIONS)
+
+      val keyParam = generator.generateDerivedParameters(targetLength * 8) as KeyParameter
+      return keyParam.key
+    }
   }
 
   /**
@@ -79,25 +98,6 @@ class SHACredentialsHasher : CredentialsHasher {
       generatePBKDF2Hash(password.toCharArray(), shaHash.saltBytes, shaHash.algorithm)
 
     return MessageDigest.isEqual(recomputedHash, shaHash.hashBytes)
-  }
-
-  private fun generatePBKDF2Hash(
-    password: CharArray,
-    salt: ByteArray,
-    algo: HashingAlgorithm,
-  ): ByteArray {
-    val (targetLength, digest) =
-      when (algo) {
-        HashingAlgorithm.SHA256 -> Pair(HASH_LENGTH_256, SHA256Digest())
-        HashingAlgorithm.SHA512 -> Pair(HASH_LENGTH_512, SHA512Digest())
-        else -> throw IllegalArgumentException("Unsupported SHA algorithm: $algo")
-      }
-
-    val generator = PKCS5S2ParametersGenerator(digest)
-    generator.init(PBEParametersGenerator.PKCS5PasswordToBytes(password), salt, ITERATIONS)
-
-    val keyParam = generator.generateDerivedParameters(targetLength * 8) as KeyParameter
-    return keyParam.key
   }
 
   private fun encodeSHAHash(hash: SHAHash): String {

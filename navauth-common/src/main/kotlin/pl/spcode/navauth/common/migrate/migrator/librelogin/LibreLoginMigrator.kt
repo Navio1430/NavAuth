@@ -29,8 +29,10 @@ import pl.spcode.navauth.common.domain.credentials.TwoFactorSecret
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
 import pl.spcode.navauth.common.domain.user.*
+import pl.spcode.navauth.common.infra.crypto.CryptoUtils
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
 import pl.spcode.navauth.common.infra.crypto.PasswordHash
+import pl.spcode.navauth.common.infra.crypto.hasher.SHACredentialsHasher
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.infra.database.EntitiesRegistrar
 import pl.spcode.navauth.common.migrate.MigrationManager
@@ -128,9 +130,9 @@ constructor(
       } else
         when (algoRaw) {
           "Argon-2ID" -> HashingAlgorithm.ARGON2
-          "LOGIT-SHA-256" -> HashingAlgorithm.LOGITSHA256
-          "SHA-256" -> HashingAlgorithm.SHA256
-          "SHA-512" -> HashingAlgorithm.SHA512
+          "LOGIT-SHA-256" -> HashingAlgorithm.SHA256
+          "SHA-256" -> HashingAlgorithm.LIBRELOGIN_SHA256
+          "SHA-512" -> HashingAlgorithm.LIBRELOGIN_SHA512
           else ->
             throw IllegalStateException(
               "Unknown hashing algorithm: $algoRaw for user ${libreUser.lastNickname}:${libreUser.uuid}"
@@ -145,9 +147,14 @@ constructor(
         HashingAlgorithm.ARGON2 -> {
           PasswordHash(convertToArgon2Full(hashRaw, saltRaw, algoRaw))
         }
-        HashingAlgorithm.SHA256 -> TODO()
-        HashingAlgorithm.SHA512 -> TODO()
-        HashingAlgorithm.LOGITSHA256 -> TODO()
+        HashingAlgorithm.SHA256,
+        HashingAlgorithm.SHA512 -> {
+          PasswordHash(convertToShaFull(hashRaw, saltRaw, algo))
+        }
+        HashingAlgorithm.LIBRELOGIN_SHA256,
+        HashingAlgorithm.LIBRELOGIN_SHA512 -> {
+          PasswordHash(convertToLibreLoginShaFull(hashRaw, saltRaw, algo))
+        }
       }
 
     return HashedPassword(passwordHash, algo)
@@ -183,5 +190,40 @@ constructor(
     val saltTrimmed = salt.trimEnd('=')
 
     return $$"$argon2id$v=$$version$m=$$memory,t=$$iterations,p=$$parallelism$$$saltTrimmed$$$hashTrimmed"
+  }
+
+  private fun convertToShaFull(hashHex: String, saltHex: String, algo: HashingAlgorithm): String {
+    val hashBytes = hashHex.hexToByteArray()
+    val saltBytes = saltHex.hexToByteArray()
+
+    val hashBase64 = CryptoUtils.base64EncodeToString(hashBytes)
+    val saltBase64 = CryptoUtils.base64EncodeToString(saltBytes)
+
+    val identifier =
+      when (algo) {
+        HashingAlgorithm.SHA256 -> SHACredentialsHasher.PBKDF2_SHA256
+        HashingAlgorithm.SHA512 -> SHACredentialsHasher.PBKDF2_SHA512
+        else -> throw IllegalStateException("Only SHA256 and SHA512 algorithms are supported")
+      }
+
+    return $$"$$identifier$$$saltBase64$$$hashBase64"
+  }
+
+  private fun convertToLibreLoginShaFull(
+    hashHex: String,
+    saltHex: String,
+    algo: HashingAlgorithm,
+  ): String {
+    val baseAlgoIdentifier =
+      when (algo) {
+        HashingAlgorithm.LIBRELOGIN_SHA256 -> HashingAlgorithm.SHA256
+        HashingAlgorithm.LIBRELOGIN_SHA512 -> HashingAlgorithm.SHA512
+        else ->
+          throw IllegalStateException(
+            "Only LibreLogin_SHA256 and LibreLogin_SHA512 algorithms are supported"
+          )
+      }
+
+    return $$"$$baseAlgoIdentifier$$$saltHex$$$hashHex"
   }
 }

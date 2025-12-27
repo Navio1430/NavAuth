@@ -30,6 +30,7 @@ class HashingAlgorithmTests {
     assertEquals(HashingAlgorithm.valueOf("ARGON2"), HashingAlgorithm.ARGON2)
     assertEquals(HashingAlgorithm.valueOf("SHA256"), HashingAlgorithm.SHA256)
     assertEquals(HashingAlgorithm.valueOf("SHA512"), HashingAlgorithm.SHA512)
-    assertEquals(HashingAlgorithm.valueOf("LOGITSHA256"), HashingAlgorithm.LOGITSHA256)
+    assertEquals(HashingAlgorithm.valueOf("LIBRELOGIN_SHA256"), HashingAlgorithm.LIBRELOGIN_SHA256)
+    assertEquals(HashingAlgorithm.valueOf("LIBRELOGIN_SHA512"), HashingAlgorithm.LIBRELOGIN_SHA512)
   }
 }
