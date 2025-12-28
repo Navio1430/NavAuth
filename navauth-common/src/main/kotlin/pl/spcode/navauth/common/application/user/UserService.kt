@@ -21,6 +21,7 @@ package pl.spcode.navauth.common.application.user
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
+import pl.spcode.navauth.common.domain.common.TransactionService
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.User
@@ -33,6 +34,7 @@ class UserService
 constructor(
   val userRepository: UserRepository,
   val userCredentialsService: UserCredentialsService,
+  val txService: TransactionService,
 ) {
 
   fun findUserByUsername(username: String): User? {
@@ -44,9 +46,10 @@ constructor(
   }
 
   fun storeUserWithCredentials(user: User, password: HashedPassword) {
-    // todo in transaction
-    userRepository.save(user)
-    userCredentialsService.storeUserCredentials(UserCredentials.create(user, password))
+    txService.inTransaction {
+      userRepository.save(user)
+      userCredentialsService.storeUserCredentials(UserCredentials.create(user, password))
+    }
   }
 
   fun storePremiumUser(user: User) {
@@ -56,11 +59,15 @@ constructor(
   }
 
   fun migrateToPremium(user: User, mojangId: MojangId) {
-    val premiumUser = User.premium(user.id, user.username, mojangId, false)
-    // todo in transaction
-    // todo (in the future) do not delete credentials if there's 2FA enabled
-    //    userCredentialsService.deleteUserCredentials(user)
-    userRepository.save(premiumUser)
+    txService.inTransaction {
+      val credentials = userCredentialsService.findCredentials(user)!!
+      // require credentials only if there's 2FA enabled
+      val requireCredentials = credentials.isTwoFactorEnabled
+      val premiumUser = User.premium(user.id, user.username, mojangId, requireCredentials)
+
+      // do not delete credentials in case a revert was requested
+      userRepository.save(premiumUser)
+    }
   }
 
   fun findUserByMojangUuid(uuid: MojangId): User? {
