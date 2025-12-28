@@ -1,6 +1,4 @@
 
-// todo add licenser and spotless plugins
-
 plugins {
   id("java")
   kotlin("jvm") version "2.2.21"
