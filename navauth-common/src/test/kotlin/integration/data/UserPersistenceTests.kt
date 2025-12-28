@@ -99,4 +99,27 @@ class UserPersistenceTests {
     val user = userRepo.findByUsernameLowercase("nonexistent")
     assertNull(user)
   }
+
+  @Test
+  fun `test findByMojangUuid with existing user`() {
+    val id = UserId(UUID.randomUUID())
+    val mojangId = MojangId(UUID.randomUUID())
+    val name = generateRandomString(10)
+    val username = Username(name)
+    val userToPersist = User.premium(id, username, mojangId)
+    userRepo.save(userToPersist)
+
+    val userLower = userRepo.findByMojangUuid(mojangId)
+
+    assertNotNull(userLower, "User should be found by lowercased username")
+    assertEquals(userToPersist.id, userLower.id, "User ID should match")
+    assertEquals(userToPersist.username, userLower.username, "User name should match")
+    assertEquals(true, userLower.isPremium)
+  }
+
+  @Test
+  fun `test findByMojangUuid non-existent user returns null`() {
+    val user = userRepo.findByMojangUuid(MojangId(UUID.randomUUID()))
+    assertNull(user)
+  }
 }

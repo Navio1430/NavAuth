@@ -21,6 +21,7 @@ package pl.spcode.navauth.common.infra.persistence.ormlite.user
 import com.google.inject.Inject
 import com.j256.ormlite.dao.Dao
 import java.util.UUID
+import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserRepository
 import pl.spcode.navauth.common.infra.database.DatabaseManager
@@ -41,7 +42,12 @@ class UserRepositoryImpl @Inject constructor(databaseManager: DatabaseManager) :
   }
 
   override fun findByUsernameLowercase(username: String): User? {
-    val query = queryBuilder().where().eq("usernameLowercase", username.lowercase())
+    val query = queryBuilder().where().eq("username_lowercase", username.lowercase())
+    return dao().queryForFirst(query.prepare())?.toDomain()
+  }
+
+  override fun findByMojangUuid(uuid: MojangId): User? {
+    val query = queryBuilder().where().eq("mojang_uuid", uuid.value)
     return dao().queryForFirst(query.prepare())?.toDomain()
   }
 }

@@ -26,4 +26,6 @@ interface UserRepository {
   fun findByUsername(username: String): User?
 
   fun findByUsernameLowercase(username: String): User?
+
+  fun findByMojangUuid(uuid: MojangId): User?
 }
