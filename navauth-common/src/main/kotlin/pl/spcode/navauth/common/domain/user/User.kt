@@ -52,4 +52,8 @@ private constructor(
       needsCreds: Boolean = false,
     ): User = User(id, username, needsCreds, mojangUuid)
   }
+
+  override fun toString(): String {
+    return "User(id=$id, username=$username, mojangUuid=$mojangUuid, credentialsRequired=$credentialsRequired)"
+  }
 }

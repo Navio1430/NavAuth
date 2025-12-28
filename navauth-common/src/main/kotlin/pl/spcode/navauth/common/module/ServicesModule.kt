@@ -24,10 +24,14 @@ import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
+import pl.spcode.navauth.common.domain.common.TransactionService
+import pl.spcode.navauth.common.infra.persistence.ormlite.TransactionServiceImpl
 
 class ServicesModule : AbstractModule() {
 
   override fun configure() {
+    bind(TransactionService::class.java).to(TransactionServiceImpl::class.java)
+
     bind(MojangProfileService::class.java)
     bind(AuthHandshakeSessionService::class.java)
 

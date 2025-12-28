@@ -24,6 +24,7 @@ import java.util.UUID
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.config.MigrationConfig
+import pl.spcode.navauth.common.domain.common.TransactionService
 import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 import pl.spcode.navauth.common.domain.credentials.TwoFactorSecret
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
@@ -46,6 +47,7 @@ class LibreLoginMigrator
 constructor(
   val userRepository: UserRepository,
   val userCredentialsRepository: UserCredentialsRepository,
+  val txService: TransactionService,
   migrationConfig: MigrationConfig,
   pluginDirectory: PluginDirectory,
 ) : Migrator {
@@ -80,43 +82,53 @@ constructor(
     val qb = sourceDao.queryBuilder().orderBy("uuid", true).offset(offset).limit(limit).prepare()
 
     val libreUsers = sourceDao.query(qb)
-    libreUsers.forEach { lUser ->
-      val isPremium = lUser.premiumUuid != null
-      val twoFactorEnabled = lUser.secret != null
-
-      val username = Username(lUser.lastNickname!!)
-      val userId = UserId(lUser.uuid!!)
-
-      val targetUser =
-        if (isPremium) {
-          User.premium(userId, username, MojangId(lUser.premiumUuid!!), twoFactorEnabled)
-        } else {
-          User.nonPremium(userId, username)
-        }
-
-      val hashedPassword = getHashedPassword(lUser)
-      if (!isPremium && hashedPassword == null) {
-        logger.info(
-          "Non-Premium user ${lUser.lastNickname}:${lUser.uuid} has no password which is an invalid record. Skipping record..."
-        )
-        return@forEach
-      } else {
-        val twoFactorSecret = lUser.secret?.let { TwoFactorSecret(it) }
-        val credentials =
-          UserCredentials.create(
-            userId,
-            hashedPassword!!.passwordHash,
-            hashedPassword.algo,
-            twoFactorSecret,
-          )
-        userCredentialsRepository.save(credentials)
-      }
-
-      // todo in transaction
-      userRepository.save(targetUser)
-    }
+    txService.inTransaction { libreUsers.forEach { lUser -> migrateSingleUser(lUser) } }
 
     return libreUsers.size.toLong()
+  }
+
+  private fun migrateSingleUser(lUser: LibreLoginUser) {
+    val isPremium = lUser.premiumUuid != null
+    val twoFactorEnabled = lUser.secret != null
+
+    val username = Username(lUser.lastNickname!!)
+    val userId = UserId(lUser.uuid!!)
+
+    // skip if the user already exists
+    val existingUser = userRepository.findByUsernameLowercase(lUser.lastNickname!!)
+    if (existingUser != null) {
+      logger.info(
+        "User ${lUser.lastNickname}:${lUser.uuid} already exists. Found user: $existingUser. Skipping record..."
+      )
+      return
+    }
+
+    val targetUser =
+      if (isPremium) {
+        User.premium(userId, username, MojangId(lUser.premiumUuid!!), twoFactorEnabled)
+      } else {
+        User.nonPremium(userId, username)
+      }
+
+    val hashedPassword = getHashedPassword(lUser)
+    if (!isPremium && hashedPassword == null) {
+      logger.info(
+        "Non-Premium user ${lUser.lastNickname}:${lUser.uuid} has no password which is an invalid record. Skipping record..."
+      )
+      return
+    } else {
+      val twoFactorSecret = lUser.secret?.let { TwoFactorSecret(it) }
+      val credentials =
+        UserCredentials.create(
+          userId,
+          hashedPassword!!.passwordHash,
+          hashedPassword.algo,
+          twoFactorSecret,
+        )
+      userCredentialsRepository.save(credentials)
+    }
+
+    userRepository.save(targetUser)
   }
 
   private fun getHashedPassword(libreUser: LibreLoginUser): HashedPassword? {
@@ -131,6 +143,7 @@ constructor(
         when (algoRaw) {
           "Argon-2ID" -> HashingAlgorithm.ARGON2
           "LOGIT-SHA-256" -> HashingAlgorithm.SHA256
+          "LOGIT-SHA-512" -> HashingAlgorithm.SHA512
           "SHA-256" -> HashingAlgorithm.LIBRELOGIN_SHA256
           "SHA-512" -> HashingAlgorithm.LIBRELOGIN_SHA512
           else ->
