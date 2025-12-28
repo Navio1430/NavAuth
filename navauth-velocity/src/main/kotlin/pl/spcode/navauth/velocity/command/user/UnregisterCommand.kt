@@ -60,6 +60,8 @@ constructor(val userService: UserService, val userCredentialsService: UserCreden
       return
     }
 
+    // todo check if 2fa is enabled
+
     val credentials = userCredentialsService.findCredentials(user)!!
     val isCorrectPassword = userCredentialsService.verifyPassword(credentials, currentPassword)
     if (!isCorrectPassword) {
