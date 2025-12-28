@@ -24,13 +24,17 @@ import java.util.UUID
 
 @DatabaseTable(tableName = "navauth_users")
 data class UserRecord(
-  @DatabaseField(id = true) val uuid: UUID = UUID.randomUUID(),
-  @DatabaseField(canBeNull = true, index = true) val mojangUuid: UUID? = null,
-  @DatabaseField(canBeNull = false, index = true) val username: String = "",
+  @DatabaseField(columnName = "uuid", id = true) val uuid: UUID = UUID.randomUUID(),
+  @DatabaseField(columnName = "mojang_uuid", canBeNull = true, index = true)
+  val mojangUuid: UUID? = null,
+  @DatabaseField(columnName = "username", canBeNull = false, index = true)
+  val username: String = "",
   // we use another field for username lowercased, because it is easier than creating a separate
   // index
-  @DatabaseField(canBeNull = false, index = true) val usernameLowercase: String = "",
-  @DatabaseField(canBeNull = false) val credentialsRequired: Boolean = true,
+  @DatabaseField(columnName = "username_lowercased", canBeNull = false, index = true)
+  val usernameLowercase: String = "",
+  @DatabaseField(columnName = "credentials_required", canBeNull = false)
+  val credentialsRequired: Boolean = true,
 ) {
   init {
     require(usernameLowercase == username.lowercase()) { "usernameLowercase must be lowercase" }
