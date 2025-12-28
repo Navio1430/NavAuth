@@ -31,7 +31,7 @@ data class UserRecord(
   val username: String = "",
   // we use another field for username lowercased, because it is easier than creating a separate
   // index
-  @DatabaseField(columnName = "username_lowercased", canBeNull = false, index = true)
+  @DatabaseField(columnName = "username_lowercase", canBeNull = false, index = true)
   val usernameLowercase: String = "",
   @DatabaseField(columnName = "credentials_required", canBeNull = false)
   val credentialsRequired: Boolean = true,
