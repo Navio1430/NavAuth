@@ -71,6 +71,6 @@ constructor(
   }
 
   fun findUserByMojangUuid(uuid: MojangId): User? {
-    TODO()
+    return userRepository.findByMojangUuid(uuid)
   }
 }
