@@ -44,7 +44,6 @@ import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.velocity.application.auth.session.VelocityAuthSessionFactory
 import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
-import java.util.UUID
 
 class LoginListeners
 @Inject
@@ -226,7 +225,7 @@ constructor(
     }
 
     // todo apply nickname prefix/suffix if set
-    //profile.withName("name")
+    // profile.withName("name")
 
     event.gameProfile = profile
   }
