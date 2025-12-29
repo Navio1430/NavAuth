@@ -23,7 +23,9 @@ import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.connection.PostLoginEvent
 import com.velocitypowered.api.event.connection.PreLoginEvent
+import com.velocitypowered.api.event.player.GameProfileRequestEvent
 import com.velocitypowered.api.proxy.Player
+import com.velocitypowered.api.util.GameProfile
 import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -42,6 +44,7 @@ import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.velocity.application.auth.session.VelocityAuthSessionFactory
 import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
+import java.util.UUID
 
 class LoginListeners
 @Inject
@@ -207,13 +210,26 @@ constructor(
     authHandshakeSessionService.closeSession(sessionId)
   }
 
-  // this event is invoked just after online encryption so we can
-  // assume premium player was authenticated at this point
-  //  @Subscribe
-  //  fun onGameProfile(event: GameProfileRequestEvent) {
-  //    val sessionId = VelocityUniqueSessionId(event.username, event.connection.remoteAddress)
-  //    val session = authHandshakeSessionService.findSession(sessionId)!!
-  //  }
+  // this event is invoked just after online encryption, so we can
+  // assume the premium player was authenticated at this point
+  @Subscribe
+  fun onGameProfile(event: GameProfileRequestEvent) {
+    val sessionId = VelocityUniqueSessionId(event.username, event.connection.remoteAddress)
+    val session = authHandshakeSessionService.findSession(sessionId)!!
+
+    val profile: GameProfile
+    if (session.existingUser != null) {
+      val user = session.existingUser!!
+      profile = GameProfile(user.id.value, user.username.value, event.originalProfile.properties)
+    } else {
+      profile = event.originalProfile
+    }
+
+    // todo apply nickname prefix/suffix if set
+    //profile.withName("name")
+
+    event.gameProfile = profile
+  }
 
   private fun createAuthSession(
     player: Player,
