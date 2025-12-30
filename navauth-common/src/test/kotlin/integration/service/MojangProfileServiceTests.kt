@@ -30,6 +30,7 @@ import kotlin.test.assertNull
 import org.junit.jupiter.api.extension.ExtendWith
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.domain.user.MojangId
+import pl.spcode.navauth.common.domain.user.Username
 import utils.generateRandomString
 
 @ExtendWith(ApplicationTestExtension::class)
@@ -39,10 +40,10 @@ class MojangProfileServiceTests {
 
   @Test
   fun `test mojang profile fetch`() {
-    val profile = mojangProfileService.fetchProfileInfo("notch")
+    val profile = mojangProfileService.fetchProfileInfo(Username("notch"))
 
     assertNotNull(profile)
-    assertEquals(profile.name, "Notch")
+    assertEquals(profile.name, Username("Notch"))
     assertEquals(profile.uuid, MojangId(UUID.fromString("069a79f4-44e9-4726-a5be-fca90e38aaf5")))
   }
 
@@ -50,7 +51,7 @@ class MojangProfileServiceTests {
   @Retry(value = 2)
   @Test
   fun `test fetched mojang profile doesn't exists`() {
-    val profile = mojangProfileService.fetchProfileInfo(generateRandomString(15))
+    val profile = mojangProfileService.fetchProfileInfo(Username(generateRandomString(15)))
 
     assertNull(profile)
   }

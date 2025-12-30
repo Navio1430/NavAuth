@@ -50,7 +50,7 @@ class MojangProfileService @Inject constructor(val httpClient: HttpClient) {
   fun fetchProfileInfo(usernameCaseIgnored: Username): MojangProfile? {
     val requestUri =
       URI.create(
-        "https://api.minecraftservices.com/minecraft/profile/lookup/name/$usernameCaseIgnored"
+        "https://api.minecraftservices.com/minecraft/profile/lookup/name/${usernameCaseIgnored.value}"
       )
     val request = HttpRequest.newBuilder(requestUri).GET().build()
 
