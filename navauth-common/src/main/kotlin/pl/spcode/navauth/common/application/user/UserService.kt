@@ -21,6 +21,7 @@ package pl.spcode.navauth.common.application.user
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
+import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.domain.common.TransactionService
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.user.MojangId
@@ -35,6 +36,7 @@ class UserService
 constructor(
   val userRepository: UserRepository,
   val userCredentialsService: UserCredentialsService,
+  val profileService: MojangProfileService,
   val txService: TransactionService,
 ) {
 
@@ -92,16 +94,54 @@ constructor(
    */
   fun migrateUsername(user: User, newUsername: Username): User {
     return txService.inTransaction {
-      if (user.username == newUsername)
-        throw IllegalArgumentException("username cannot be the same")
-
-      val conflictingUser = userRepository.findByUsernameIgnoreCase(newUsername.value)
-      if (conflictingUser != null) throw UsernameAlreadyTakenException("username already taken")
-
-      val newUser = user.withNewUsername(newUsername)
-      userRepository.save(newUser)
-      return@inTransaction newUser
+      return@inTransaction migrateUsernameNoTx(user, newUsername)
     }
+  }
+
+  /**
+   * Migrates a non-premium user's data to a new username. This operation is performed within a
+   * transactional context and ensures that the new username is not associated with a premium user
+   * and is available for use.
+   *
+   * @param user The non-premium user whose data will be migrated.
+   * @param newUsername The new username to assign to the user.
+   * @return The updated user with the new username.
+   * @throws UsernameAlreadyTakenException if another user already takes the new username.
+   * @throws IllegalArgumentException If the user is a premium user, or the new username belongs to
+   *   a premium profile.
+   */
+  fun migrateData(user: User, newUsername: Username): User {
+    require(!user.isPremium) { "cannot migrate premium user data" }
+
+    profileService.fetchProfileInfo(newUsername)?.let {
+      throw IllegalArgumentException("cannot migrate to premium username")
+    }
+
+    return txService.inTransaction {
+      return@inTransaction migrateUsernameNoTx(user, newUsername)
+    }
+  }
+
+  /**
+   * Updates the username of the given user to a new username without a transactional context. This
+   * method checks if the new username conflicts with other existing usernames and ensures it is
+   * different from the user's current username.
+   *
+   * @param user The user whose username is being updated.
+   * @param newUsername The new username to be assigned to the user.
+   * @return The updated user with the new username.
+   * @throws UsernameAlreadyTakenException if another user already takes the new username.
+   * @throws IllegalArgumentException if the new username is the same as the existing username.
+   */
+  private fun migrateUsernameNoTx(user: User, newUsername: Username): User {
+    if (user.username == newUsername) throw IllegalArgumentException("username cannot be the same")
+
+    val conflictingUser = userRepository.findByUsernameIgnoreCase(newUsername.value)
+    if (conflictingUser != null) throw UsernameAlreadyTakenException("username already taken")
+
+    val newUser = user.withNewUsername(newUsername)
+    userRepository.save(newUser)
+    return newUser
   }
 
   fun findUserByMojangUuid(uuid: MojangId): User? {
