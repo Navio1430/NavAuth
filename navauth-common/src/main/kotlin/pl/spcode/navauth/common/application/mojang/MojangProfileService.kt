@@ -43,7 +43,7 @@ class MojangProfileService @Inject constructor(val httpClient: HttpClient) {
   ) {
 
     fun toMojangProfile(): MojangProfile {
-      return MojangProfile(MojangId(UuidUtils.from32(uuidWithoutDashes)), name)
+      return MojangProfile(MojangId(UuidUtils.from32(uuidWithoutDashes)), Username(name))
     }
   }
 

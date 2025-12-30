@@ -46,17 +46,19 @@ constructor(
       if (userByMojangUuid != null) {
         // user with the same mojang uuid exists, but with different nickname
         try {
-          userService.migrateUsername(userByMojangUuid, Username(correspondingPremiumProfile.name))
+          userService.migrateUsername(userByMojangUuid, correspondingPremiumProfile.name)
         } catch (e: UsernameAlreadyTakenException) {
           return failure(
             UsernameResFailureReason.UsernameMigrationFailedUsernameAlreadyTaken(
-              correspondingPremiumProfile.name
+              correspondingPremiumProfile.name.value
             )
           )
         }
-        if (connUsername.value != correspondingPremiumProfile.name) {
+        if (connUsername != correspondingPremiumProfile.name) {
           return failure(
-            UsernameResFailureReason.PremiumUsernameNotIdentical(correspondingPremiumProfile.name)
+            UsernameResFailureReason.PremiumUsernameNotIdentical(
+              correspondingPremiumProfile.name.value
+            )
           )
         }
         return success(
@@ -69,13 +71,10 @@ constructor(
     if (existingUserIgnoreCase != null && existingUserIgnoreCase.isPremium && isPremiumNickname) {
       // check if the letter case changed
       if (
-        correspondingPremiumProfile.name != existingUserIgnoreCase.username.value &&
-          correspondingPremiumProfile.name.equals(existingUserIgnoreCase.username.value, true)
+        correspondingPremiumProfile.name != existingUserIgnoreCase.username &&
+          correspondingPremiumProfile.name.value.equals(existingUserIgnoreCase.username.value, true)
       ) {
-        userService.migrateUsername(
-          existingUserIgnoreCase,
-          Username(correspondingPremiumProfile.name),
-        )
+        userService.migrateUsername(existingUserIgnoreCase, correspondingPremiumProfile.name)
         return success(
           EncryptionType.ENFORCE_PREMIUM,
           PostUsernameResolutionState.PREMIUM_USERNAME_MIGRATED,
@@ -86,7 +85,9 @@ constructor(
     if (existingUserIgnoreCase != null && !existingUserIgnoreCase.isPremium) {
       if (isPremiumNickname) {
         return failure(
-          UsernameResFailureReason.NonPremiumWithPremiumConflict(correspondingPremiumProfile.name)
+          UsernameResFailureReason.NonPremiumWithPremiumConflict(
+            correspondingPremiumProfile.name.value
+          )
         )
         //        if (correspondingPremiumProfile.name == connUsername) {
         //          // possible premium user tries to join on the current nonpremium account
@@ -122,9 +123,11 @@ constructor(
 
     if (existingUserIgnoreCase == null) {
       if (isPremiumNickname) {
-        if (connUsername.value != correspondingPremiumProfile.name) {
+        if (connUsername != correspondingPremiumProfile.name) {
           return failure(
-            UsernameResFailureReason.PremiumUsernameNotIdentical(correspondingPremiumProfile.name)
+            UsernameResFailureReason.PremiumUsernameNotIdentical(
+              correspondingPremiumProfile.name.value
+            )
           )
         }
         return success(EncryptionType.ENFORCE_PREMIUM, PostUsernameResolutionState.NEW_ACCOUNT)
