@@ -28,6 +28,7 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import pl.spcode.navauth.common.domain.mojang.MojangProfile
 import pl.spcode.navauth.common.domain.user.MojangId
+import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.common.shared.http.HttpStatusCodes
 import pl.spcode.navauth.common.shared.utils.UuidUtils
 
@@ -46,7 +47,7 @@ class MojangProfileService @Inject constructor(val httpClient: HttpClient) {
     }
   }
 
-  fun fetchProfileInfo(usernameCaseIgnored: String): MojangProfile? {
+  fun fetchProfileInfo(usernameCaseIgnored: Username): MojangProfile? {
     val requestUri =
       URI.create(
         "https://api.minecraftservices.com/minecraft/profile/lookup/name/$usernameCaseIgnored"

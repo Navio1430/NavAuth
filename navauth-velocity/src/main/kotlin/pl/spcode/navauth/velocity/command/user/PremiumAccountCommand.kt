@@ -29,6 +29,7 @@ import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
+import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.velocity.command.Permissions
 import pl.spcode.navauth.velocity.component.TextColors
 
@@ -46,13 +47,13 @@ constructor(val userService: UserService, val mojangProfileService: MojangProfil
     "Enables auto-login and migrates to premium.",
   )
   fun changeToPremiumAccount(@Context sender: Player) {
-    val user = userService.findUserByUsername(sender.username)!!
+    val user = userService.findUserByExactUsername(sender.username)!!
     if (user.isPremium) {
       sender.sendMessage(Component.text("Account is already set as a premium one.", TextColors.RED))
       return
     }
 
-    val mojangProfile = mojangProfileService.fetchProfileInfo(sender.username)
+    val mojangProfile = mojangProfileService.fetchProfileInfo(Username(sender.username))
     if (mojangProfile == null) {
       sender.sendMessage(
         Component.text(

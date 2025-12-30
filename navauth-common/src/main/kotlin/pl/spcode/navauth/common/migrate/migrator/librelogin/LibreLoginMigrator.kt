@@ -95,7 +95,7 @@ constructor(
     val userId = UserId(lUser.uuid!!)
 
     // skip if the user already exists
-    val existingUser = userRepository.findByUsernameLowercase(lUser.lastNickname!!)
+    val existingUser = userRepository.findByUsernameIgnoreCase(lUser.lastNickname!!)
     if (existingUser != null) {
       logger.info(
         "User ${lUser.lastNickname}:${lUser.uuid} already exists. Found user: $existingUser. Skipping record..."

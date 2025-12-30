@@ -36,12 +36,12 @@ class UserRepositoryImpl @Inject constructor(databaseManager: DatabaseManager) :
     return save(user.toRecord())
   }
 
-  override fun findByUsername(username: String): User? {
+  override fun findByExactUsername(username: String): User? {
     val query = queryBuilder().where().eq("username", username)
     return dao().queryForFirst(query.prepare())?.toDomain()
   }
 
-  override fun findByUsernameLowercase(username: String): User? {
+  override fun findByUsernameIgnoreCase(username: String): User? {
     val query = queryBuilder().where().eq("username_lowercase", username.lowercase())
     return dao().queryForFirst(query.prepare())?.toDomain()
   }

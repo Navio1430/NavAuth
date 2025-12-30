@@ -16,16 +16,6 @@
  *
  */
 
-package pl.spcode.navauth.common.domain.user
+package pl.spcode.navauth.common.application.user
 
-import com.j256.ormlite.dao.Dao
-
-interface UserRepository {
-  fun save(user: User): Dao.CreateOrUpdateStatus
-
-  fun findByExactUsername(username: String): User?
-
-  fun findByUsernameIgnoreCase(username: String): User?
-
-  fun findByMojangUuid(uuid: MojangId): User?
-}
+class UsernameAlreadyTakenException(message: String) : Exception(message)

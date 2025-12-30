@@ -45,7 +45,7 @@ constructor(val userService: UserService, val userCredentialsService: UserCreden
     "Force unregister specified user. Works like unregister command, but doesn't require password."
   )
   fun forceUnregister(@Context sender: Player, @Arg(value = "playerName") playerName: String) {
-    val user = userService.findUserByUsernameLowercase(playerName.lowercase())
+    val user = userService.findUserByUsernameIgnoreCase(playerName.lowercase())
 
     if (user == null) {
       sender.sendMessage(Component.text("User '${playerName}' not found.", TextColors.RED))

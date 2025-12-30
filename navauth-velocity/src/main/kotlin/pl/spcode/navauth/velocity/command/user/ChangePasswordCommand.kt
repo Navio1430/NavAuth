@@ -49,7 +49,7 @@ constructor(val userService: UserService, val userCredentialsService: UserCreden
     @Arg(value = "current_password") currentPassword: String,
     @Arg(value = "new_password") newPassword: String,
   ) {
-    val user = userService.findUserByUsername(sender.username)!!
+    val user = userService.findUserByExactUsername(sender.username)!!
     if (user.isPremium) {
       sender.sendMessage(
         Component.text(

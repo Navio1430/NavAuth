@@ -53,6 +53,10 @@ private constructor(
     ): User = User(id, username, needsCreds, mojangUuid)
   }
 
+  fun withNewUsername(username: Username): User {
+    return User(this.id, username, this.credentialsRequired, this.mojangUuid)
+  }
+
   override fun toString(): String {
     return "User(id=$id, username=$username, mojangUuid=$mojangUuid, credentialsRequired=$credentialsRequired)"
   }
