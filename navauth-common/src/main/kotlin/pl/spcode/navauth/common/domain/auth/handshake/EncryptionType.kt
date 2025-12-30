@@ -18,9 +18,7 @@
 
 package pl.spcode.navauth.common.domain.auth.handshake
 
-enum class AuthHandshakeUsernameState {
-  VALID_USERNAME,
-  PREMIUM_USERNAME_CHANGED,
-  USERNAME_POTENTIAL_CONFLICT,
-  USERNAME_CONFLICT,
+enum class EncryptionType {
+  ENFORCE_PREMIUM,
+  NONE,
 }

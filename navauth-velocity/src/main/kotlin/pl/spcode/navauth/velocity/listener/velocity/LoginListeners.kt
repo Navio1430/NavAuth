@@ -30,12 +30,13 @@ import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.application.auth.handshake.AuthHandshakeSessionService
-import pl.spcode.navauth.common.application.mojang.MojangProfileService
+import pl.spcode.navauth.common.application.auth.username.UsernameResFailureReason
+import pl.spcode.navauth.common.application.auth.username.UsernameResResult
+import pl.spcode.navauth.common.application.auth.username.UsernameResolutionService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeSession
-import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeState
-import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeUsernameState
+import pl.spcode.navauth.common.domain.auth.handshake.EncryptionType
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionState
 import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.User
@@ -48,9 +49,9 @@ import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 class LoginListeners
 @Inject
 constructor(
-  val profileService: MojangProfileService,
   val userService: UserService,
   val authHandshakeSessionService: AuthHandshakeSessionService,
+  val usernameResolutionService: UsernameResolutionService,
   val authSessionFactory: VelocityAuthSessionFactory,
   val messagesConfig: MessagesConfig,
 ) {
@@ -64,102 +65,51 @@ constructor(
     // todo check if user nickname matches regex
     val connUsername = event.username
 
-    var existingUser = userService.findUserByUsernameLowercase(connUsername)
-    val userExists = existingUser != null
-    val correspondingPremiumProfile = profileService.fetchProfileInfo(connUsername)
-    val isPremiumNickname = correspondingPremiumProfile != null
+    val existingUser = userService.findUserByUsernameIgnoreCase(connUsername)
 
-    val sessionId = VelocityUniqueSessionId(event.username, event.connection.remoteAddress)
-    val session = authHandshakeSessionService.createSession(sessionId, existingUser, connUsername)
-
-    if (userExists) {
-      if (existingUser.isPremium) {
-        // user could change 1 letter to be uppercased/lowercased in their nickname
-        if (connUsername != existingUser.username.value) {
-          session.usernameState = AuthHandshakeUsernameState.PREMIUM_USERNAME_CHANGED
-          // let them through and make data migration later after auth
+    val res =
+      usernameResolutionService.resolveUsernameConflicts(Username(connUsername), existingUser)
+    when (res) {
+      is UsernameResResult.Success -> {
+        when (res.requestedEncryption) {
+          EncryptionType.ENFORCE_PREMIUM -> {
+            // We force velocity to handle the initiation of the "minecraft encryption protocol".
+            // User won't go any further than this event if not authenticated by velocity.
+            // todo set session cookie token ->
+            //  if the same player disconnects twice at the same handshake stage
+            //  then display "You're trying to login into a premium account..."
+            event.result = PreLoginEvent.PreLoginComponentResult.forceOnlineMode()
+          }
+          EncryptionType.NONE ->
+            event.result = PreLoginEvent.PreLoginComponentResult.forceOfflineMode()
         }
       }
-      // non premium user
-      else {
-        if (isPremiumNickname) {
-          if (correspondingPremiumProfile.name == existingUser.username.value) {
-            session.usernameState = AuthHandshakeUsernameState.USERNAME_POTENTIAL_CONFLICT
-            if (connUsername != correspondingPremiumProfile.name) {
-              event.result =
-                usernameRequiredDeniedResult(connUsername, correspondingPremiumProfile.name)
-              return
+      is UsernameResResult.Failure -> {
+        val failureReason = res.reason
+        event.result =
+          when (failureReason) {
+            is UsernameResFailureReason.NonPremiumUsernameNotIdentical -> {
+              usernameRequiredDeniedResult(connUsername, failureReason.requiredUsername)
             }
-          } else {
-            // todo refactor conflicts
-            session.usernameState = AuthHandshakeUsernameState.USERNAME_CONFLICT
-            event.result = usernameConflictDeniedResult(correspondingPremiumProfile.name)
-            return
+            is UsernameResFailureReason.PremiumUsernameNotIdentical -> {
+              premiumUsernameRequiredDeniedResult(connUsername, failureReason.requiredUsername)
+            }
+            is UsernameResFailureReason.NonPremiumWithPremiumConflict -> {
+              usernameConflictDeniedResult(failureReason.premiumUsername)
+            }
+            is UsernameResFailureReason.UsernameMigrationFailedUsernameAlreadyTaken -> {
+              usernameMigrationFailedUsernameAlreadyTakenResult(failureReason.username)
+            }
           }
-        }
-        // not a premium nickname
-        else {
-          if (connUsername != existingUser.username.value) {
-            event.result = usernameRequiredDeniedResult(connUsername, existingUser.username.value)
-            return
-          }
-        }
-      }
-    }
-    // user doesn't exist yet
-    else {
-      if (isPremiumNickname) {
-        if (connUsername != correspondingPremiumProfile.name) {
-          event.result =
-            premiumUsernameRequiredDeniedResult(connUsername, correspondingPremiumProfile.name)
-          return
-        }
       }
     }
 
-    val forcePremiumSession: Boolean
-
-    if (session.usernameState == AuthHandshakeUsernameState.PREMIUM_USERNAME_CHANGED) {
-      forcePremiumSession = true
-    } else if (isPremiumNickname) {
-      if (existingUser?.isPremium == true) {
-        forcePremiumSession = true
-      } else {
-        existingUser = userService.findUserByMojangUuid(correspondingPremiumProfile.uuid)
-        if (existingUser != null) {
-          session.usernameState = AuthHandshakeUsernameState.PREMIUM_USERNAME_CHANGED
-        }
-        forcePremiumSession = true
-      }
-    } else {
-      // even if username is not found in mojang services,
-      // then still it can be an old username with premium status
-      // that's why we do the check here
-      forcePremiumSession = existingUser?.isPremium == true
-    }
-
-    session.state =
-      if (forcePremiumSession) {
-        // We force velocity to authenticate the player and
-        // User won't go any further than this event if not authenticated by velocity
-        AuthHandshakeState.REQUIRES_ONLINE_ENCRYPTION
-      } else {
-        AuthHandshakeState.REQUIRES_CREDENTIALS
-      }
-
-    // todo create advanced auto resolution strategy
-
-    if (forcePremiumSession) {
-      // todo set session cookie token ->
-      //  if the same player disconnects twice at the same handshake stage
-      //  then display "You're trying to login into a premium account..."
-      // We force velocity to handle the initiation of the "minecraft encryption protocol".
-      // There's no point in handling this ourselves (there must be a dedicated
-      // client-side modification to make this reliable).
-      event.result = PreLoginEvent.PreLoginComponentResult.forceOnlineMode()
-    } else {
-      event.result = PreLoginEvent.PreLoginComponentResult.forceOfflineMode()
-    }
+    authHandshakeSessionService.createSession(
+      VelocityUniqueSessionId(connUsername, event.connection.remoteAddress),
+      existingUser,
+      connUsername,
+      res,
+    )
   }
 
   // event invoked after preLogin event for offline users and after preLogin + encryption protocol
@@ -181,28 +131,6 @@ constructor(
         Component.text("NavAuth: Auth session expired, please try again", TextColors.RED)
       )
       return
-    }
-
-    when (handshakeSession.usernameState) {
-      AuthHandshakeUsernameState.VALID_USERNAME -> {}
-      AuthHandshakeUsernameState.PREMIUM_USERNAME_CHANGED -> {
-        // todo do after auth:
-        //   send username changed event
-        //   migrate data
-      }
-      AuthHandshakeUsernameState.USERNAME_POTENTIAL_CONFLICT -> {
-        // todo send message about potential conflict and /premium activation
-      }
-      AuthHandshakeUsernameState.USERNAME_CONFLICT -> {
-        // if somehow player is still here then disconnect them
-        player.disconnect(
-          Component.text(
-            "NavAuth: Bad state. Username conflict in PostLogin event.",
-            TextColors.RED,
-          )
-        )
-        return
-      }
     }
 
     createAuthSession(player, handshakeSession, username)
@@ -237,16 +165,16 @@ constructor(
   ) {
     val existingUser = handshakeSession.existingUser
     val uniqueSessionId = VelocityUniqueSessionId(player)
-    if (handshakeSession.state == AuthHandshakeState.REQUIRES_ONLINE_ENCRYPTION) {
+    if (handshakeSession.requestedEncryptionType == EncryptionType.ENFORCE_PREMIUM) {
       val session = authSessionFactory.createPremiumAuthSession(player, uniqueSessionId)
-      // we are in postLogin event so we can assume
+      // we are in postLogin event, so we can assume
       // that velocity did the verification for us
       if (existingUser == null) {
         createAndStorePremiumUser(player)
       }
       session.authenticate()
       return
-    } else if (handshakeSession.state == AuthHandshakeState.REQUIRES_CREDENTIALS) {
+    } else if (handshakeSession.requestedEncryptionType == EncryptionType.NONE) {
       val session =
         if (existingUser != null) {
           authSessionFactory.createLoginAuthSession(player, uniqueSessionId, existingUser)
@@ -262,7 +190,7 @@ constructor(
       "Player {}:{} went through preLogin with bad auth state: {}",
       username,
       player.uniqueId,
-      handshakeSession.state.toString(),
+      handshakeSession.toString(),
     )
     player.disconnect(Component.text("NavAuth: Bad auth state", TextColors.RED))
   }
@@ -314,5 +242,11 @@ constructor(
         .toComponent()
 
     return PreLoginEvent.PreLoginComponentResult.denied(component)
+  }
+
+  private fun usernameMigrationFailedUsernameAlreadyTakenResult(
+    username: String
+  ): PreLoginEvent.PreLoginComponentResult {
+    TODO()
   }
 }

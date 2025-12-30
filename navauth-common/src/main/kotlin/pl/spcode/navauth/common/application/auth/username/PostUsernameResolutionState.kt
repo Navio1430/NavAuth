@@ -16,9 +16,10 @@
  *
  */
 
-package pl.spcode.navauth.common.domain.auth.handshake
+package pl.spcode.navauth.common.application.auth.username
 
-enum class AuthHandshakeState {
-  REQUIRES_ONLINE_ENCRYPTION,
-  REQUIRES_CREDENTIALS,
+enum class PostUsernameResolutionState {
+  NO_CHANGE,
+  NEW_ACCOUNT,
+  PREMIUM_USERNAME_MIGRATED,
 }

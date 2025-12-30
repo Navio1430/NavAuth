@@ -18,19 +18,27 @@
 
 package pl.spcode.navauth.common.domain.auth.handshake
 
+import pl.spcode.navauth.common.application.auth.username.PostUsernameResolutionState
 import pl.spcode.navauth.common.domain.user.User
 
 /**
- * @param existingUser user who already exists in the database
- * @param connUsername username who made the initial connection
+ * Represents a session during the authentication handshake process.
+ *
+ * @property existingUser The existing previously persisted user, or null if the user is not
+ *   registered yet.
+ * @property connUsername The connection username provided during the handshake.
+ * @property requestedEncryptionType The type of encryption requested during the handshake.
+ * @property postUsernameResolutionState Represents the state resulting from resolving the username
+ *   during the handshake process.
  */
-class AuthHandshakeSession(val existingUser: User?, val connUsername: String) {
-
-  /** current state of the handshake session */
-  var state: AuthHandshakeState = AuthHandshakeState.REQUIRES_ONLINE_ENCRYPTION
-  var usernameState: AuthHandshakeUsernameState = AuthHandshakeUsernameState.VALID_USERNAME
+class AuthHandshakeSession(
+  val existingUser: User?,
+  val connUsername: String,
+  val requestedEncryptionType: EncryptionType,
+  val postUsernameResolutionState: PostUsernameResolutionState,
+) {
 
   override fun toString(): String {
-    return "AuthHandshakeSession(connUsername='$connUsername', state=$state, usernameState=$usernameState)"
+    return "AuthHandshakeSession(existingUser=$existingUser, connUsername='$connUsername', requestedEncryptionType=$requestedEncryptionType, postUsernameResolutionState=$postUsernameResolutionState)"
   }
 }
