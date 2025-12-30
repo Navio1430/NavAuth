@@ -30,4 +30,8 @@ dependencies {
   runtimeOnly("org.postgresql:postgresql:42.7.8")
   runtimeOnly("org.xerial:sqlite-jdbc:3.51.1.0")
 
+  // tests
+  testImplementation("io.kotest:kotest-runner-junit5:5.8.0")
+  testImplementation("io.kotest:kotest-assertions-core:5.8.0")
+  testImplementation("io.mockk:mockk:1.13.8")
 }

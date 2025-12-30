@@ -22,3 +22,9 @@ fun generateRandomString(length: Int): String {
   val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
   return (1..length).map { allowedChars.random() }.joinToString("")
 }
+
+fun invertCase(str: String): String {
+  return str
+    .map { it -> if (it.isLowerCase()) it.uppercase() else if (it.isUpperCase()) it.lowercase() }
+    .joinToString()
+}
