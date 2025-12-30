@@ -21,6 +21,7 @@ package pl.spcode.navauth.common.module
 import com.google.inject.AbstractModule
 import pl.spcode.navauth.common.application.auth.handshake.AuthHandshakeSessionService
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
+import pl.spcode.navauth.common.application.auth.username.UsernameResolutionService
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
@@ -31,6 +32,8 @@ class ServicesModule : AbstractModule() {
 
   override fun configure() {
     bind(TransactionService::class.java).to(TransactionServiceImpl::class.java)
+
+    bind(UsernameResolutionService::class.java)
 
     bind(MojangProfileService::class.java)
     bind(AuthHandshakeSessionService::class.java)
