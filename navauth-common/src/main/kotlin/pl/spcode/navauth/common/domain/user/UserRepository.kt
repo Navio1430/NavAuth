@@ -28,4 +28,6 @@ interface UserRepository {
   fun findByUsernameIgnoreCase(username: String): User?
 
   fun findByMojangUuid(uuid: MojangId): User?
+
+  fun findByUserUuid(uuid: UserUuid): User?
 }

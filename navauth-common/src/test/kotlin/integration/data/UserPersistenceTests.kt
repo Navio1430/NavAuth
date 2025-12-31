@@ -28,8 +28,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.User
-import pl.spcode.navauth.common.domain.user.UserId
 import pl.spcode.navauth.common.domain.user.UserRepository
+import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.domain.user.Username
 import utils.generateRandomString
 
@@ -40,7 +40,7 @@ class UserPersistenceTests {
 
   @Test
   fun `test persisted user exists`() {
-    val id = UserId(UUID.randomUUID())
+    val id = UserUuid(UUID.randomUUID())
     val name = generateRandomString(10)
     val username = Username(name)
     val userToPersist = User.nonPremium(id, username)
@@ -49,7 +49,7 @@ class UserPersistenceTests {
     val user = userRepo.findByExactUsername(name)
 
     assertNotNull(user, "Persisted user should exist in repository")
-    assertEquals(userToPersist.id, user.id, "User ID should match")
+    assertEquals(userToPersist.uuid, user.uuid, "User ID should match")
     assertEquals(userToPersist.username, user.username, "User name should match")
     assertEquals(false, user.isPremium)
   }
@@ -62,7 +62,7 @@ class UserPersistenceTests {
 
   @Test
   fun `test findByUsername existing premium user`() {
-    val id = UserId(UUID.randomUUID())
+    val id = UserUuid(UUID.randomUUID())
     val mojangId = MojangId(UUID.randomUUID())
     val name = generateRandomString(10)
     val username = Username(name)
@@ -72,14 +72,14 @@ class UserPersistenceTests {
     val user = userRepo.findByExactUsername(name)
 
     assertNotNull(user, "User should be found by username")
-    assertEquals(userToPersist.id, user.id, "User ID should match")
+    assertEquals(userToPersist.uuid, user.uuid, "User ID should match")
     assertEquals(userToPersist.username, user.username, "User name should match")
     assertEquals(true, user.isPremium)
   }
 
   @Test
   fun `test findByUsernameLowercased with existing user`() {
-    val id = UserId(UUID.randomUUID())
+    val id = UserUuid(UUID.randomUUID())
     val mojangId = MojangId(UUID.randomUUID())
     val name = generateRandomString(10)
     val username = Username(name)
@@ -89,7 +89,7 @@ class UserPersistenceTests {
     val userLower = userRepo.findByUsernameIgnoreCase(name.lowercase())
 
     assertNotNull(userLower, "User should be found by lowercased username")
-    assertEquals(userToPersist.id, userLower.id, "User ID should match")
+    assertEquals(userToPersist.uuid, userLower.uuid, "User ID should match")
     assertEquals(userToPersist.username, userLower.username, "User name should match")
     assertEquals(true, userLower.isPremium)
   }
@@ -102,7 +102,7 @@ class UserPersistenceTests {
 
   @Test
   fun `test findByMojangUuid with existing user`() {
-    val id = UserId(UUID.randomUUID())
+    val id = UserUuid(UUID.randomUUID())
     val mojangId = MojangId(UUID.randomUUID())
     val name = generateRandomString(10)
     val username = Username(name)
@@ -112,7 +112,7 @@ class UserPersistenceTests {
     val userLower = userRepo.findByMojangUuid(mojangId)
 
     assertNotNull(userLower, "User should be found by lowercased username")
-    assertEquals(userToPersist.id, userLower.id, "User ID should match")
+    assertEquals(userToPersist.uuid, userLower.uuid, "User ID should match")
     assertEquals(userToPersist.username, userLower.username, "User name should match")
     assertEquals(true, userLower.isPremium)
   }
@@ -120,6 +120,27 @@ class UserPersistenceTests {
   @Test
   fun `test findByMojangUuid non-existent user returns null`() {
     val user = userRepo.findByMojangUuid(MojangId(UUID.randomUUID()))
+    assertNull(user)
+  }
+
+  @Test
+  fun `test findByUserUuid with existing user`() {
+    val id = UserUuid(UUID.randomUUID())
+    val mojangId = MojangId(UUID.randomUUID())
+    val name = generateRandomString(10)
+    val username = Username(name)
+    val userToPersist = User.premium(id, username, mojangId)
+    userRepo.save(userToPersist)
+
+    val foundUser = userRepo.findByUserUuid(id)
+
+    assertNotNull(foundUser)
+    assertEquals(userToPersist.uuid, foundUser.uuid)
+  }
+
+  @Test
+  fun `test findByUserUuid non-existent user returns null`() {
+    val user = userRepo.findByUserUuid(UserUuid(UUID.randomUUID()))
     assertNull(user)
   }
 }

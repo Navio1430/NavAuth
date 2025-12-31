@@ -33,7 +33,7 @@ import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 import pl.spcode.navauth.common.domain.user.User
-import pl.spcode.navauth.common.domain.user.UserId
+import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.common.infra.crypto.hasher.BCryptCredentialsHasher
 import pl.spcode.navauth.velocity.command.Permissions
@@ -70,7 +70,7 @@ constructor(
     }
 
     userService.storeUserWithCredentials(
-      User.nonPremium(UserId(sender.uniqueId), Username(sender.username)),
+      User.nonPremium(UserUuid(sender.uniqueId), Username(sender.username)),
       BCryptCredentialsHasher().hash(password),
     )
     session.authenticate()

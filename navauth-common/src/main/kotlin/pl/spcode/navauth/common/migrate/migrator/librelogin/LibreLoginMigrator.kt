@@ -94,7 +94,7 @@ constructor(
     val twoFactorEnabled = lUser.secret != null
 
     val username = usernameValidator.validate(lUser.lastNickname!!)
-    val userId = UserId(lUser.uuid!!)
+    val userUuid = UserUuid(lUser.uuid!!)
 
     // skip if the user already exists
     val existingUser = userRepository.findByUsernameIgnoreCase(lUser.lastNickname!!)
@@ -107,9 +107,9 @@ constructor(
 
     val targetUser =
       if (isPremium) {
-        User.premium(userId, username, MojangId(lUser.premiumUuid!!), twoFactorEnabled)
+        User.premium(userUuid, username, MojangId(lUser.premiumUuid!!), twoFactorEnabled)
       } else {
-        User.nonPremium(userId, username)
+        User.nonPremium(userUuid, username)
       }
 
     val hashedPassword = getHashedPassword(lUser)
@@ -122,7 +122,7 @@ constructor(
       val twoFactorSecret = lUser.secret?.let { TwoFactorSecret(it) }
       val credentials =
         UserCredentials.create(
-          userId,
+          userUuid,
           hashedPassword!!.passwordHash,
           hashedPassword.algo,
           twoFactorSecret,

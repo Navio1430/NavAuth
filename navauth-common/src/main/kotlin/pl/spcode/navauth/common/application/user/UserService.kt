@@ -27,6 +27,7 @@ import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserRepository
+import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
 
@@ -46,6 +47,14 @@ constructor(
 
   fun findUserByUsernameIgnoreCase(username: String): User? {
     return userRepository.findByUsernameIgnoreCase(username)
+  }
+
+  fun findUserByUuid(uuid: UserUuid): User? {
+    return userRepository.findByUserUuid(uuid)
+  }
+
+  fun findUserByMojangUuid(uuid: MojangId): User? {
+    return userRepository.findByMojangUuid(uuid)
   }
 
   fun storeUserWithCredentials(user: User, password: HashedPassword) {
@@ -74,7 +83,7 @@ constructor(
       val credentials = userCredentialsService.findCredentials(user)!!
       // require credentials only if there's 2FA enabled
       val requireCredentials = credentials.isTwoFactorEnabled
-      val premiumUser = User.premium(user.id, user.username, mojangId, requireCredentials)
+      val premiumUser = User.premium(user.uuid, user.username, mojangId, requireCredentials)
 
       // do not delete credentials in case a revert was requested
       userRepository.save(premiumUser)
@@ -142,9 +151,5 @@ constructor(
     val newUser = user.withNewUsername(newUsername)
     userRepository.save(newUser)
     return newUser
-  }
-
-  fun findUserByMojangUuid(uuid: MojangId): User? {
-    return userRepository.findByMojangUuid(uuid)
   }
 }

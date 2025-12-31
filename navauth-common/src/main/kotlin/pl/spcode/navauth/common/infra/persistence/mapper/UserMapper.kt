@@ -20,13 +20,13 @@ package pl.spcode.navauth.common.infra.persistence.mapper
 
 import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.User
-import pl.spcode.navauth.common.domain.user.UserId
+import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.common.infra.persistence.ormlite.user.UserRecord
 
 fun User.toRecord(): UserRecord =
   UserRecord(
-    uuid = id.value,
+    uuid = uuid.value,
     mojangUuid = mojangUuid?.value,
     username = username.value,
     usernameLowercase = username.value.lowercase(),
@@ -36,11 +36,11 @@ fun User.toRecord(): UserRecord =
 fun UserRecord.toDomain(): User =
   if (mojangUuid != null) {
     User.premium(
-      id = UserId(uuid),
+      id = UserUuid(uuid),
       username = Username(username),
       mojangUuid = MojangId(mojangUuid),
-      needsCreds = credentialsRequired,
+      requiresCredentials = credentialsRequired,
     )
   } else {
-    User.nonPremium(id = UserId(uuid), username = Username(username))
+    User.nonPremium(id = UserUuid(uuid), username = Username(username))
   }

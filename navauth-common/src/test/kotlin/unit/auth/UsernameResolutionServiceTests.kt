@@ -18,7 +18,6 @@
 
 package unit.auth
 
-import com.google.common.base.Verify.verify
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -35,7 +34,7 @@ import pl.spcode.navauth.common.domain.auth.handshake.EncryptionType
 import pl.spcode.navauth.common.domain.mojang.MojangProfile
 import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.User
-import pl.spcode.navauth.common.domain.user.UserId
+import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.domain.user.Username
 import utils.generateRandomString
 import utils.invertCase
@@ -83,7 +82,7 @@ class UsernameResolutionServiceTests :
       val premiumProfile = MojangProfile(MojangId(UUID.randomUUID()), username)
       every { mockProfileService.fetchProfileInfo(username) } returns premiumProfile
       val existingUser =
-        User.premium(UserId(premiumProfile.uuid.value), username, premiumProfile.uuid, false)
+        User.premium(UserUuid(premiumProfile.uuid.value), username, premiumProfile.uuid, false)
 
       val result = service.resolveUsernameConflicts(username, existingUser)
 
@@ -97,7 +96,7 @@ class UsernameResolutionServiceTests :
     test("existing nonpremium user same connection username returns success, none encryption") {
       val username = Username(generateRandomString(10))
       every { mockProfileService.fetchProfileInfo(username) } returns null
-      val existingUser = User.nonPremium(UserId(UUID.randomUUID()), username)
+      val existingUser = User.nonPremium(UserUuid(UUID.randomUUID()), username)
 
       val result = service.resolveUsernameConflicts(username, existingUser)
 
@@ -109,7 +108,7 @@ class UsernameResolutionServiceTests :
       val username = Username(generateRandomString(10))
       val premiumProfile = MojangProfile(MojangId(UUID.randomUUID()), username)
       every { mockProfileService.fetchProfileInfo(username) } returns premiumProfile
-      val existingUser = User.nonPremium(UserId(premiumProfile.uuid.value), username)
+      val existingUser = User.nonPremium(UserUuid(premiumProfile.uuid.value), username)
 
       val result = service.resolveUsernameConflicts(username, existingUser)
 
@@ -123,7 +122,7 @@ class UsernameResolutionServiceTests :
       val username = Username(generateRandomString(10))
       val connUsername = Username(generateRandomString(10))
       every { mockProfileService.fetchProfileInfo(connUsername) } returns null
-      val existingUser = User.nonPremium(UserId(UUID.randomUUID()), username)
+      val existingUser = User.nonPremium(UserUuid(UUID.randomUUID()), username)
 
       val result = service.resolveUsernameConflicts(connUsername, existingUser)
 
@@ -140,7 +139,7 @@ class UsernameResolutionServiceTests :
       every { mockProfileService.fetchProfileInfo(connUsername) } returns premiumProfile
       every { mockUserService.findUserByMojangUuid(MojangId(any())) } returns null
       val existingUser =
-        User.premium(UserId(UUID.randomUUID()), username, premiumProfile.uuid, false)
+        User.premium(UserUuid(UUID.randomUUID()), username, premiumProfile.uuid, false)
 
       val result = service.resolveUsernameConflicts(connUsername, existingUser)
 
@@ -166,7 +165,7 @@ class UsernameResolutionServiceTests :
     test("migrates successfully with existing premium user and different mojang username") {
       val mojangId = MojangId(UUID.randomUUID())
       val existingUser =
-        User.premium(UserId(UUID.randomUUID()), Username(generateRandomString(10)), mojangId)
+        User.premium(UserUuid(UUID.randomUUID()), Username(generateRandomString(10)), mojangId)
       val updatedUsername = Username(generateRandomString(10))
       mockMigrationSetup(mojangId, existingUser, updatedUsername)
 
@@ -185,7 +184,7 @@ class UsernameResolutionServiceTests :
     ) {
       val mojangId = MojangId(UUID.randomUUID())
       val existingUser =
-        User.premium(UserId(UUID.randomUUID()), Username(generateRandomString(10)), mojangId)
+        User.premium(UserUuid(UUID.randomUUID()), Username(generateRandomString(10)), mojangId)
       val updatedUsername = Username(invertCase(existingUser.username.value))
       mockMigrationSetup(mojangId, existingUser, updatedUsername)
 

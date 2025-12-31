@@ -19,17 +19,21 @@
 package pl.spcode.navauth.common.infra.persistence.mapper
 
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
-import pl.spcode.navauth.common.domain.user.UserId
+import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.infra.crypto.PasswordHash
 import pl.spcode.navauth.common.infra.persistence.ormlite.credentials.UserCredentialsRecord
 
 fun UserCredentialsRecord.toDomain(): UserCredentials {
   return UserCredentials.create(
-    userId = UserId(uuid),
+    userUuid = UserUuid(uuid),
     hash = PasswordHash(passwordHash),
     algo = algo,
   )
 }
 
 fun UserCredentials.toRecord(): UserCredentialsRecord =
-  UserCredentialsRecord(uuid = userId.value, passwordHash = passwordHash.value, algo = hashingAlgo)
+  UserCredentialsRecord(
+    uuid = userUuid.value,
+    passwordHash = passwordHash.value,
+    algo = hashingAlgo,
+  )
