@@ -24,7 +24,10 @@ import java.util.UUID
 
 @JvmInline value class MojangId(val value: UUID)
 
-@JvmInline value class Username(val value: String)
+@JvmInline
+value class Username(val value: String) {
+  override fun toString(): String = value
+}
 
 @ConsistentCopyVisibility
 data class User
@@ -52,8 +55,8 @@ private constructor(
     return User(this.uuid, username, this.credentialsRequired, this.mojangUuid)
   }
 
-  fun withCredentialsRequired(credentialsRequired: Boolean): User {
-    return User(this.uuid, this.username, credentialsRequired, this.mojangUuid)
+  fun toNonPremium(): User {
+    return copy(mojangUuid = null, credentialsRequired = true)
   }
 
   override fun toString(): String {
