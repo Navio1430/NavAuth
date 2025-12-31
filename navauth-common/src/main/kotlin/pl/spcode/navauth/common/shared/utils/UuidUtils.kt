@@ -96,5 +96,16 @@ class UuidUtils {
       }
       return UUID(hi, lo)
     }
+
+    fun fromString(input: String): UUID {
+      return when (input.length) {
+        32 -> from32(input)
+        36 -> UUID.fromString(input)
+        else ->
+          throw IllegalArgumentException(
+            "Invalid UUID format: expected 32 hex chars or 36 chars with dashes (8-4-4-4-12)"
+          )
+      }
+    }
   }
 }

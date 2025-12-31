@@ -20,6 +20,7 @@ package pl.spcode.navauth.velocity
 
 import com.google.inject.Inject
 import com.google.inject.Injector
+import com.google.inject.Key
 import com.google.inject.Singleton
 import com.velocitypowered.api.command.CommandSource
 import com.velocitypowered.api.event.Subscribe
@@ -33,9 +34,11 @@ import java.nio.file.Path
 import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import pl.spcode.navauth.common.command.UserArgumentResolver
 import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.config.MigrationConfig
+import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.module.DataPersistenceModule
 import pl.spcode.navauth.common.module.HttpClientModule
@@ -126,8 +129,15 @@ constructor(
 
   fun registerCommands(injector: Injector) {
     val commands = CommandsRegistry.getWithInjection(injector)
+
+    val userArgumentResolver =
+      injector.getInstance(object : Key<UserArgumentResolver<CommandSource>>() {})
+
     this.liteCommands =
-      LiteVelocityFactory.builder(this.proxyServer).commands(*commands.toTypedArray()).build()
+      LiteVelocityFactory.builder(this.proxyServer)
+        .commands(*commands.toTypedArray())
+        .argumentParser(User::class.java, userArgumentResolver)
+        .build()
   }
 
   fun registerListeners(injector: Injector) {
