@@ -26,6 +26,7 @@ My main issues were:
 - minecraft dialogs support for login/register
 - whitelist for offline players
 - password hashing algorithm auto-migration
+- protected permission groups -> no way of changing passwords etc.
 
 ## 📊 Feature Comparison
 
