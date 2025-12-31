@@ -93,8 +93,17 @@ constructor(
     }
   }
 
+  /**
+   * Migrates a premium user to a non-premium user with updated credentials. This operation
+   * ensures the user has the required credentials and updates the user's information in a transactional context.
+   *
+   * @param user The user to be migrated, which must be a premium user.
+   * @param newPassword The new hashed password to set for the user.
+   * @return The updated user with non-premium status and required credentials.
+   * @throws IllegalArgumentException if the user is already a premium user.
+   */
   fun migrateToNonPremium(user: User, newPassword: HashedPassword): User {
-    require(!user.isPremium) { "cannot migrate premium user to non-premium" }
+    require(user.isPremium) { "cannot migrate non-premium user to non-premium" }
 
     return txService.inTransaction {
       val newCredentials =
@@ -103,7 +112,7 @@ constructor(
 
       userCredentialsService.storeUserCredentials(user, newCredentials)
 
-      // make sure user
+      // make sure the user has credentials required
       val nonPremiumUser = user.withCredentialsRequired(true)
       userRepository.save(nonPremiumUser)
       return@inTransaction nonPremiumUser
