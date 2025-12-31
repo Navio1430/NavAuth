@@ -48,6 +48,8 @@ open class GeneralConfig : OkaeriConfig() {
   @Comment("Maximum number of login retries before kicking the player.")
   var maxLoginRetries: Int = 3
 
+  @Comment("Usernames config") var usernamesConfig: UsernamesConfig = UsernamesConfig()
+
   @Variable("CONFIG_VERSION")
   @Comment("Config version. DO NOT CHANGE this property!")
   var configVersion: Int = 0

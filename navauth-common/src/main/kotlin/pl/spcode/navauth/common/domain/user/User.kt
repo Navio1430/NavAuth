@@ -24,12 +24,7 @@ import java.util.UUID
 
 @JvmInline value class MojangId(val value: UUID)
 
-@JvmInline
-value class Username(val value: String) {
-  init {
-    // todo check regex
-  }
-}
+@JvmInline value class Username(val value: String)
 
 @ConsistentCopyVisibility
 data class User

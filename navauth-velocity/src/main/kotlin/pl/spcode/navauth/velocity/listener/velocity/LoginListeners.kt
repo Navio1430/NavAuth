@@ -34,6 +34,7 @@ import pl.spcode.navauth.common.application.auth.username.UsernameResFailureReas
 import pl.spcode.navauth.common.application.auth.username.UsernameResResult
 import pl.spcode.navauth.common.application.auth.username.UsernameResolutionService
 import pl.spcode.navauth.common.application.user.UserService
+import pl.spcode.navauth.common.application.validator.UsernameValidator
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeSession
 import pl.spcode.navauth.common.domain.auth.handshake.EncryptionType
@@ -50,6 +51,7 @@ class LoginListeners
 @Inject
 constructor(
   val userService: UserService,
+  val usernameValidator: UsernameValidator,
   val authHandshakeSessionService: AuthHandshakeSessionService,
   val usernameResolutionService: UsernameResolutionService,
   val authSessionFactory: VelocityAuthSessionFactory,
@@ -62,8 +64,13 @@ constructor(
   fun onPreLogin(event: PreLoginEvent) {
     if (!event.result.isAllowed) return
 
-    // todo check if user nickname matches regex
     val connUsername = event.username
+
+    if (usernameValidator.isValid(connUsername).not()) {
+      // todo send error message
+      event.result = PreLoginEvent.PreLoginComponentResult.denied(Component.text("Invalid username"))
+      return
+    }
 
     val existingUser = userService.findUserByUsernameIgnoreCase(connUsername)
 
