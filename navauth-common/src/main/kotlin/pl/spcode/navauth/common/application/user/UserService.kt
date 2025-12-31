@@ -94,8 +94,9 @@ constructor(
   }
 
   /**
-   * Migrates a premium user to a non-premium user with updated credentials. This operation
-   * ensures the user has the required credentials and updates the user's information in a transactional context.
+   * Migrates a premium user to a non-premium user with updated credentials. This operation ensures
+   * the user has the required credentials and updates the user's information in a transactional
+   * context.
    *
    * @param user The user to be migrated, which must be a premium user.
    * @param newPassword The new hashed password to set for the user.
