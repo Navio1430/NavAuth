@@ -107,15 +107,15 @@ constructor(
     require(user.isPremium) { "cannot migrate non-premium user to non-premium" }
 
     return txService.inTransaction {
-      val newCredentials =
-        userCredentialsService.findCredentials(user)?.withNewPassword(newPassword)
-          ?: UserCredentials.create(user, newPassword)
-
-      userCredentialsService.storeUserCredentials(user, newCredentials)
-
       // make sure the user has credentials required
-      val nonPremiumUser = user.withCredentialsRequired(true)
+      val nonPremiumUser = user.toNonPremium()
       userRepository.save(nonPremiumUser)
+
+      val newCredentials =
+        userCredentialsService.findCredentials(nonPremiumUser)?.withNewPassword(newPassword)
+          ?: UserCredentials.create(nonPremiumUser, newPassword)
+      userCredentialsService.storeUserCredentials(nonPremiumUser, newCredentials)
+
       return@inTransaction nonPremiumUser
     }
   }

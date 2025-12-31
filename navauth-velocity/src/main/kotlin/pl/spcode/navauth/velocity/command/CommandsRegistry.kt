@@ -20,8 +20,11 @@ package pl.spcode.navauth.velocity.command
 
 import com.google.inject.Injector
 import pl.spcode.navauth.velocity.command.admin.ForceChangePasswordAdminCommand
+import pl.spcode.navauth.velocity.command.admin.ForceCrackedAdminCommand
+import pl.spcode.navauth.velocity.command.admin.ForcePremiumAdminCommand
 import pl.spcode.navauth.velocity.command.admin.ForceUnregisterAdminCommand
 import pl.spcode.navauth.velocity.command.admin.MigrateUserDataAdminCommand
+import pl.spcode.navauth.velocity.command.admin.SwapAccountsAdminCommand
 import pl.spcode.navauth.velocity.command.root.MigrationRootCommand
 import pl.spcode.navauth.velocity.command.user.ChangePasswordCommand
 import pl.spcode.navauth.velocity.command.user.LoginCommand
@@ -43,6 +46,7 @@ class CommandsRegistry {
         // admin
         ForceUnregisterAdminCommand::class,
         ForceChangePasswordAdminCommand::class,
+        ForceCrackedAdminCommand::class,
         MigrateUserDataAdminCommand::class,
         // root (console only)
         MigrationRootCommand::class,
