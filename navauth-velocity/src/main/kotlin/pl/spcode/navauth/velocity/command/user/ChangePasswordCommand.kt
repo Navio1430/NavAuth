@@ -67,7 +67,7 @@ constructor(val userService: UserService, val userCredentialsService: UserCreden
     }
 
     val newCredentials = UserCredentials.create(user, BCryptCredentialsHasher().hash(newPassword))
-    userCredentialsService.storeUserCredentials(newCredentials)
+    userCredentialsService.storeUserCredentials(user, newCredentials)
 
     sender.sendMessage(Component.text("Success! New password set.", TextColors.GREEN))
   }

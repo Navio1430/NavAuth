@@ -65,4 +65,7 @@ private constructor(
       return UserCredentials(userUuid, hash, algo, twoFactorSecret)
     }
   }
+
+  fun withNewPassword(password: HashedPassword): UserCredentials =
+    copy(passwordHash = password.passwordHash)
 }

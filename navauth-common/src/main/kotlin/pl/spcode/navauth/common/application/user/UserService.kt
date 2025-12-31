@@ -58,14 +58,16 @@ constructor(
   }
 
   fun storeUserWithCredentials(user: User, password: HashedPassword) {
+    require(user.credentialsRequired) { "cannot store user without credentials required property" }
+
     txService.inTransaction {
       userRepository.save(user)
-      userCredentialsService.storeUserCredentials(UserCredentials.create(user, password))
+      userCredentialsService.storeUserCredentials(user, UserCredentials.create(user, password))
     }
   }
 
   fun storePremiumUser(user: User) {
-    assert(user.isPremium)
+    require(user.isPremium) { "cannot store non-premium user" }
 
     userRepository.save(user)
   }
@@ -88,6 +90,23 @@ constructor(
       // do not delete credentials in case a revert was requested
       userRepository.save(premiumUser)
       return@inTransaction premiumUser
+    }
+  }
+
+  fun migrateToNonPremium(user: User, newPassword: HashedPassword): User {
+    require(!user.isPremium) { "cannot migrate premium user to non-premium" }
+
+    return txService.inTransaction {
+      val newCredentials =
+        userCredentialsService.findCredentials(user)?.withNewPassword(newPassword)
+          ?: UserCredentials.create(user, newPassword)
+
+      userCredentialsService.storeUserCredentials(user, newCredentials)
+
+      // make sure user
+      val nonPremiumUser = user.withCredentialsRequired(true)
+      userRepository.save(nonPremiumUser)
+      return@inTransaction nonPremiumUser
     }
   }
 
