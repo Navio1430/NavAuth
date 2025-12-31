@@ -23,6 +23,7 @@ import com.j256.ormlite.dao.Dao
 import java.util.UUID
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import pl.spcode.navauth.common.application.validator.UsernameValidator
 import pl.spcode.navauth.common.config.MigrationConfig
 import pl.spcode.navauth.common.domain.common.TransactionService
 import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
@@ -47,6 +48,7 @@ class LibreLoginMigrator
 constructor(
   val userRepository: UserRepository,
   val userCredentialsRepository: UserCredentialsRepository,
+  val usernameValidator: UsernameValidator,
   val txService: TransactionService,
   migrationConfig: MigrationConfig,
   pluginDirectory: PluginDirectory,
@@ -91,7 +93,7 @@ constructor(
     val isPremium = lUser.premiumUuid != null
     val twoFactorEnabled = lUser.secret != null
 
-    val username = Username(lUser.lastNickname!!)
+    val username = usernameValidator.validate(lUser.lastNickname!!)
     val userId = UserId(lUser.uuid!!)
 
     // skip if the user already exists
