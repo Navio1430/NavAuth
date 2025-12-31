@@ -112,6 +112,10 @@ constructor(
       }
     }
 
+    if (res is UsernameResResult.Failure) {
+      return
+    }
+
     authHandshakeSessionService.createSession(
       VelocityUniqueSessionId(connUsername, event.connection.remoteAddress),
       existingUser,
