@@ -47,6 +47,7 @@ class CommandsRegistry {
         ForceUnregisterAdminCommand::class,
         ForceChangePasswordAdminCommand::class,
         ForceCrackedAdminCommand::class,
+        ForcePremiumAdminCommand::class,
         MigrateUserDataAdminCommand::class,
         // root (console only)
         MigrationRootCommand::class,
