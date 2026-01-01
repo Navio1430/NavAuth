@@ -84,20 +84,18 @@ constructor(
 
     if (existingUserIgnoreCase != null && !existingUserIgnoreCase.isPremium) {
       if (isPremiumNickname) {
-        return failure(
-          UsernameResFailureReason.NonPremiumWithPremiumConflict(
-            correspondingPremiumProfile.name.value
+        return if (existingUserIgnoreCase.username == correspondingPremiumProfile.name) {
+          success(
+            EncryptionType.NONE,
+            PostUsernameResolutionState.NONPREMIUM_WITH_SAME_PREMIUM_NICKNAME,
           )
-        )
-        //        if (correspondingPremiumProfile.name == connUsername) {
-        //          // possible premium user tries to join on the current nonpremium account
-        //        }
-        //        // conflict or possible premium migration
-        //        if (correspondingPremiumProfile.name != existingUser.username.value) {
-        //          // existing mojang account but with a different name case
-        //        } else {
-        //
-        //        }
+        } else {
+          failure(
+            UsernameResFailureReason.NonPremiumWithPremiumConflict(
+              correspondingPremiumProfile.name.value
+            )
+          )
+        }
       } else {
         if (connUsername.value != existingUserIgnoreCase.username.value) {
           return failure(

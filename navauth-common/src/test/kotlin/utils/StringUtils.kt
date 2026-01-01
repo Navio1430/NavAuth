@@ -25,6 +25,9 @@ fun generateRandomString(length: Int): String {
 
 fun invertCase(str: String): String {
   return str
-    .map { it -> if (it.isLowerCase()) it.uppercase() else if (it.isUpperCase()) it.lowercase() }
-    .joinToString()
+    .map {
+      return@map if (it.isLowerCase()) it.uppercaseChar()
+      else if (it.isUpperCase()) it.lowercaseChar() else it
+    }
+    .joinToString("")
 }
