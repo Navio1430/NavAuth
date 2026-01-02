@@ -32,10 +32,10 @@ import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.UserArgumentResolver
 import pl.spcode.navauth.common.command.UsernameOrUuidRaw
+import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.infra.crypto.hasher.BCryptCredentialsHasher
 import pl.spcode.navauth.velocity.command.Permissions
-import pl.spcode.navauth.velocity.component.TextColors
 
 @Command(name = "forcesetpassword")
 @Permission(Permissions.ADMIN_FORCE_SET_PASSWORD)

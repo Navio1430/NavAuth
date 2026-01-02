@@ -35,9 +35,9 @@ import pl.spcode.navauth.common.application.user.UsernameAlreadyTakenException
 import pl.spcode.navauth.common.application.validator.UsernameValidator
 import pl.spcode.navauth.common.command.UserArgumentResolver
 import pl.spcode.navauth.common.command.UsernameOrUuidRaw
+import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.velocity.command.Permissions
-import pl.spcode.navauth.velocity.component.TextColors
 
 @Command(name = "navauth user")
 @Permission(Permissions.ADMIN_MIGRATE_USER_DATA)

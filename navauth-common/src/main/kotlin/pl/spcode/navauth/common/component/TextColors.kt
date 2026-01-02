@@ -1,6 +1,6 @@
 /*
  * NavAuth
- * Copyright © 2025 Oliwier Fijas (Navio1430)
+ * Copyright © 2026 Oliwier Fijas (Navio1430)
  *
  * NavAuth is free software; You can redistribute it and/or modify it under the terms of:
  * the GNU Affero General Public License version 3 as published by the Free Software Foundation.
@@ -16,7 +16,7 @@
  *
  */
 
-package pl.spcode.navauth.velocity.component
+package pl.spcode.navauth.common.component
 
 import net.kyori.adventure.text.format.TextColor
 

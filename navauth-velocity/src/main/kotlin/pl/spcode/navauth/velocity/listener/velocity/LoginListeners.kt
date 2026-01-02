@@ -35,6 +35,7 @@ import pl.spcode.navauth.common.application.auth.username.UsernameResResult
 import pl.spcode.navauth.common.application.auth.username.UsernameResolutionService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.application.validator.UsernameValidator
+import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeSession
 import pl.spcode.navauth.common.domain.auth.handshake.EncryptionType
@@ -44,7 +45,6 @@ import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.velocity.application.auth.session.VelocityAuthSessionFactory
-import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 
 class LoginListeners

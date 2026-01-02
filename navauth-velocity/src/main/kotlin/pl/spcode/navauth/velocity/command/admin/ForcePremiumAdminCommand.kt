@@ -31,8 +31,8 @@ import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.UserArgumentResolver
 import pl.spcode.navauth.common.command.UsernameOrUuidRaw
+import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.velocity.command.Permissions
-import pl.spcode.navauth.velocity.component.TextColors
 
 @Command(name = "forcepremium")
 @Permission(Permissions.ADMIN_FORCE_PREMIUM)

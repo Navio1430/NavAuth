@@ -32,10 +32,10 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.UserArgumentResolver
 import pl.spcode.navauth.common.command.UsernameOrUuidRaw
+import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.infra.crypto.hasher.BCryptCredentialsHasher
 import pl.spcode.navauth.common.shared.utils.StringUtils.Companion.generateRandomString
 import pl.spcode.navauth.velocity.command.Permissions
-import pl.spcode.navauth.velocity.component.TextColors
 
 @Command(name = "forcecracked")
 @Permission(Permissions.ADMIN_FORCE_CRACKED)

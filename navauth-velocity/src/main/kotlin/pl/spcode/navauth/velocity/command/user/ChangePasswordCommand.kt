@@ -30,10 +30,10 @@ import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.user.UserService
+import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.infra.crypto.hasher.BCryptCredentialsHasher
 import pl.spcode.navauth.velocity.command.Permissions
-import pl.spcode.navauth.velocity.component.TextColors
 
 @Command(name = "changepassword")
 @Permission(Permissions.USER_CHANGE_PASSWORD)
