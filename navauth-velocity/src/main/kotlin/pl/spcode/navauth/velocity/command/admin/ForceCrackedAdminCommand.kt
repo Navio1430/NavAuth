@@ -19,7 +19,7 @@
 package pl.spcode.navauth.velocity.command.admin
 
 import com.google.inject.Inject
-import com.velocitypowered.api.proxy.Player
+import com.velocitypowered.api.command.CommandSource
 import dev.rollczi.litecommands.annotations.argument.Arg
 import dev.rollczi.litecommands.annotations.async.Async
 import dev.rollczi.litecommands.annotations.command.Command
@@ -46,7 +46,7 @@ constructor(val userService: UserService, val userArgumentResolver: UserArgument
   @Execute
   @Async
   fun forceCrackedMode(
-    @Context sender: Player,
+    @Context sender: CommandSource,
     @Arg(value = "username|uuid") usernameOrUuidRaw: UsernameOrUuidRaw,
     @Arg(value = "newPassword") newPasswordOpt: Optional<String>,
   ) {

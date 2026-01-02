@@ -19,7 +19,7 @@
 package pl.spcode.navauth.velocity.command.admin
 
 import com.google.inject.Inject
-import com.velocitypowered.api.proxy.Player
+import com.velocitypowered.api.command.CommandSource
 import dev.rollczi.litecommands.annotations.argument.Arg
 import dev.rollczi.litecommands.annotations.async.Async
 import dev.rollczi.litecommands.annotations.command.Command
@@ -30,6 +30,8 @@ import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.user.UserService
+import pl.spcode.navauth.common.command.UserArgumentResolver
+import pl.spcode.navauth.common.command.UsernameOrUuidRaw
 import pl.spcode.navauth.velocity.command.Permissions
 import pl.spcode.navauth.velocity.component.TextColors
 
@@ -37,20 +39,22 @@ import pl.spcode.navauth.velocity.component.TextColors
 @Permission(Permissions.ADMIN_FORCE_UNREGISTER)
 class ForceUnregisterAdminCommand
 @Inject
-constructor(val userService: UserService, val userCredentialsService: UserCredentialsService) {
+constructor(
+  val userService: UserService,
+  val userCredentialsService: UserCredentialsService,
+  val userArgumentResolver: UserArgumentResolver,
+) {
 
   @Async
   @Execute
   @Description(
     "Force unregister specified user. Works like unregister command, but doesn't require password."
   )
-  fun forceUnregister(@Context sender: Player, @Arg(value = "playerName") playerName: String) {
-    val user = userService.findUserByUsernameIgnoreCase(playerName.lowercase())
-
-    if (user == null) {
-      sender.sendMessage(Component.text("User '${playerName}' not found.", TextColors.RED))
-      return
-    }
+  fun forceUnregister(
+    @Context sender: CommandSource,
+    @Arg(value = "username|uuid") usernameOrUuidRaw: UsernameOrUuidRaw,
+  ) {
+    val user = userArgumentResolver.resolve(usernameOrUuidRaw)
 
     if (user.isPremium) {
       sender.sendMessage(

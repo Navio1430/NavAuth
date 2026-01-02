@@ -19,7 +19,7 @@
 package pl.spcode.navauth.velocity.command.admin
 
 import com.google.inject.Inject
-import com.velocitypowered.api.proxy.Player
+import com.velocitypowered.api.command.CommandSource
 import dev.rollczi.litecommands.annotations.argument.Arg
 import dev.rollczi.litecommands.annotations.async.Async
 import dev.rollczi.litecommands.annotations.command.Command
@@ -29,7 +29,8 @@ import dev.rollczi.litecommands.annotations.permission.Permission
 import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
-import pl.spcode.navauth.common.domain.user.User
+import pl.spcode.navauth.common.command.UserArgumentResolver
+import pl.spcode.navauth.common.command.UsernameOrUuidRaw
 import pl.spcode.navauth.velocity.command.Permissions
 import pl.spcode.navauth.velocity.component.TextColors
 
@@ -37,11 +38,19 @@ import pl.spcode.navauth.velocity.component.TextColors
 @Permission(Permissions.ADMIN_FORCE_PREMIUM)
 class ForcePremiumAdminCommand
 @Inject
-constructor(val userService: UserService, val profileService: MojangProfileService) {
+constructor(
+  val userService: UserService,
+  val profileService: MojangProfileService,
+  val userArgumentResolver: UserArgumentResolver,
+) {
 
   @Execute
   @Async
-  fun forcePremiumMode(@Context sender: Player, @Arg(value = "username|uuid") user: User) {
+  fun forcePremiumMode(
+    @Context sender: CommandSource,
+    @Arg(value = "username|uuid") usernameOrUuidRaw: UsernameOrUuidRaw,
+  ) {
+    val user = userArgumentResolver.resolve(usernameOrUuidRaw)
 
     if (user.isPremium) {
       sender.sendMessage(Component.text("User is already premium.", TextColors.RED))
