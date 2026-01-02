@@ -23,6 +23,7 @@ import dev.rollczi.litecommands.handler.result.ResultHandlerChain
 import dev.rollczi.litecommands.invocation.Invocation
 import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.component.AudienceProvider
+import pl.spcode.navauth.common.component.TextColors
 
 class UserResolveExceptionHandler<SENDER> constructor(val audienceProvider: AudienceProvider) :
   ExceptionHandler<SENDER, UserResolveException> {
@@ -35,13 +36,13 @@ class UserResolveExceptionHandler<SENDER> constructor(val audienceProvider: Audi
     val audience = audienceProvider.getAudience(invocation)
     when (exception) {
       is UserResolveException.InvalidUuid -> {
-        audience.sendMessage(Component.text("UUID '${exception.uuid}' is not valid"))
+        audience.sendMessage(Component.text("UUID '${exception.uuid}' is not valid", TextColors.RED))
       }
       is UserResolveException.UsernameNotFound -> {
-        audience.sendMessage(Component.text("User '${exception.username}' not found"))
+        audience.sendMessage(Component.text("User '${exception.username}' not found", TextColors.RED))
       }
       is UserResolveException.UuidNotFound -> {
-        audience.sendMessage(Component.text("User with '${exception.uuid}' UUID not found"))
+        audience.sendMessage(Component.text("User with '${exception.uuid}' UUID not found", TextColors.RED))
       }
     }
   }
