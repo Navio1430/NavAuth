@@ -1,6 +1,6 @@
 /*
  * NavAuth
- * Copyright © 2025 Oliwier Fijas (Navio1430)
+ * Copyright © 2026 Oliwier Fijas (Navio1430)
  *
  * NavAuth is free software; You can redistribute it and/or modify it under the terms of:
  * the GNU Affero General Public License version 3 as published by the Free Software Foundation.
@@ -19,12 +19,6 @@
 package pl.spcode.navauth.common.command
 
 import com.google.inject.Inject
-import dev.rollczi.litecommands.argument.Argument
-import dev.rollczi.litecommands.argument.parser.ParseResult
-import dev.rollczi.litecommands.argument.resolver.ArgumentResolver
-import dev.rollczi.litecommands.invocation.Invocation
-import dev.rollczi.litecommands.suggestion.SuggestionContext
-import dev.rollczi.litecommands.suggestion.SuggestionResult
 import java.util.UUID
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.application.validator.UsernameValidator
@@ -32,40 +26,36 @@ import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.shared.utils.UuidUtils
 
-class UserArgumentResolver<SENDER>
+class UserArgumentResolver
 @Inject
-constructor(val userService: UserService, val usernameValidator: UsernameValidator) :
-  ArgumentResolver<SENDER, User>() {
+constructor(val userService: UserService, val usernameValidator: UsernameValidator) {
 
-  override fun parse(
-    invocation: Invocation<SENDER>,
-    context: Argument<User>,
-    argument: String,
-  ): ParseResult<User> {
-
-    val user =
-      when (usernameValidator.isValid(argument)) {
-        true -> userService.findUserByUsernameIgnoreCase(argument)
-        false -> {
-          val uuid: UUID
-          try {
-            uuid = UuidUtils.fromString(argument)
-          } catch (e: Exception) {
-            return ParseResult.failure("Invalid UUID format")
-          }
-
-          userService.findUserByUuid(UserUuid(uuid))
-        }
+  /**
+   * Resolves a user based on the provided username or UUID.
+   *
+   * @param usernameOrUuid the username or UUID string to resolve the user for
+   * @return the resolved User object
+   * @throws UserResolveException.UsernameNotFound if the username is not found
+   * @throws UserResolveException.UuidNotFound if the UUID is not found
+   * @throws UserResolveException.InvalidUuid if the input string is not a valid UUID
+   */
+  fun resolve(usernameOrUuid: UsernameOrUuidRaw): User {
+    val raw = usernameOrUuid.value
+    return when (usernameValidator.isValid(raw)) {
+      true -> {
+        userService.findUserByUsernameIgnoreCase(raw)
+          ?: throw UserResolveException.UsernameNotFound(raw)
       }
+      false -> {
+        val uuid: UUID
+        try {
+          uuid = UuidUtils.fromString(raw)
+        } catch (e: Exception) {
+          throw UserResolveException.InvalidUuid(raw)
+        }
 
-    return if (user != null) ParseResult.success(user) else ParseResult.failure("User not found")
-  }
-
-  override fun suggest(
-    invocation: Invocation<SENDER>,
-    argument: Argument<User>,
-    context: SuggestionContext,
-  ): SuggestionResult {
-    return SuggestionResult.empty()
+        userService.findUserByUuid(UserUuid(uuid)) ?: throw UserResolveException.UuidNotFound(raw)
+      }
+    }
   }
 }

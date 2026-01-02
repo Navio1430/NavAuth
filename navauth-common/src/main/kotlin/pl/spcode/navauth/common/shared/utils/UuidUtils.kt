@@ -22,6 +22,12 @@ import java.util.UUID
 
 class UuidUtils {
   companion object {
+
+    val UUID_REGEX =
+      Regex(
+        "^(?:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|[0-9a-fA-F]{32})$"
+      )
+
     fun from32(noHyphensId: String): UUID {
       if (noHyphensId.length != 32) {
         throw NumberFormatException("UUID has to be 32 char with no hyphens")

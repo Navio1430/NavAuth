@@ -30,7 +30,8 @@ import java.util.Optional
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import pl.spcode.navauth.common.application.user.UserService
-import pl.spcode.navauth.common.domain.user.User
+import pl.spcode.navauth.common.command.UserArgumentResolver
+import pl.spcode.navauth.common.command.UsernameOrUuidRaw
 import pl.spcode.navauth.common.infra.crypto.hasher.BCryptCredentialsHasher
 import pl.spcode.navauth.common.shared.utils.StringUtils.Companion.generateRandomString
 import pl.spcode.navauth.velocity.command.Permissions
@@ -38,15 +39,18 @@ import pl.spcode.navauth.velocity.component.TextColors
 
 @Command(name = "forcecracked")
 @Permission(Permissions.ADMIN_FORCE_CRACKED)
-class ForceCrackedAdminCommand @Inject constructor(val userService: UserService) {
+class ForceCrackedAdminCommand
+@Inject
+constructor(val userService: UserService, val userArgumentResolver: UserArgumentResolver) {
 
   @Execute
   @Async
   fun forceCrackedMode(
     @Context sender: Player,
-    @Arg(value = "username|uuid") user: User,
+    @Arg(value = "username|uuid") usernameOrUuidRaw: UsernameOrUuidRaw,
     @Arg(value = "newPassword") newPasswordOpt: Optional<String>,
   ) {
+    val user = userArgumentResolver.resolve(usernameOrUuidRaw)
 
     if (!user.isPremium) {
       sender.sendMessage(
