@@ -46,7 +46,12 @@ constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
 
   @Async
   @Execute(name = "login")
-  @Description("Manual login command for non-premium players")
+  @Description(
+      "Logs in into account using password (and 2FA code if set).",
+      "Password parameter is always required (check `/2fa` command which is responsible for 2FA code only).",
+      "If you want to disable this command for specific group, then set ",
+      "their `${Permissions.USER_LOGIN}` permission value to **FALSE**."
+  )
   fun login(
     @Context sender: Player,
     @Arg(value = "password") password: String,
@@ -84,6 +89,12 @@ constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
 
   @Async
   @Execute(name = "2fa")
+  @Description(
+      "Logs in into account using 2FA code.",
+      "Works only if user account has TOTP2FA code set as the only one required to authenticate.",
+      "If you want to disable this command for specific group, then set ",
+      "their `${Permissions.USER_LOGIN}` permission value to **FALSE**."
+  )
   fun loginViaTwoFactor(@Context sender: Player, @Arg(value = "code") code: String) {
     // if permission is set explicitly to FALSE
     if (sender.getPermissionValue(Permissions.USER_LOGIN) == Tristate.FALSE) {

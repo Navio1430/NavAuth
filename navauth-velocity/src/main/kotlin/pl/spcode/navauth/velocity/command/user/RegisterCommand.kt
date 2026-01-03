@@ -56,7 +56,7 @@ constructor(
     "Creates a new account with specified password.",
     "Applicable only for non-premium players.",
     "If you want to disable this command for specific group, then set ",
-    "their '**${Permissions.USER_REGISTER}**' permission value to **FALSE**.",
+    "their `${Permissions.USER_REGISTER}` permission value to **FALSE**.",
   )
   fun register(
     @Context sender: Player,
