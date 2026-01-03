@@ -63,7 +63,7 @@ constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
 
     val uniqueSessionId = VelocityUniqueSessionId(sender)
     val session = authSessionService.findSession(uniqueSessionId)
-    if (session?.getSessionType() != AuthSessionType.LOGIN) {
+    if (session?.getSessionType() != AuthSessionType.LOGIN || session.isAuthenticated) {
       sender.sendMessage(Component.text("Can't use this command right now.", TextColors.RED))
       return
     }

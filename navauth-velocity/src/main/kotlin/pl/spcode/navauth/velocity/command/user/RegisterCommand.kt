@@ -73,13 +73,13 @@ constructor(
     }
 
     val session = authSessionService.findSession(VelocityUniqueSessionId(sender))
-    if (session?.getSessionType() != AuthSessionType.REGISTER) {
+    if (session?.getSessionType() != AuthSessionType.REGISTER || session.isAuthenticated) {
       sender.sendMessage(Component.text("Can't use this command right now.", TextColors.RED))
       return
     }
 
     if (password != repeatPassword) {
-      // todo send error message
+      sender.sendMessage(Component.text("Both passwords must match.", TextColors.RED))
       return
     }
 
@@ -90,6 +90,5 @@ constructor(
     session.authenticate()
 
     sender.sendMessage(Component.text("Account created", TextColor.color(0, 200, 0)))
-    // todo move player to lobby
   }
 }
