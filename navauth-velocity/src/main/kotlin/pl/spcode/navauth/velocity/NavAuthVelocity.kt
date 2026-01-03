@@ -20,6 +20,7 @@ package pl.spcode.navauth.velocity
 
 import com.google.inject.Inject
 import com.google.inject.Injector
+import com.google.inject.Key
 import com.google.inject.Singleton
 import com.velocitypowered.api.command.CommandSource
 import com.velocitypowered.api.event.Subscribe
@@ -33,6 +34,10 @@ import java.nio.file.Path
 import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import pl.spcode.navauth.common.command.UserResolveException
+import pl.spcode.navauth.common.command.UserResolveExceptionHandler
+import pl.spcode.navauth.common.command.UsernameOrUuidParser
+import pl.spcode.navauth.common.command.UsernameOrUuidRaw
 import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.config.MigrationConfig
@@ -44,6 +49,7 @@ import pl.spcode.navauth.common.module.PluginDirectoryModule
 import pl.spcode.navauth.common.module.ServicesModule
 import pl.spcode.navauth.common.module.YamlConfigModule
 import pl.spcode.navauth.velocity.command.CommandsRegistry
+import pl.spcode.navauth.velocity.component.VelocityAudienceProvider
 import pl.spcode.navauth.velocity.listener.VelocityListenersRegistry
 import pl.spcode.navauth.velocity.module.SchedulerModule
 import pl.spcode.navauth.velocity.module.VelocityMultificationsModule
@@ -126,8 +132,19 @@ constructor(
 
   fun registerCommands(injector: Injector) {
     val commands = CommandsRegistry.getWithInjection(injector)
+
+    val userArgumentParser =
+      injector.getInstance(object : Key<UsernameOrUuidParser<CommandSource>>() {})
+
     this.liteCommands =
-      LiteVelocityFactory.builder(this.proxyServer).commands(*commands.toTypedArray()).build()
+      LiteVelocityFactory.builder(this.proxyServer)
+        .commands(*commands.toTypedArray())
+        .argumentParser(UsernameOrUuidRaw::class.java, userArgumentParser)
+        .exception(
+          UserResolveException::class.java,
+          UserResolveExceptionHandler(VelocityAudienceProvider(proxyServer)),
+        )
+        .build()
   }
 
   fun registerListeners(injector: Injector) {

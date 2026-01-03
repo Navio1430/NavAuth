@@ -41,11 +41,11 @@ class UserCredentialsRepositoryImpl @Inject constructor(databaseManager: Databas
   }
 
   override fun findByUser(user: User): UserCredentials? {
-    val query = queryBuilder().where().eq("uuid", user.id.value)
+    val query = queryBuilder().where().eq("uuid", user.uuid.value)
     return dao().queryForFirst(query.prepare())?.toDomain()
   }
 
   override fun deleteByUser(user: User) {
-    dao().deleteById(user.id.value)
+    dao().deleteById(user.uuid.value)
   }
 }

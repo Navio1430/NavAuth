@@ -31,13 +31,13 @@ import net.kyori.adventure.text.format.TextColor
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.user.UserService
+import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 import pl.spcode.navauth.common.domain.user.User
-import pl.spcode.navauth.common.domain.user.UserId
+import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.common.infra.crypto.hasher.BCryptCredentialsHasher
 import pl.spcode.navauth.velocity.command.Permissions
-import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 
@@ -70,7 +70,7 @@ constructor(
     }
 
     userService.storeUserWithCredentials(
-      User.nonPremium(UserId(sender.uniqueId), Username(sender.username)),
+      User.nonPremium(UserUuid(sender.uniqueId), Username(sender.username)),
       BCryptCredentialsHasher().hash(password),
     )
     session.authenticate()

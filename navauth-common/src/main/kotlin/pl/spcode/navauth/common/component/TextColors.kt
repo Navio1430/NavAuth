@@ -1,6 +1,6 @@
 /*
  * NavAuth
- * Copyright © 2025 Oliwier Fijas (Navio1430)
+ * Copyright © 2026 Oliwier Fijas (Navio1430)
  *
  * NavAuth is free software; You can redistribute it and/or modify it under the terms of:
  * the GNU Affero General Public License version 3 as published by the Free Software Foundation.
@@ -16,18 +16,13 @@
  *
  */
 
-package utils
+package pl.spcode.navauth.common.component
 
-fun generateRandomString(length: Int): String {
-  val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
-  return (1..length).map { allowedChars.random() }.joinToString("")
-}
+import net.kyori.adventure.text.format.TextColor
 
-fun invertCase(str: String): String {
-  return str
-    .map {
-      return@map if (it.isLowerCase()) it.uppercaseChar()
-      else if (it.isUpperCase()) it.lowercaseChar() else it
-    }
-    .joinToString("")
+class TextColors {
+  companion object {
+    val RED = TextColor.color(242, 55, 41)
+    val GREEN = TextColor.color(0, 200, 0)
+  }
 }

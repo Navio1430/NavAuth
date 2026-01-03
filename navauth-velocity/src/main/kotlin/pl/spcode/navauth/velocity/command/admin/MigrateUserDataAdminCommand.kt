@@ -32,9 +32,12 @@ import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.application.user.UsernameAlreadyTakenException
+import pl.spcode.navauth.common.application.validator.UsernameValidator
+import pl.spcode.navauth.common.command.UserArgumentResolver
+import pl.spcode.navauth.common.command.UsernameOrUuidRaw
+import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.velocity.command.Permissions
-import pl.spcode.navauth.velocity.component.TextColors
 
 @Command(name = "navauth user")
 @Permission(Permissions.ADMIN_MIGRATE_USER_DATA)
@@ -44,6 +47,8 @@ constructor(
   val proxyServer: ProxyServer,
   val userService: UserService,
   val profileService: MojangProfileService,
+  val userArgumentResolver: UserArgumentResolver,
+  val usernameValidator: UsernameValidator,
 ) {
 
   @Async
@@ -51,15 +56,10 @@ constructor(
   @Description()
   fun migrateUserData(
     @Context sender: Player,
-    // todo add player argument resolver from player name and uuid
-    @Arg(value = "playerName") playerName: String,
-    @Arg(value = "newUsername") newUsername: String,
+    @Arg(value = "username|uuid") usernameOrUuidRaw: UsernameOrUuidRaw,
+    @Arg(value = "newAccountUsername") newUsername: String,
   ) {
-    val user = userService.findUserByUsernameIgnoreCase(playerName)
-    if (user == null) {
-      sender.sendMessage(Component.text("User '${playerName}' not found.", TextColors.RED))
-      return
-    }
+    val user = userArgumentResolver.resolve(usernameOrUuidRaw)
 
     if (user.isPremium) {
       sender.sendMessage(
@@ -67,6 +67,13 @@ constructor(
           "Can't execute the command! Account '${user.username}' is set to premium mode. Use /navauth forcecracked command first.",
           TextColors.RED,
         )
+      )
+      return
+    }
+
+    if (!usernameValidator.isValid(newUsername)) {
+      sender.sendMessage(
+        Component.text("Provided username '${newUsername}' is invalid.", TextColors.RED)
       )
       return
     }
@@ -82,8 +89,6 @@ constructor(
       return
     }
 
-    // todo validate username
-
     try {
       userService.migrateData(user, Username(newUsername))
     } catch (e: UsernameAlreadyTakenException) {
@@ -98,7 +103,7 @@ constructor(
 
     // todo send api event
 
-    proxyServer.getPlayer(playerName).ifPresent {
+    proxyServer.getPlayer(user.username.value).ifPresent {
       it.disconnect(
         Component.text("Your account data has been migrated to '${newUsername}'.", TextColors.GREEN)
       )

@@ -27,6 +27,7 @@ import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserRepository
+import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
 
@@ -48,15 +49,25 @@ constructor(
     return userRepository.findByUsernameIgnoreCase(username)
   }
 
+  fun findUserByUuid(uuid: UserUuid): User? {
+    return userRepository.findByUserUuid(uuid)
+  }
+
+  fun findUserByMojangUuid(uuid: MojangId): User? {
+    return userRepository.findByMojangUuid(uuid)
+  }
+
   fun storeUserWithCredentials(user: User, password: HashedPassword) {
+    require(user.credentialsRequired) { "cannot store user without credentials required property" }
+
     txService.inTransaction {
       userRepository.save(user)
-      userCredentialsService.storeUserCredentials(UserCredentials.create(user, password))
+      userCredentialsService.storeUserCredentials(user, UserCredentials.create(user, password))
     }
   }
 
   fun storePremiumUser(user: User) {
-    assert(user.isPremium)
+    require(user.isPremium) { "cannot store non-premium user" }
 
     userRepository.save(user)
   }
@@ -74,11 +85,38 @@ constructor(
       val credentials = userCredentialsService.findCredentials(user)!!
       // require credentials only if there's 2FA enabled
       val requireCredentials = credentials.isTwoFactorEnabled
-      val premiumUser = User.premium(user.id, user.username, mojangId, requireCredentials)
+      val premiumUser = User.premium(user.uuid, user.username, mojangId, requireCredentials)
 
       // do not delete credentials in case a revert was requested
       userRepository.save(premiumUser)
       return@inTransaction premiumUser
+    }
+  }
+
+  /**
+   * Migrates a premium user to a non-premium user with updated credentials. This operation ensures
+   * the user has the required credentials and updates the user's information in a transactional
+   * context.
+   *
+   * @param user The user to be migrated, which must be a premium user.
+   * @param newPassword The new hashed password to set for the user.
+   * @return The updated user with non-premium status and required credentials.
+   * @throws IllegalArgumentException if the user is already a premium user.
+   */
+  fun migrateToNonPremium(user: User, newPassword: HashedPassword): User {
+    require(user.isPremium) { "cannot migrate non-premium user to non-premium" }
+
+    return txService.inTransaction {
+      // make sure the user has credentials required
+      val nonPremiumUser = user.toNonPremium()
+      userRepository.save(nonPremiumUser)
+
+      val newCredentials =
+        userCredentialsService.findCredentials(nonPremiumUser)?.withNewPassword(newPassword)
+          ?: UserCredentials.create(nonPremiumUser, newPassword)
+      userCredentialsService.storeUserCredentials(nonPremiumUser, newCredentials)
+
+      return@inTransaction nonPremiumUser
     }
   }
 
@@ -142,9 +180,5 @@ constructor(
     val newUser = user.withNewUsername(newUsername)
     userRepository.save(newUser)
     return newUser
-  }
-
-  fun findUserByMojangUuid(uuid: MojangId): User? {
-    return userRepository.findByMojangUuid(uuid)
   }
 }

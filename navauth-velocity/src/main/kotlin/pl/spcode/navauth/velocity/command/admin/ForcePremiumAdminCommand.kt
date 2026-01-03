@@ -27,54 +27,53 @@ import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
 import net.kyori.adventure.text.Component
-import pl.spcode.navauth.common.annotation.Description
-import pl.spcode.navauth.common.application.credentials.UserCredentialsService
+import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.UserArgumentResolver
 import pl.spcode.navauth.common.command.UsernameOrUuidRaw
 import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.velocity.command.Permissions
 
-@Command(name = "forceunregister")
-@Permission(Permissions.ADMIN_FORCE_UNREGISTER)
-class ForceUnregisterAdminCommand
+@Command(name = "forcepremium")
+@Permission(Permissions.ADMIN_FORCE_PREMIUM)
+class ForcePremiumAdminCommand
 @Inject
 constructor(
   val userService: UserService,
-  val userCredentialsService: UserCredentialsService,
+  val profileService: MojangProfileService,
   val userArgumentResolver: UserArgumentResolver,
 ) {
 
-  @Async
   @Execute
-  @Description(
-    "Force unregister specified user. Works like unregister command, but doesn't require password."
-  )
-  fun forceUnregister(
+  @Async
+  fun forcePremiumMode(
     @Context sender: CommandSource,
     @Arg(value = "username|uuid") usernameOrUuidRaw: UsernameOrUuidRaw,
   ) {
     val user = userArgumentResolver.resolve(usernameOrUuidRaw)
 
     if (user.isPremium) {
+      sender.sendMessage(Component.text("User is already premium.", TextColors.RED))
+      return
+    }
+
+    val profile = profileService.fetchProfileInfo(user.username)
+    if (profile == null) {
       sender.sendMessage(
         Component.text(
-          "Can't execute the command! Account '${user.username}' is set to premium mode.",
+          "Can't find '${user.username}' user in Mojang database. This player can't be migrated to premium mode.",
           TextColors.RED,
         )
       )
       return
     }
 
-    val userCredentials = userCredentialsService.findCredentials(user)
-    if (userCredentials == null) {
-      sender.sendMessage(Component.text("User is already unregistered.", TextColors.RED))
-      return
-    }
-
-    userCredentialsService.deleteUserCredentials(user)
+    userService.migrateToPremium(user, profile.uuid)
     sender.sendMessage(
-      Component.text("Success! User '${user.username}' credentials deleted.", TextColors.GREEN)
+      Component.text(
+        "User '${user.username}' successfully migrated to premium mode.",
+        TextColors.GREEN,
+      )
     )
   }
 }

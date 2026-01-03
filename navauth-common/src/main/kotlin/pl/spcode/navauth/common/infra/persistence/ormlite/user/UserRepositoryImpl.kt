@@ -24,6 +24,7 @@ import java.util.UUID
 import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserRepository
+import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.infra.persistence.mapper.toDomain
 import pl.spcode.navauth.common.infra.persistence.mapper.toRecord
@@ -48,6 +49,11 @@ class UserRepositoryImpl @Inject constructor(databaseManager: DatabaseManager) :
 
   override fun findByMojangUuid(uuid: MojangId): User? {
     val query = queryBuilder().where().eq("mojang_uuid", uuid.value)
+    return dao().queryForFirst(query.prepare())?.toDomain()
+  }
+
+  override fun findByUserUuid(uuid: UserUuid): User? {
+    val query = queryBuilder().where().eq("uuid", uuid.value)
     return dao().queryForFirst(query.prepare())?.toDomain()
   }
 }

@@ -29,10 +29,10 @@ import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
+import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionState
 import pl.spcode.navauth.velocity.application.server.ServerNotFoundException
 import pl.spcode.navauth.velocity.application.server.VelocityServerSelectionService
-import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 

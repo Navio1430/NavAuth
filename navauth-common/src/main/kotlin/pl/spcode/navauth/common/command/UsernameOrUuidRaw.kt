@@ -1,6 +1,6 @@
 /*
  * NavAuth
- * Copyright © 2025 Oliwier Fijas (Navio1430)
+ * Copyright © 2026 Oliwier Fijas (Navio1430)
  *
  * NavAuth is free software; You can redistribute it and/or modify it under the terms of:
  * the GNU Affero General Public License version 3 as published by the Free Software Foundation.
@@ -16,13 +16,6 @@
  *
  */
 
-package pl.spcode.navauth.velocity.component
+package pl.spcode.navauth.common.command
 
-import net.kyori.adventure.text.format.TextColor
-
-class TextColors {
-  companion object {
-    val RED = TextColor.color(242, 55, 41)
-    val GREEN = TextColor.color(0, 200, 0)
-  }
-}
+data class UsernameOrUuidRaw(val value: String)

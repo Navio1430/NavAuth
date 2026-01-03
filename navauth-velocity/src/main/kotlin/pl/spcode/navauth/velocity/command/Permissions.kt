@@ -32,6 +32,8 @@ class Permissions {
     const val ADMIN_BASE = "$BASE.admin"
     const val ADMIN_FORCE_UNREGISTER = "$ADMIN_BASE.forceunregister"
     const val ADMIN_FORCE_SET_PASSWORD = "$ADMIN_BASE.forcesetpassword"
+    const val ADMIN_FORCE_CRACKED = "$ADMIN_BASE.forcecracked"
+    const val ADMIN_FORCE_PREMIUM = "$ADMIN_BASE.forcepremium"
     const val ADMIN_MIGRATE_USER_DATA = "$ADMIN_BASE.migrateuserdata"
   }
 }

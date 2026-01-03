@@ -30,6 +30,10 @@ dependencies {
   runtimeOnly("org.postgresql:postgresql:42.7.8")
   runtimeOnly("org.xerial:sqlite-jdbc:3.51.1.0")
 
+  // litecommands core (compileOnly because it is platform-dependent)
+  // todo add litecommands version to versions.toml for full compatibility across modules
+  compileOnly("dev.rollczi:litecommands-core:3.10.6")
+
   // tests
   testImplementation("io.kotest:kotest-runner-junit5:5.8.0")
   testImplementation("io.kotest:kotest-assertions-core:5.8.0")

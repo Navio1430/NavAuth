@@ -1,6 +1,6 @@
 /*
  * NavAuth
- * Copyright © 2025 Oliwier Fijas (Navio1430)
+ * Copyright © 2026 Oliwier Fijas (Navio1430)
  *
  * NavAuth is free software; You can redistribute it and/or modify it under the terms of:
  * the GNU Affero General Public License version 3 as published by the Free Software Foundation.
@@ -16,18 +16,12 @@
  *
  */
 
-package utils
+package pl.spcode.navauth.common.command
 
-fun generateRandomString(length: Int): String {
-  val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
-  return (1..length).map { allowedChars.random() }.joinToString("")
-}
+sealed class UserResolveException : Exception() {
+  data class UsernameNotFound(val username: String) : UserResolveException()
 
-fun invertCase(str: String): String {
-  return str
-    .map {
-      return@map if (it.isLowerCase()) it.uppercaseChar()
-      else if (it.isUpperCase()) it.lowercaseChar() else it
-    }
-    .joinToString("")
+  data class UuidNotFound(val uuid: String) : UserResolveException()
+
+  data class InvalidUuid(val uuid: String) : UserResolveException()
 }

@@ -35,16 +35,16 @@ import pl.spcode.navauth.common.application.auth.username.UsernameResResult
 import pl.spcode.navauth.common.application.auth.username.UsernameResolutionService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.application.validator.UsernameValidator
+import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeSession
 import pl.spcode.navauth.common.domain.auth.handshake.EncryptionType
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionState
 import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.User
-import pl.spcode.navauth.common.domain.user.UserId
+import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.velocity.application.auth.session.VelocityAuthSessionFactory
-import pl.spcode.navauth.velocity.component.TextColors
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 
 class LoginListeners
@@ -68,7 +68,8 @@ constructor(
 
     if (usernameValidator.isValid(connUsername).not()) {
       // todo send error message
-      event.result = PreLoginEvent.PreLoginComponentResult.denied(Component.text("Invalid username"))
+      event.result =
+        PreLoginEvent.PreLoginComponentResult.denied(Component.text("Invalid username"))
       return
     }
 
@@ -109,6 +110,10 @@ constructor(
             }
           }
       }
+    }
+
+    if (res is UsernameResResult.Failure) {
+      return
     }
 
     authHandshakeSessionService.createSession(
@@ -154,7 +159,7 @@ constructor(
     val profile: GameProfile
     if (session.existingUser != null) {
       val user = session.existingUser!!
-      profile = GameProfile(user.id.value, user.username.value, event.originalProfile.properties)
+      profile = GameProfile(user.uuid.value, user.username.value, event.originalProfile.properties)
     } else {
       profile = event.originalProfile
     }
@@ -204,7 +209,7 @@ constructor(
 
   private fun createAndStorePremiumUser(player: Player) {
     val premiumUser =
-      User.premium(UserId(player.uniqueId), Username(player.username), MojangId(player.uniqueId))
+      User.premium(UserUuid(player.uniqueId), Username(player.username), MojangId(player.uniqueId))
     userService.storePremiumUser(premiumUser)
   }
 

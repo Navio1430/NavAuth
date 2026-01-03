@@ -38,7 +38,14 @@ constructor(val credentialsRepository: UserCredentialsRepository) {
     return credentialsRepository.findByUser(user)
   }
 
-  fun storeUserCredentials(userCredentials: UserCredentials) {
+  fun storeUserCredentials(user: User, userCredentials: UserCredentials) {
+    require(userCredentials.userUuid == user.uuid) {
+      "provided credentials do not belong to the provided user"
+    }
+    require(user.credentialsRequired) {
+      "cannot store credentials for a user without credentials required property"
+    }
+
     credentialsRepository.save(userCredentials)
   }
 

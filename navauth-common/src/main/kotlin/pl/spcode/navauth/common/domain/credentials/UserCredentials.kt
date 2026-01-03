@@ -19,7 +19,7 @@
 package pl.spcode.navauth.common.domain.credentials
 
 import pl.spcode.navauth.common.domain.user.User
-import pl.spcode.navauth.common.domain.user.UserId
+import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
 import pl.spcode.navauth.common.infra.crypto.PasswordHash
 
@@ -33,7 +33,7 @@ value class TwoFactorSecret(val value: String) {
 @ConsistentCopyVisibility
 data class UserCredentials
 private constructor(
-  val userId: UserId,
+  val userUuid: UserUuid,
   val passwordHash: PasswordHash,
   val hashingAlgo: HashingAlgorithm,
   val twoFactorSecret: TwoFactorSecret?,
@@ -49,7 +49,7 @@ private constructor(
       twoFactorSecret: TwoFactorSecret? = null,
     ): UserCredentials {
       return UserCredentials(
-        userId = user.id,
+        userUuid = user.uuid,
         passwordHash = password.passwordHash,
         hashingAlgo = password.algo,
         twoFactorSecret = twoFactorSecret,
@@ -57,12 +57,15 @@ private constructor(
     }
 
     fun create(
-      userId: UserId,
+      userUuid: UserUuid,
       hash: PasswordHash,
       algo: HashingAlgorithm,
       twoFactorSecret: TwoFactorSecret? = null,
     ): UserCredentials {
-      return UserCredentials(userId, hash, algo, twoFactorSecret)
+      return UserCredentials(userUuid, hash, algo, twoFactorSecret)
     }
   }
+
+  fun withNewPassword(password: HashedPassword): UserCredentials =
+    copy(passwordHash = password.passwordHash)
 }

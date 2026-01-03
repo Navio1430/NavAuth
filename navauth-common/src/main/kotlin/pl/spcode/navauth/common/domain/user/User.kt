@@ -20,16 +20,19 @@ package pl.spcode.navauth.common.domain.user
 
 import java.util.UUID
 
-@JvmInline value class UserId(val value: UUID)
+@JvmInline value class UserUuid(val value: UUID)
 
 @JvmInline value class MojangId(val value: UUID)
 
-@JvmInline value class Username(val value: String)
+@JvmInline
+value class Username(val value: String) {
+  override fun toString(): String = value
+}
 
 @ConsistentCopyVisibility
 data class User
 private constructor(
-  val id: UserId,
+  val uuid: UserUuid,
   val username: Username,
   val credentialsRequired: Boolean,
   val mojangUuid: MojangId? = null, // null = non-premium
@@ -38,21 +41,25 @@ private constructor(
     get() = mojangUuid != null
 
   companion object Factory {
-    fun nonPremium(id: UserId, username: Username): User = User(id, username, true)
+    fun nonPremium(id: UserUuid, username: Username): User = User(id, username, true)
 
     fun premium(
-      id: UserId,
+      id: UserUuid,
       username: Username,
       mojangUuid: MojangId,
-      needsCreds: Boolean = false,
-    ): User = User(id, username, needsCreds, mojangUuid)
+      requiresCredentials: Boolean = false,
+    ): User = User(id, username, requiresCredentials, mojangUuid)
   }
 
   fun withNewUsername(username: Username): User {
-    return User(this.id, username, this.credentialsRequired, this.mojangUuid)
+    return User(this.uuid, username, this.credentialsRequired, this.mojangUuid)
+  }
+
+  fun toNonPremium(): User {
+    return copy(mojangUuid = null, credentialsRequired = true)
   }
 
   override fun toString(): String {
-    return "User(id=$id, username=$username, mojangUuid=$mojangUuid, credentialsRequired=$credentialsRequired)"
+    return "User(id=$uuid, username=$username, mojangUuid=$mojangUuid, credentialsRequired=$credentialsRequired)"
   }
 }

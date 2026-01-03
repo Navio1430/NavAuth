@@ -16,18 +16,14 @@
  *
  */
 
-package utils
+package pl.spcode.navauth.common.shared.utils
 
-fun generateRandomString(length: Int): String {
-  val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
-  return (1..length).map { allowedChars.random() }.joinToString("")
-}
+class StringUtils {
 
-fun invertCase(str: String): String {
-  return str
-    .map {
-      return@map if (it.isLowerCase()) it.uppercaseChar()
-      else if (it.isUpperCase()) it.lowercaseChar() else it
+  companion object {
+    fun generateRandomString(length: Int): String {
+      val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+      return (1..length).map { allowedChars.random() }.joinToString("")
     }
-    .joinToString("")
+  }
 }

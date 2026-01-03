@@ -26,55 +26,48 @@ import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
+import java.util.Optional
 import net.kyori.adventure.text.Component
-import pl.spcode.navauth.common.annotation.Description
-import pl.spcode.navauth.common.application.credentials.UserCredentialsService
+import net.kyori.adventure.text.minimessage.MiniMessage
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.UserArgumentResolver
 import pl.spcode.navauth.common.command.UsernameOrUuidRaw
 import pl.spcode.navauth.common.component.TextColors
+import pl.spcode.navauth.common.infra.crypto.hasher.BCryptCredentialsHasher
+import pl.spcode.navauth.common.shared.utils.StringUtils.Companion.generateRandomString
 import pl.spcode.navauth.velocity.command.Permissions
 
-@Command(name = "forceunregister")
-@Permission(Permissions.ADMIN_FORCE_UNREGISTER)
-class ForceUnregisterAdminCommand
+@Command(name = "forcecracked")
+@Permission(Permissions.ADMIN_FORCE_CRACKED)
+class ForceCrackedAdminCommand
 @Inject
-constructor(
-  val userService: UserService,
-  val userCredentialsService: UserCredentialsService,
-  val userArgumentResolver: UserArgumentResolver,
-) {
+constructor(val userService: UserService, val userArgumentResolver: UserArgumentResolver) {
 
-  @Async
   @Execute
-  @Description(
-    "Force unregister specified user. Works like unregister command, but doesn't require password."
-  )
-  fun forceUnregister(
+  @Async
+  fun forceCrackedMode(
     @Context sender: CommandSource,
     @Arg(value = "username|uuid") usernameOrUuidRaw: UsernameOrUuidRaw,
+    @Arg(value = "newPassword") newPasswordOpt: Optional<String>,
   ) {
     val user = userArgumentResolver.resolve(usernameOrUuidRaw)
 
-    if (user.isPremium) {
+    if (!user.isPremium) {
       sender.sendMessage(
-        Component.text(
-          "Can't execute the command! Account '${user.username}' is set to premium mode.",
-          TextColors.RED,
-        )
+        Component.text("User '${user.username}' is already non-premium account.", TextColors.RED)
       )
       return
     }
 
-    val userCredentials = userCredentialsService.findCredentials(user)
-    if (userCredentials == null) {
-      sender.sendMessage(Component.text("User is already unregistered.", TextColors.RED))
-      return
-    }
+    val newPassword = newPasswordOpt.orElseGet { generateRandomString(8) }
 
-    userCredentialsService.deleteUserCredentials(user)
+    // todo use hasher factory instead
+    userService.migrateToNonPremium(user, BCryptCredentialsHasher().hash(newPassword))
     sender.sendMessage(
-      Component.text("Success! User '${user.username}' credentials deleted.", TextColors.GREEN)
+      MiniMessage.miniMessage()
+        .deserialize(
+          "<${TextColors.GREEN.asHexString()}>User '${user.username}' has been successfully migrated to non-premium mode. Their new password is: <aqua><bold><click:copy_to_clipboard:${newPassword}>CLICK HERE TO COPY</click>"
+        )
     )
   }
 }
