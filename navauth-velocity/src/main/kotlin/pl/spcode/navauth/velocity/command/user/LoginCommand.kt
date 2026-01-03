@@ -26,6 +26,8 @@ import dev.rollczi.litecommands.annotations.async.Async
 import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
+import java.util.Optional
+import kotlin.jvm.optionals.getOrNull
 import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
@@ -45,7 +47,11 @@ constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
   @Async
   @Execute
   @Description("Manual login command for non-premium players")
-  fun login(@Context sender: Player, @Arg(value = "password") password: String) {
+  fun login(
+    @Context sender: Player,
+    @Arg(value = "password") password: String,
+    @Arg(value = "2fa") twoFactorCode: Optional<String>,
+  ) {
     // if permission is set explicitly to FALSE
     if (sender.getPermissionValue(Permissions.USER_LOGIN) == Tristate.FALSE) {
       // todo unify missing permission handler
@@ -64,11 +70,20 @@ constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
 
     session as VelocityLoginAuthSession
 
-    if (session.authWithPassword(password)) {
+    if (session.userCredentials.isTwoFactorEnabled) {
+      if (!twoFactorCode.isPresent) {
+        sender.sendMessage(
+          Component.text("Please provide two-factor authentication code.", TextColors.RED)
+        )
+        return
+      }
+    }
+
+    if (session.auth(password, twoFactorCode.getOrNull())) {
       sender.sendMessage(Component.text("Logged in!", TextColors.GREEN))
       return
     }
 
-    sender.sendMessage(Component.text("Wrong password!", TextColors.RED))
+    sender.sendMessage(Component.text("Wrong credentials!", TextColors.RED))
   }
 }

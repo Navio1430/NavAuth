@@ -27,7 +27,7 @@ import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 import pl.spcode.navauth.velocity.multification.VelocityMultification
 import pl.spcode.navauth.velocity.scheduler.NavAuthScheduler
 
-class VelocityPremiumAuthSession(
+class VelocityAutoLoginAuthSession(
   val player: Player,
   val scheduler: NavAuthScheduler,
   val multification: VelocityMultification,

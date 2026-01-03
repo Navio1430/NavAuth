@@ -37,20 +37,32 @@ open class LoginAuthSession<T : PlayerAdapter>(
   override fun onInvalidate() {}
 
   /**
-   * @param password raw (not hashed) password
+   * Authenticates a user using a combination of password and two-factor authentication code if
+   * required.
    *
-   * note: we don't use CharArray, which is then zeroed because platform command parameters are in
-   * the heap anyway.
-   *
-   * @return true if authenticated, otherwise false
+   * @param password the raw (not hashed) password to authenticate the user, can be null if not
+   *   required
+   * @param twoFactorCode the two-factor authentication code, can be null if 2FA is not enabled
+   * @return true if the authentication is successful, otherwise false
+   * @throws IllegalArgumentException if `password` or `twoFactorCode` is required by the user
+   *   credentials but not provided
    */
-  fun authWithPassword(password: String): Boolean {
-    val verified = userCredentialsService.verifyPassword(userCredentials, password)
-
-    if (verified) {
-      authenticate()
+  fun auth(password: String?, twoFactorCode: String?): Boolean {
+    if (userCredentials.isTwoFactorEnabled) {
+      require(twoFactorCode != null) { "twoFactorCode parameter is required by user credentials" }
+      if (!userCredentialsService.verifyCode(userCredentials, twoFactorCode)) {
+        return false
+      }
     }
 
-    return verified
+    if (userCredentials.isPasswordRequired) {
+      require(password != null) { "password parameter is required by user credentials" }
+      if (!userCredentialsService.verifyPassword(userCredentials, password)) {
+        return false
+      }
+    }
+
+    authenticate()
+    return true
   }
 }

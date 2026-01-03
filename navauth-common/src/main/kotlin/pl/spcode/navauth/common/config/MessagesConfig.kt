@@ -61,7 +61,12 @@ open class MessagesConfig : OkaeriConfig() {
   var multification = NoticesConfig()
 
   class NoticesConfig : OkaeriConfig() {
-    var loginInstruction: Notice = Notice.chat("<green>Please login using /login command.</green>")
+    var loginPasswordOnlyInstruction: Notice =
+      Notice.chat("<green>Please login using \"/login <password>\" command.</green>")
+    var loginTwoFactorOnlyInstruction: Notice =
+      Notice.chat("<green>Please login using \"/2fa <code>\" command.</green>")
+    var loginPasswordAndTwoFactorInstruction: Notice =
+      Notice.chat("<green>Please login using \"/login <password> <2fa_code>\" command.</green>")
 
     var registerInstruction: Notice =
       Notice.chat("<green>Please register using /register command.</green>")
