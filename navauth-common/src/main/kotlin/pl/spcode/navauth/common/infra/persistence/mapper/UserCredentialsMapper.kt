@@ -18,6 +18,7 @@
 
 package pl.spcode.navauth.common.infra.persistence.mapper
 
+import pl.spcode.navauth.common.domain.credentials.TOTPSecret
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.infra.crypto.PasswordHash
@@ -31,6 +32,10 @@ fun UserCredentialsRecord.toDomain(): UserCredentials {
         return@let PasswordHash(it)
       },
     algo = algo,
+    totpSecret =
+      twoFactorSecret?.let {
+        return@let TOTPSecret(it)
+      },
   )
 }
 
@@ -39,4 +44,5 @@ fun UserCredentials.toRecord(): UserCredentialsRecord =
     uuid = userUuid.value,
     passwordHash = passwordHash?.value,
     algo = hashingAlgo,
+    twoFactorSecret = totpSecret?.value,
   )
