@@ -24,7 +24,7 @@ import pl.spcode.navauth.common.infra.crypto.HashedPassword
 import pl.spcode.navauth.common.infra.crypto.PasswordHash
 
 @JvmInline
-value class TwoFactorSecret(val value: String) {
+value class TOTPSecret(val value: String) {
   init {
     require(value.length >= 16) { "Secret must be at least 16 characters long" }
   }
@@ -36,23 +36,23 @@ private constructor(
   val userUuid: UserUuid,
   val passwordHash: PasswordHash,
   val hashingAlgo: HashingAlgorithm,
-  val twoFactorSecret: TwoFactorSecret?,
+  val totpSecret: TOTPSecret?,
 ) {
 
   val isTwoFactorEnabled: Boolean
-    get() = twoFactorSecret != null
+    get() = totpSecret != null
 
   companion object Factory {
     fun create(
       user: User,
       password: HashedPassword,
-      twoFactorSecret: TwoFactorSecret? = null,
+      totpSecret: TOTPSecret? = null,
     ): UserCredentials {
       return UserCredentials(
         userUuid = user.uuid,
         passwordHash = password.passwordHash,
         hashingAlgo = password.algo,
-        twoFactorSecret = twoFactorSecret,
+        totpSecret = totpSecret,
       )
     }
 
@@ -60,9 +60,9 @@ private constructor(
       userUuid: UserUuid,
       hash: PasswordHash,
       algo: HashingAlgorithm,
-      twoFactorSecret: TwoFactorSecret? = null,
+      totpSecret: TOTPSecret? = null,
     ): UserCredentials {
-      return UserCredentials(userUuid, hash, algo, twoFactorSecret)
+      return UserCredentials(userUuid, hash, algo, totpSecret)
     }
   }
 

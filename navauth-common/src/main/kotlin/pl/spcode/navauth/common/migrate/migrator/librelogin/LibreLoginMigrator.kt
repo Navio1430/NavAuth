@@ -27,7 +27,7 @@ import pl.spcode.navauth.common.application.validator.UsernameValidator
 import pl.spcode.navauth.common.config.MigrationConfig
 import pl.spcode.navauth.common.domain.common.TransactionService
 import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
-import pl.spcode.navauth.common.domain.credentials.TwoFactorSecret
+import pl.spcode.navauth.common.domain.credentials.TOTPSecret
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
 import pl.spcode.navauth.common.domain.user.*
@@ -119,13 +119,13 @@ constructor(
       )
       return
     } else {
-      val twoFactorSecret = lUser.secret?.let { TwoFactorSecret(it) }
+      val totpSecret = lUser.secret?.let { TOTPSecret(it) }
       val credentials =
         UserCredentials.create(
           userUuid,
           hashedPassword!!.passwordHash,
           hashedPassword.algo,
-          twoFactorSecret,
+          totpSecret,
         )
       userCredentialsRepository.save(credentials)
     }
