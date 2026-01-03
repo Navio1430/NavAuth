@@ -24,6 +24,7 @@ import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
 import pl.spcode.navauth.common.domain.user.User
+import pl.spcode.navauth.common.infra.crypto.TOTP2FA
 import pl.spcode.navauth.common.infra.crypto.hasher.Argon2CredentialsHasher
 import pl.spcode.navauth.common.infra.crypto.hasher.BCryptCredentialsHasher
 import pl.spcode.navauth.common.infra.crypto.hasher.LibreLoginSHACredentialsHasher
@@ -55,6 +56,7 @@ constructor(val credentialsRepository: UserCredentialsRepository) {
 
   /** @param password the raw (not hashed) password */
   fun verifyPassword(credentials: UserCredentials, password: String): Boolean {
+    require(credentials.passwordHash != null) { "credentials do not have a password hash" }
 
     val verified =
       when (credentials.hashingAlgo) {
@@ -75,5 +77,10 @@ constructor(val credentialsRepository: UserCredentialsRepository) {
       }
 
     return verified
+  }
+
+  fun verifyCode(credentials: UserCredentials, code: String): Boolean {
+    require(credentials.totpSecret != null) { "credentials do not have a TOTP secret" }
+    return TOTP2FA().verifyTOTP(credentials.totpSecret, code)
   }
 }

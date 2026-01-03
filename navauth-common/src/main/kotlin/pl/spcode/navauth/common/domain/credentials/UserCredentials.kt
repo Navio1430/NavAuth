@@ -34,10 +34,14 @@ value class TOTPSecret(val value: String) {
 data class UserCredentials
 private constructor(
   val userUuid: UserUuid,
-  val passwordHash: PasswordHash,
+  // password can be null, because sometimes only 2FA is required
+  val passwordHash: PasswordHash?,
   val hashingAlgo: HashingAlgorithm,
   val totpSecret: TOTPSecret?,
 ) {
+
+  val isPasswordRequired: Boolean
+    get() = passwordHash != null
 
   val isTwoFactorEnabled: Boolean
     get() = totpSecret != null
@@ -58,10 +62,14 @@ private constructor(
 
     fun create(
       userUuid: UserUuid,
-      hash: PasswordHash,
+      hash: PasswordHash?,
       algo: HashingAlgorithm,
       totpSecret: TOTPSecret? = null,
     ): UserCredentials {
+      require(hash != null || totpSecret != null) {
+        "Credentials must have either password or TOTP secret"
+      }
+
       return UserCredentials(userUuid, hash, algo, totpSecret)
     }
   }

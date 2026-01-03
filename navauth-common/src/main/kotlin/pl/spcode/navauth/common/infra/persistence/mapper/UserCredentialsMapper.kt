@@ -26,7 +26,10 @@ import pl.spcode.navauth.common.infra.persistence.ormlite.credentials.UserCreden
 fun UserCredentialsRecord.toDomain(): UserCredentials {
   return UserCredentials.create(
     userUuid = UserUuid(uuid),
-    hash = PasswordHash(passwordHash),
+    hash =
+      passwordHash?.let {
+        return@let PasswordHash(it)
+      },
     algo = algo,
   )
 }
@@ -34,6 +37,6 @@ fun UserCredentialsRecord.toDomain(): UserCredentials {
 fun UserCredentials.toRecord(): UserCredentialsRecord =
   UserCredentialsRecord(
     uuid = userUuid.value,
-    passwordHash = passwordHash.value,
+    passwordHash = passwordHash?.value,
     algo = hashingAlgo,
   )

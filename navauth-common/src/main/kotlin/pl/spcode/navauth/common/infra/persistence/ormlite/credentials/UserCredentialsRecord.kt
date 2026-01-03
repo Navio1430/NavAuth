@@ -27,8 +27,7 @@ import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 class UserCredentialsRecord(
   // one-to-one relationship with a user entity
   @DatabaseField(id = true) var uuid: UUID = UUID.randomUUID(),
-  @DatabaseField val passwordHash: String = "",
+  @DatabaseField val passwordHash: String? = null,
   @DatabaseField val algo: HashingAlgorithm = HashingAlgorithm.BCRYPT,
-  @DatabaseField val twoFactorSecret: String = "",
-  @DatabaseField val twoFactorEnabled: Boolean = false,
+  @DatabaseField val twoFactorSecret: String? = null,
 )
