@@ -87,8 +87,14 @@ constructor(
       val requireCredentials = credentials.isTwoFactorEnabled
       val premiumUser = User.premium(user.uuid, user.username, mojangId, requireCredentials)
 
-      // do not delete credentials in case a revert was requested
       userRepository.save(premiumUser)
+      if (requireCredentials) {
+        val newCredentials = credentials.withoutPassword()
+        userCredentialsService.storeUserCredentials(premiumUser, newCredentials)
+      } else {
+        userCredentialsService.deleteUserCredentials(user)
+      }
+
       return@inTransaction premiumUser
     }
   }
