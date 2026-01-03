@@ -19,5 +19,6 @@
 package pl.spcode.navauth.common.domain.player
 
 enum class DisconnectReason {
-  AUTH_SESSION_CLOSED
+  AUTH_SESSION_CLOSED,
+  TOO_MANY_LOGIN_ATTEMPTS,
 }

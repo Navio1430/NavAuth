@@ -22,13 +22,17 @@ import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.domain.auth.session.AuthSession
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
+import pl.spcode.navauth.common.domain.player.DisconnectReason
 import pl.spcode.navauth.common.domain.player.PlayerAdapter
 
 open class LoginAuthSession<T : PlayerAdapter>(
   playerAdapter: T,
   val userCredentials: UserCredentials,
   val userCredentialsService: UserCredentialsService,
+  val maxLoginAttempts: Int,
 ) : AuthSession<T>(playerAdapter) {
+
+  private var attemptsLeft = maxLoginAttempts
 
   override fun getSessionType(): AuthSessionType {
     return AuthSessionType.LOGIN
@@ -48,6 +52,17 @@ open class LoginAuthSession<T : PlayerAdapter>(
    *   credentials but not provided
    */
   fun auth(password: String?, twoFactorCode: String?): Boolean {
+    val result = tryAuth(password, twoFactorCode)
+    if (!result) {
+      attemptsLeft -= 1
+      if (attemptsLeft <= 0) {
+        playerAdapter.disconnect(DisconnectReason.TOO_MANY_LOGIN_ATTEMPTS)
+      }
+    }
+    return result
+  }
+
+  private fun tryAuth(password: String?, twoFactorCode: String?): Boolean {
     if (userCredentials.isTwoFactorEnabled) {
       require(twoFactorCode != null) { "twoFactorCode parameter is required by user credentials" }
       if (!userCredentialsService.verifyCode(userCredentials, twoFactorCode)) {

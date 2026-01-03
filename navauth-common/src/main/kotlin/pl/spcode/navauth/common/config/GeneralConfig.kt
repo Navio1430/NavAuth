@@ -45,8 +45,8 @@ open class GeneralConfig : OkaeriConfig() {
   var limboServers: List<String> = listOf("limbo")
     protected set
 
-  @Comment("Maximum number of login retries before kicking the player.")
-  var maxLoginRetries: Int = 3
+  @Comment("Maximum number of login attempts before kicking the player.")
+  var maxLoginAttempts: Int = 3
 
   @Comment("Usernames config") var usernamesConfig: UsernamesConfig = UsernamesConfig()
 

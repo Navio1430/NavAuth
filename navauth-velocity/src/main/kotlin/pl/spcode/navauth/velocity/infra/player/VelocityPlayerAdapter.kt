@@ -20,6 +20,7 @@ package pl.spcode.navauth.velocity.infra.player
 
 import com.velocitypowered.api.proxy.Player
 import net.kyori.adventure.text.Component
+import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.player.DisconnectReason
 import pl.spcode.navauth.common.domain.player.PlayerAdapter
 
@@ -30,8 +31,13 @@ class VelocityPlayerAdapter(val velocityPlayer: Player) : PlayerAdapter {
       DisconnectReason.AUTH_SESSION_CLOSED ->
         velocityPlayer.disconnect(
           Component.text(
-            "NavAuth: Session closed. This is a security measure to prevent users from staying on the server without an active session."
+            "NavAuth: Session closed. This is a security measure to prevent users from staying on the server without an active session.",
+            TextColors.RED,
           )
+        )
+      DisconnectReason.TOO_MANY_LOGIN_ATTEMPTS ->
+        velocityPlayer.disconnect(
+          Component.text("Too many login attempts. Please try again later.", TextColors.RED)
         )
     }
   }
