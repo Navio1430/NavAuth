@@ -76,4 +76,9 @@ private constructor(
 
   fun withNewPassword(password: HashedPassword): UserCredentials =
     copy(passwordHash = password.passwordHash)
+
+  fun withoutPassword(): UserCredentials {
+    require(totpSecret != null) { "to create credentials without password, totpSecret must be set" }
+    return copy(passwordHash = null)
+  }
 }
