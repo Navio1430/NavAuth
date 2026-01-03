@@ -8,5 +8,6 @@
 | PlayerChooseInitialServerEvent | FIRST          |
 | ServerPreConnectEvent          | FIRST          |
 | PlayerChooseInitialServerEvent | NORMAL         |
+| GameProfileRequestEvent        | NORMAL         |
 | PostLoginEvent                 | FIRST          |
 | PreLoginEvent                  | LAST           |

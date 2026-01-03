@@ -19,13 +19,13 @@
 package pl.spcode.navauth.velocity.command.user
 
 import com.google.inject.Inject
+import com.velocitypowered.api.permission.Tristate
 import com.velocitypowered.api.proxy.Player
 import dev.rollczi.litecommands.annotations.argument.Arg
 import dev.rollczi.litecommands.annotations.async.Async
 import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
-import dev.rollczi.litecommands.annotations.permission.Permission
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import pl.spcode.navauth.common.annotation.Description
@@ -41,8 +41,8 @@ import pl.spcode.navauth.velocity.command.Permissions
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 
+// we use inverted permission in this command
 @Command(name = "register")
-@Permission(Permissions.USER_REGISTER)
 class RegisterCommand
 @Inject
 constructor(
@@ -52,12 +52,26 @@ constructor(
 
   @Async
   @Execute
-  @Description("Create a new account with a password", "Applicable for non-premium players")
+  @Description(
+    "Creates a new account with specified password.",
+    "Applicable only for non-premium players.",
+    "If you want to disable this command for specific group, then set ",
+    "their '**${Permissions.USER_REGISTER}**' permission value to **FALSE**.",
+  )
   fun register(
     @Context sender: Player,
     @Arg(value = "password") password: String,
     @Arg(value = "repeat_password") repeatPassword: String,
   ) {
+    // if permission is set explicitly to FALSE
+    if (sender.getPermissionValue(Permissions.USER_REGISTER) == Tristate.FALSE) {
+      // todo unify missing permission handler
+      sender.sendMessage(
+        Component.text("You don't have permission to use this command.", TextColors.RED)
+      )
+      return
+    }
+
     val session = authSessionService.findSession(VelocityUniqueSessionId(sender))
     if (session?.getSessionType() != AuthSessionType.REGISTER) {
       sender.sendMessage(Component.text("Can't use this command right now.", TextColors.RED))

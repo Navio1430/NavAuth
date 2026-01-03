@@ -37,7 +37,8 @@ class CommandsGenerator : Generator {
       val baseCommandAnnotation = kClass.findAnnotation<Command>()
       val classPermissionAnnotation = kClass.findAnnotation<Permission>()
 
-      val basePermission = classPermissionAnnotation?.value?.joinToString(" ") ?: "no perm"
+      val basePermission =
+        classPermissionAnnotation?.value?.joinToString(" ") ?: "available by default"
       val baseCommandName = baseCommandAnnotation?.name?.trimStart('/') ?: ""
 
       kClass.functions.forEach { function ->
@@ -66,7 +67,7 @@ class CommandsGenerator : Generator {
       Table.Builder()
         .withAlignments(Table.ALIGN_LEFT, Table.ALIGN_LEFT)
         .addRow("Command name", "Permission", "Description")
-    commands.forEach { tableBuilder.addRow(it.name, it.perm, it.desc) }
+    commands.forEach { tableBuilder.addRow("`/${it.name}`", it.perm, it.desc) }
     md.appendLine(tableBuilder.build())
 
     commands.forEach {
