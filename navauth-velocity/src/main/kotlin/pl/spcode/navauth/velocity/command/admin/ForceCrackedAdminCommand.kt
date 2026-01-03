@@ -27,8 +27,8 @@ import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
-import me.uniodex.velocityrcon.commandsource.IRconCommandSource
 import java.util.Optional
+import me.uniodex.velocityrcon.commandsource.IRconCommandSource
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import pl.spcode.navauth.common.application.user.UserService
@@ -66,11 +66,12 @@ constructor(val userService: UserService, val userArgumentResolver: UserArgument
     // todo use hasher factory instead
     userService.migrateToNonPremium(user, BCryptCredentialsHasher().hash(newPassword))
 
-    val passwordText = if (sender is ConsoleCommandSource || sender is IRconCommandSource) {
-      "$newPassword"
-    } else {
-      "<aqua><bold><click:copy_to_clipboard:${newPassword}>CLICK HERE TO COPY</click>"
-    }
+    val passwordText =
+      if (sender is ConsoleCommandSource || sender is IRconCommandSource) {
+        "$newPassword"
+      } else {
+        "<aqua><bold><click:copy_to_clipboard:${newPassword}>CLICK HERE TO COPY</click>"
+      }
     sender.sendMessage(
       MiniMessage.miniMessage()
         .deserialize(
