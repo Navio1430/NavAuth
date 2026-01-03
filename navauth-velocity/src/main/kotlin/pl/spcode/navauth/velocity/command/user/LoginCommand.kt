@@ -23,7 +23,7 @@ import com.velocitypowered.api.permission.Tristate
 import com.velocitypowered.api.proxy.Player
 import dev.rollczi.litecommands.annotations.argument.Arg
 import dev.rollczi.litecommands.annotations.async.Async
-import dev.rollczi.litecommands.annotations.command.Command
+import dev.rollczi.litecommands.annotations.command.RootCommand
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import java.util.Optional
@@ -39,13 +39,13 @@ import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 
 // we use inverted permission in this command
-@Command(name = "login")
+@RootCommand
 class LoginCommand
 @Inject
 constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
 
   @Async
-  @Execute
+  @Execute(name = "login")
   @Description("Manual login command for non-premium players")
   fun login(
     @Context sender: Player,
@@ -79,7 +79,47 @@ constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
       }
     }
 
-    if (session.auth(password, twoFactorCode.getOrNull())) {
+    authenticate(sender, session, password, twoFactorCode.getOrNull())
+  }
+
+  @Async
+  @Execute(name = "2fa")
+  fun loginViaTwoFactor(@Context sender: Player, @Arg(value = "code") code: String) {
+    // if permission is set explicitly to FALSE
+    if (sender.getPermissionValue(Permissions.USER_LOGIN) == Tristate.FALSE) {
+      // todo unify missing permission handler
+      sender.sendMessage(
+        Component.text("You don't have permission to use this command.", TextColors.RED)
+      )
+      return
+    }
+
+    val uniqueSessionId = VelocityUniqueSessionId(sender)
+    val session = authSessionService.findSession(uniqueSessionId)
+    if (session?.getSessionType() != AuthSessionType.LOGIN || session.isAuthenticated) {
+      sender.sendMessage(Component.text("Can't use this command right now.", TextColors.RED))
+      return
+    }
+
+    session as VelocityLoginAuthSession
+
+    if (!session.userCredentials.isTwoFactorEnabled || session.userCredentials.isPasswordRequired) {
+      sender.sendMessage(
+        Component.text("Can't use 2fa command right now. Please use /login command.")
+      )
+      return
+    }
+
+    authenticate(sender, session, null, code)
+  }
+
+  fun authenticate(
+    sender: Player,
+    session: VelocityLoginAuthSession,
+    password: String?,
+    code: String?,
+  ) {
+    if (session.auth(password, code)) {
       sender.sendMessage(Component.text("Logged in!", TextColors.GREEN))
       return
     }

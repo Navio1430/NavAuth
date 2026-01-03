@@ -32,7 +32,7 @@ class CommandsListeners
 @Inject
 constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
 
-  val whitelist = listOf("login", "register")
+  val whitelist = listOf("login", "register", "2fa")
 
   @Subscribe(order = PostOrder.FIRST)
   fun onCommand(event: CommandExecuteEvent) {
