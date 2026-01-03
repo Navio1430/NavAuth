@@ -20,12 +20,14 @@ package pl.spcode.navauth.velocity.command.admin
 
 import com.google.inject.Inject
 import com.velocitypowered.api.command.CommandSource
+import com.velocitypowered.api.proxy.ConsoleCommandSource
 import dev.rollczi.litecommands.annotations.argument.Arg
 import dev.rollczi.litecommands.annotations.async.Async
 import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
+import me.uniodex.velocityrcon.commandsource.IRconCommandSource
 import java.util.Optional
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
@@ -63,10 +65,16 @@ constructor(val userService: UserService, val userArgumentResolver: UserArgument
 
     // todo use hasher factory instead
     userService.migrateToNonPremium(user, BCryptCredentialsHasher().hash(newPassword))
+
+    val passwordText = if (sender is ConsoleCommandSource || sender is IRconCommandSource) {
+      "$newPassword"
+    } else {
+      "<aqua><bold><click:copy_to_clipboard:${newPassword}>CLICK HERE TO COPY</click>"
+    }
     sender.sendMessage(
       MiniMessage.miniMessage()
         .deserialize(
-          "<${TextColors.GREEN.asHexString()}>User '${user.username}' has been successfully migrated to non-premium mode. Their new password is: <aqua><bold><click:copy_to_clipboard:${newPassword}>CLICK HERE TO COPY</click>"
+          "<${TextColors.GREEN.asHexString()}>User '${user.username}' has been successfully migrated to non-premium mode. Their new password is: $passwordText"
         )
     )
   }
