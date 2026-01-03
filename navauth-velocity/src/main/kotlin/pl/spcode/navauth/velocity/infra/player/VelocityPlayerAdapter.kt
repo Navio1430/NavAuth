@@ -24,14 +24,19 @@ import pl.spcode.navauth.common.domain.player.DisconnectReason
 import pl.spcode.navauth.common.domain.player.PlayerAdapter
 
 class VelocityPlayerAdapter(val velocityPlayer: Player) : PlayerAdapter {
+
   override fun disconnect(reason: DisconnectReason) {
     when (reason) {
       DisconnectReason.AUTH_SESSION_CLOSED ->
         velocityPlayer.disconnect(
           Component.text(
-            "NavAuth Session closed. This is a security measure for unexcepted behaviour."
+            "NavAuth: Session closed. This is a security measure to prevent users from staying on the server without an active session."
           )
         )
     }
+  }
+
+  override fun isOnline(): Boolean {
+    return velocityPlayer.isActive
   }
 }

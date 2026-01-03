@@ -21,4 +21,6 @@ package pl.spcode.navauth.common.domain.player
 interface PlayerAdapter {
 
   fun disconnect(reason: DisconnectReason)
+
+  fun isOnline(): Boolean
 }
