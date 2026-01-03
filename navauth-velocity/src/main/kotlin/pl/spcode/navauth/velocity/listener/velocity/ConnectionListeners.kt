@@ -135,6 +135,7 @@ constructor(
       }
       try {
         val limbo = getLimboServerUnauthenticated(event)
+        event.setInitialServer(limbo)
         logger.debug(
           "set user '{}' initial server to limbo server named {}",
           player.username,
