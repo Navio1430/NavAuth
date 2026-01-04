@@ -29,6 +29,7 @@ import pl.spcode.navauth.velocity.command.user.ChangePasswordCommand
 import pl.spcode.navauth.velocity.command.user.LoginCommand
 import pl.spcode.navauth.velocity.command.user.PremiumAccountCommand
 import pl.spcode.navauth.velocity.command.user.RegisterCommand
+import pl.spcode.navauth.velocity.command.user.SetupTwoFactorCommand
 import pl.spcode.navauth.velocity.command.user.UnregisterCommand
 
 class CommandsRegistry {
@@ -42,6 +43,7 @@ class CommandsRegistry {
         UnregisterCommand::class,
         ChangePasswordCommand::class,
         PremiumAccountCommand::class,
+        SetupTwoFactorCommand::class,
         // admin
         ForceUnregisterAdminCommand::class,
         ForceChangePasswordAdminCommand::class,

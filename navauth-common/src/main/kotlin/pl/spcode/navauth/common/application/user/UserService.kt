@@ -23,6 +23,7 @@ import com.google.inject.Singleton
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.domain.common.TransactionService
+import pl.spcode.navauth.common.domain.credentials.TOTPSecret
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.User
@@ -57,12 +58,15 @@ constructor(
     return userRepository.findByMojangUuid(uuid)
   }
 
-  fun storeUserWithCredentials(user: User, password: HashedPassword) {
+  fun createAndStoreUserWithNewCredentials(user: User, password: HashedPassword) {
     require(user.credentialsRequired) { "cannot store user without credentials required property" }
 
     txService.inTransaction {
       userRepository.save(user)
-      userCredentialsService.storeUserCredentials(user, UserCredentials.create(user, password))
+      userCredentialsService.storeUserCredentials(
+        user,
+        UserCredentials.create(user, password, null),
+      )
     }
   }
 
@@ -119,7 +123,7 @@ constructor(
 
       val newCredentials =
         userCredentialsService.findCredentials(nonPremiumUser)?.withNewPassword(newPassword)
-          ?: UserCredentials.create(nonPremiumUser, newPassword)
+          ?: UserCredentials.create(nonPremiumUser, newPassword, null)
       userCredentialsService.storeUserCredentials(nonPremiumUser, newCredentials)
 
       return@inTransaction nonPremiumUser
@@ -186,5 +190,25 @@ constructor(
     val newUser = user.withNewUsername(newUsername)
     userRepository.save(newUser)
     return newUser
+  }
+
+  fun enableTwoFactorAuth(user: User, totpSecret: TOTPSecret) {
+    txService.inTransaction {
+      val credentials =
+        userCredentialsService.findCredentials(user)
+          ?: UserCredentials.create(user, null, totpSecret)
+
+      val userWithCredentials =
+        if (!user.credentialsRequired) {
+          val user = user.withCredentialsRequired()
+          userRepository.save(user)
+          user
+        } else {
+          user
+        }
+
+      val newCredentials = credentials.withTotpSecret(totpSecret)
+      userCredentialsService.storeUserCredentials(userWithCredentials, newCredentials)
+    }
   }
 }

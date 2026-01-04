@@ -28,6 +28,7 @@ class Permissions {
     const val USER_UNREGISTER = "$USER_BASE.unregister"
     const val USER_CHANGE_PASSWORD = "$USER_BASE.changepassword"
     const val USER_CHANGE_TO_PREMIUM_ACCOUNT = "$USER_BASE.premium"
+    const val USER_SETUP_TWO_FACTOR = "$USER_BASE.setuptwofactor"
 
     const val ADMIN_BASE = "$BASE.admin"
     const val ADMIN_FORCE_UNREGISTER = "$ADMIN_BASE.forceunregister"

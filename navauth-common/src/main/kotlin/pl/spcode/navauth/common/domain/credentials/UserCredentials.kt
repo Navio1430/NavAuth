@@ -76,4 +76,6 @@ private constructor(
     }
     return copy(hashedPassword = null)
   }
+
+  fun withTotpSecret(totpSecret: TOTPSecret): UserCredentials = copy(totpSecret = totpSecret)
 }
