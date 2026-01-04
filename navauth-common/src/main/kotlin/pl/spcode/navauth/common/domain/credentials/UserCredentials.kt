@@ -35,13 +35,18 @@ data class UserCredentials
 private constructor(
   val userUuid: UserUuid,
   // password can be null, because sometimes only 2FA is required
-  val passwordHash: PasswordHash?,
-  val hashingAlgo: HashingAlgorithm,
+  val hashedPassword: HashedPassword?,
   val totpSecret: TOTPSecret?,
 ) {
 
+  init {
+    require(hashedPassword != null || totpSecret != null) {
+      "Credentials must have either password or TOTP secret"
+    }
+  }
+
   val isPasswordRequired: Boolean
-    get() = passwordHash != null
+    get() = hashedPassword != null
 
   val isTwoFactorEnabled: Boolean
     get() = totpSecret != null
@@ -49,36 +54,30 @@ private constructor(
   companion object Factory {
     fun create(
       user: User,
-      password: HashedPassword,
-      totpSecret: TOTPSecret? = null,
+      password: HashedPassword?,
+      totpSecret: TOTPSecret?
     ): UserCredentials {
       return UserCredentials(
         userUuid = user.uuid,
-        passwordHash = password.passwordHash,
-        hashingAlgo = password.algo,
+        hashedPassword = password,
         totpSecret = totpSecret,
       )
     }
 
     fun create(
       userUuid: UserUuid,
-      hash: PasswordHash?,
-      algo: HashingAlgorithm,
-      totpSecret: TOTPSecret? = null,
+      hashedPassword: HashedPassword?,
+      totpSecret: TOTPSecret?
     ): UserCredentials {
-      require(hash != null || totpSecret != null) {
-        "Credentials must have either password or TOTP secret"
-      }
-
-      return UserCredentials(userUuid, hash, algo, totpSecret)
+      return UserCredentials(userUuid, hashedPassword, totpSecret)
     }
   }
 
   fun withNewPassword(password: HashedPassword): UserCredentials =
-    copy(passwordHash = password.passwordHash)
+    copy(hashedPassword = password)
 
   fun withoutPassword(): UserCredentials {
-    require(totpSecret != null) { "to create credentials without password, totpSecret must be set" }
-    return copy(passwordHash = null)
+    require(totpSecret != null) { "to create credentials without password, at least totpSecret must be set" }
+    return copy(hashedPassword = null)
   }
 }

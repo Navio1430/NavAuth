@@ -83,7 +83,7 @@ constructor(
       return
     }
 
-    userService.storeUserWithCredentials(
+    userService.createAndStoreUserWithNewCredentials(
       User.nonPremium(UserUuid(sender.uniqueId), Username(sender.username)),
       BCryptCredentialsHasher().hash(password),
     )

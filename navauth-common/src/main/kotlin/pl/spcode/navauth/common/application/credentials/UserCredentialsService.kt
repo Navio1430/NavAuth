@@ -56,23 +56,25 @@ constructor(val credentialsRepository: UserCredentialsRepository) {
 
   /** @param password the raw (not hashed) password */
   fun verifyPassword(credentials: UserCredentials, password: String): Boolean {
-    require(credentials.passwordHash != null) { "credentials do not have a password hash" }
+    require(credentials.hashedPassword != null) { "credentials do not have a password hash" }
+
+    val passwordHash = credentials.hashedPassword.passwordHash
 
     val verified =
-      when (credentials.hashingAlgo) {
+      when (credentials.hashedPassword.algo) {
         HashingAlgorithm.BCRYPT -> {
-          BCryptCredentialsHasher().verify(password, credentials.passwordHash)
+          BCryptCredentialsHasher().verify(password, passwordHash)
         }
         HashingAlgorithm.ARGON2 -> {
-          Argon2CredentialsHasher().verify(password, credentials.passwordHash)
+          Argon2CredentialsHasher().verify(password, passwordHash)
         }
         HashingAlgorithm.SHA256,
         HashingAlgorithm.SHA512 -> {
-          SHACredentialsHasher().verify(password, credentials.passwordHash)
+          SHACredentialsHasher().verify(password, passwordHash)
         }
         HashingAlgorithm.LIBRELOGIN_SHA256,
         HashingAlgorithm.LIBRELOGIN_SHA512 -> {
-          LibreLoginSHACredentialsHasher().verify(password, credentials.passwordHash)
+          LibreLoginSHACredentialsHasher().verify(password, passwordHash)
         }
       }
 

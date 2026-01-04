@@ -21,17 +21,17 @@ package pl.spcode.navauth.common.infra.persistence.mapper
 import pl.spcode.navauth.common.domain.credentials.TOTPSecret
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.user.UserUuid
+import pl.spcode.navauth.common.infra.crypto.HashedPassword
 import pl.spcode.navauth.common.infra.crypto.PasswordHash
 import pl.spcode.navauth.common.infra.persistence.ormlite.credentials.UserCredentialsRecord
 
 fun UserCredentialsRecord.toDomain(): UserCredentials {
   return UserCredentials.create(
     userUuid = UserUuid(uuid),
-    hash =
+    hashedPassword =
       passwordHash?.let {
-        return@let PasswordHash(it)
+        return@let HashedPassword(PasswordHash(it), algo!!)
       },
-    algo = algo,
     totpSecret =
       twoFactorSecret?.let {
         return@let TOTPSecret(it)
@@ -42,7 +42,7 @@ fun UserCredentialsRecord.toDomain(): UserCredentials {
 fun UserCredentials.toRecord(): UserCredentialsRecord =
   UserCredentialsRecord(
     uuid = userUuid.value,
-    passwordHash = passwordHash?.value,
-    algo = hashingAlgo,
+    passwordHash = hashedPassword?.passwordHash?.value,
+    algo = hashedPassword?.algo,
     twoFactorSecret = totpSecret?.value,
   )

@@ -28,6 +28,14 @@ class UserCredentialsRecord(
   // one-to-one relationship with a user entity
   @DatabaseField(id = true) var uuid: UUID = UUID.randomUUID(),
   @DatabaseField val passwordHash: String? = null,
-  @DatabaseField val algo: HashingAlgorithm = HashingAlgorithm.BCRYPT,
+  @DatabaseField val algo: HashingAlgorithm? = null,
   @DatabaseField val twoFactorSecret: String? = null,
-)
+) {
+  init {
+    if (passwordHash != null) {
+      require(algo != null) { "algo must not be null" }
+    }
+
+    require(twoFactorSecret != null || passwordHash != null) { "credentials must have either password or TOTP secret" }
+  }
+}
