@@ -20,6 +20,7 @@ package pl.spcode.navauth.common.application.credentials
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import pl.spcode.navauth.common.domain.common.TransactionService
 import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
@@ -33,7 +34,10 @@ import pl.spcode.navauth.common.infra.crypto.hasher.SHACredentialsHasher
 @Singleton
 class UserCredentialsService
 @Inject
-constructor(val credentialsRepository: UserCredentialsRepository) {
+constructor(
+  val credentialsRepository: UserCredentialsRepository,
+  val transactionService: TransactionService,
+) {
 
   fun findCredentials(user: User): UserCredentials? {
     return credentialsRepository.findByUser(user)
@@ -84,5 +88,24 @@ constructor(val credentialsRepository: UserCredentialsRepository) {
   fun verifyCode(credentials: UserCredentials, code: String): Boolean {
     require(credentials.totpSecret != null) { "credentials do not have a TOTP secret" }
     return TOTP2FA().verifyTOTP(credentials.totpSecret, code)
+  }
+
+  /**
+   * Updates the password for a given user to a new hashed password. Validates that the user has
+   * existing credentials before updating.
+   *
+   * @param user the user whose password needs to be updated
+   * @param newPassword the new raw password to be hashed and stored
+   */
+  fun updatePassword(user: User, newPassword: String) {
+    transactionService.inTransaction {
+      val credentials = findCredentials(user)
+      require(credentials != null) { "user does not have credentials" }
+
+      // todo use factory instead
+      val hashedPassword = BCryptCredentialsHasher().hash(newPassword)
+      val newCredentials = credentials.withNewPassword(hashedPassword)
+      storeUserCredentials(user, newCredentials)
+    }
   }
 }

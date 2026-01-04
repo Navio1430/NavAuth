@@ -67,9 +67,7 @@ constructor(
       return
     }
 
-    // todo immediately
-    //    userCredentialsService.updatePassword(user, password)
-
+    userCredentialsService.updatePassword(user, password)
     sender.sendMessage(
       Component.text("Success! User '${user.username}' credentials set.", TextColors.GREEN)
     )
