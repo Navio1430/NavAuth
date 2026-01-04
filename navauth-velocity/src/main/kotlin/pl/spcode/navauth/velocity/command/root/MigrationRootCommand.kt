@@ -21,7 +21,6 @@ package pl.spcode.navauth.velocity.command.root
 import com.google.inject.Inject
 import com.velocitypowered.api.command.CommandSource
 import com.velocitypowered.api.proxy.ConsoleCommandSource
-import com.velocitypowered.api.proxy.ProxyServer
 import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
@@ -32,12 +31,14 @@ import pl.spcode.navauth.common.migrate.MigrationManager
 
 @Command(name = "migration")
 @Permission("navauth.root")
-class MigrationRootCommand
-@Inject
-constructor(private val migrationManager: MigrationManager, private val proxyServer: ProxyServer) {
+class MigrationRootCommand @Inject constructor(private val migrationManager: MigrationManager) {
 
   @Execute(name = "start")
-  @Description("")
+  @Description(
+    "Starts the account data migration process based on provided migration config.",
+    "Ensures only console or RCON can run it, prevents parallel executions,",
+    "and reports whether the migration finished successfully or failed.",
+  )
   fun startMigration(@Context sender: CommandSource) {
 
     if (sender !is ConsoleCommandSource && sender !is IRconCommandSource) {

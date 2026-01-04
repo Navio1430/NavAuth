@@ -27,6 +27,7 @@ import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
 import net.kyori.adventure.text.Component
+import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.UserArgumentResolver
@@ -46,6 +47,7 @@ constructor(
 
   @Execute
   @Async
+  @Description("Does the same thing as `/premium` on specified user, buy forcefully used as admin")
   fun forcePremiumMode(
     @Context sender: CommandSource,
     @Arg(value = "username|uuid") usernameOrUuidRaw: UsernameOrUuidRaw,

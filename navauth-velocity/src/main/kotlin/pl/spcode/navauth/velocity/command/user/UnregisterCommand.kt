@@ -42,7 +42,8 @@ constructor(val userService: UserService, val userCredentialsService: UserCreden
   @Async
   @Execute
   @Description(
-    "Unregister your account.",
+    "Unregisters user account.",
+    "This command **will not delete user data**.",
     "**NOTE**: someone will be able to acquire and register the account after.",
   )
   fun unregister(

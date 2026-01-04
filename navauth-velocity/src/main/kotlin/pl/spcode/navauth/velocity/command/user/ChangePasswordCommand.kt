@@ -43,7 +43,7 @@ constructor(val userService: UserService, val userCredentialsService: UserCreden
 
   @Async
   @Execute
-  @Description("Change your account password")
+  @Description("Changes account password to new one. Requires current password.")
   fun changePassword(
     @Context sender: Player,
     @Arg(value = "current_password") currentPassword: String,

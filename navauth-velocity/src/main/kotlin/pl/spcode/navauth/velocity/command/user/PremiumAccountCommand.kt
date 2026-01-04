@@ -42,9 +42,10 @@ constructor(val userService: UserService, val mojangProfileService: MojangProfil
   @Async
   @Execute
   @Description(
-    "Change your account to premium account.",
-    "Applicable for non-premium players.",
+    "Migrates account mode to premium account.",
+    "Applicable for non-premium players only.",
     "Enables auto-login and migrates to premium.",
+    "This command will remove bound **password** and will leave **2FA** secret if enabled.",
   )
   fun changeToPremiumAccount(@Context sender: Player) {
     val user = userService.findUserByExactUsername(sender.username)!!

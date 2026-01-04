@@ -31,6 +31,7 @@ import java.util.Optional
 import me.uniodex.velocityrcon.commandsource.IRconCommandSource
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
+import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.UserArgumentResolver
 import pl.spcode.navauth.common.command.UsernameOrUuidRaw
@@ -45,8 +46,12 @@ class ForceCrackedAdminCommand
 @Inject
 constructor(val userService: UserService, val userArgumentResolver: UserArgumentResolver) {
 
-  @Execute
   @Async
+  @Execute
+  @Description(
+    "Forces a premium user account into non-premium (cracked) mode.",
+    "Generates or assigns a new password and updates the user’s authentication data accordingly.",
+  )
   fun forceCrackedMode(
     @Context sender: CommandSource,
     @Arg(value = "username|uuid") usernameOrUuidRaw: UsernameOrUuidRaw,
