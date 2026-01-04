@@ -21,7 +21,6 @@ package pl.spcode.navauth.common.domain.credentials
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
-import pl.spcode.navauth.common.infra.crypto.PasswordHash
 
 @JvmInline
 value class TOTPSecret(val value: String) {
@@ -52,11 +51,7 @@ private constructor(
     get() = totpSecret != null
 
   companion object Factory {
-    fun create(
-      user: User,
-      password: HashedPassword?,
-      totpSecret: TOTPSecret?
-    ): UserCredentials {
+    fun create(user: User, password: HashedPassword?, totpSecret: TOTPSecret?): UserCredentials {
       return UserCredentials(
         userUuid = user.uuid,
         hashedPassword = password,
@@ -67,17 +62,18 @@ private constructor(
     fun create(
       userUuid: UserUuid,
       hashedPassword: HashedPassword?,
-      totpSecret: TOTPSecret?
+      totpSecret: TOTPSecret?,
     ): UserCredentials {
       return UserCredentials(userUuid, hashedPassword, totpSecret)
     }
   }
 
-  fun withNewPassword(password: HashedPassword): UserCredentials =
-    copy(hashedPassword = password)
+  fun withNewPassword(password: HashedPassword): UserCredentials = copy(hashedPassword = password)
 
   fun withoutPassword(): UserCredentials {
-    require(totpSecret != null) { "to create credentials without password, at least totpSecret must be set" }
+    require(totpSecret != null) {
+      "to create credentials without password, at least totpSecret must be set"
+    }
     return copy(hashedPassword = null)
   }
 }

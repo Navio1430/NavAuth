@@ -32,10 +32,11 @@ class UserCredentialsRecord(
   @DatabaseField val twoFactorSecret: String? = null,
 ) {
   init {
+    // only this check is reliable because this object can be created by an ORM with all null values
     if (passwordHash != null) {
       require(algo != null) { "algo must not be null" }
     }
 
-    require(twoFactorSecret != null || passwordHash != null) { "credentials must have either password or TOTP secret" }
+    // do not check other things as this object can be initialized with null values
   }
 }

@@ -113,20 +113,14 @@ constructor(
       }
 
     val hashedPassword = getHashedPassword(lUser)
-    if (!isPremium && hashedPassword == null) {
+    if (!isPremium && hashedPassword == null && lUser.secret == null) {
       logger.info(
-        "Non-Premium user ${lUser.lastNickname}:${lUser.uuid} has no password which is an invalid record. Skipping record..."
+        "Non-Premium user ${lUser.lastNickname}:${lUser.uuid} has no password or 2FA secret which is an invalid record. Skipping record..."
       )
       return
     } else {
       val totpSecret = lUser.secret?.let { TOTPSecret(it) }
-      val credentials =
-        UserCredentials.create(
-          userUuid,
-          hashedPassword!!.passwordHash,
-          hashedPassword.algo,
-          totpSecret,
-        )
+      val credentials = UserCredentials.create(userUuid, hashedPassword, totpSecret)
       userCredentialsRepository.save(credentials)
     }
 

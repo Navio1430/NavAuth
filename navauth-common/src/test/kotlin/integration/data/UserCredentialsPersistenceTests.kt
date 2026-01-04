@@ -25,6 +25,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.junit.jupiter.api.extension.ExtendWith
 import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
+import pl.spcode.navauth.common.domain.credentials.TOTPSecret
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
 import pl.spcode.navauth.common.domain.user.User
@@ -40,18 +41,28 @@ class UserCredentialsPersistenceTests {
   @Inject private lateinit var userCredentialsRepository: UserCredentialsRepository
 
   @Test
-  fun `create user credentials from user and hashed password`() {
-    val id = UserUuid(UUID.randomUUID())
-    val username = Username(generateRandomString(10))
-    val user = User.nonPremium(id, username)
-    val hashedPassword = HashedPassword(PasswordHash("hashed_pw"), HashingAlgorithm.BCRYPT)
+  fun `find user credentials by user`() {
+    val user = createNonPremiumUser()
+    val credentials = createUserCredentials(user)
 
-    val credentials = UserCredentials.create(user, hashedPassword)
     userCredentialsRepository.save(credentials)
     val savedCredentials = userCredentialsRepository.findByUser(user)!!
 
-    assertEquals(id, savedCredentials.userUuid)
-    assertEquals(hashedPassword.passwordHash, savedCredentials.passwordHash)
-    assertEquals(hashedPassword.algo, savedCredentials.hashingAlgo)
+    assertEquals(user.uuid, savedCredentials.userUuid)
+    assertEquals(credentials.hashedPassword, savedCredentials.hashedPassword)
+    assertEquals(credentials.totpSecret, savedCredentials.totpSecret)
+  }
+
+  fun createNonPremiumUser(): User {
+    val id = UserUuid(UUID.randomUUID())
+    val username = Username(generateRandomString(10))
+    val user = User.nonPremium(id, username)
+    return user
+  }
+
+  fun createUserCredentials(user: User): UserCredentials {
+    val hashedPassword = HashedPassword(PasswordHash("hashed_pw"), HashingAlgorithm.BCRYPT)
+    val totpSecret = TOTPSecret(generateRandomString(16))
+    return UserCredentials.create(user, hashedPassword, totpSecret)
   }
 }

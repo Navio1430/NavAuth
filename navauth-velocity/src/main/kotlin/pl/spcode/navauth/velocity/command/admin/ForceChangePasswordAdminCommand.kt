@@ -33,8 +33,6 @@ import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.UserArgumentResolver
 import pl.spcode.navauth.common.command.UsernameOrUuidRaw
 import pl.spcode.navauth.common.component.TextColors
-import pl.spcode.navauth.common.domain.credentials.UserCredentials
-import pl.spcode.navauth.common.infra.crypto.hasher.BCryptCredentialsHasher
 import pl.spcode.navauth.velocity.command.Permissions
 
 @Command(name = "forcesetpassword")
@@ -69,8 +67,8 @@ constructor(
       return
     }
 
-    val newCredentials = UserCredentials.create(user, BCryptCredentialsHasher().hash(password))
-    userCredentialsService.storeUserCredentials(user, newCredentials)
+    // todo immediately
+    //    userCredentialsService.updatePassword(user, password)
 
     sender.sendMessage(
       Component.text("Success! User '${user.username}' credentials set.", TextColors.GREEN)
