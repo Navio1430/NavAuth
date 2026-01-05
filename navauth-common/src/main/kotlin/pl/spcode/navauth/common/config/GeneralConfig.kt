@@ -50,6 +50,9 @@ open class GeneralConfig : OkaeriConfig() {
 
   @Comment("Usernames config") var usernamesConfig: UsernamesConfig = UsernamesConfig()
 
+  @Comment("Two-factor (2FA) TOTP authentication config")
+  var twoFactorAuthConfig: TwoFactorAuthConfig = TwoFactorAuthConfig()
+
   @Variable("CONFIG_VERSION")
   @Comment("Config version. DO NOT CHANGE this property!")
   var configVersion: Int = 0

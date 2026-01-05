@@ -33,6 +33,7 @@ import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.component.TextColors
+import pl.spcode.navauth.common.config.TwoFactorAuthConfig
 import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.infra.crypto.TOTP2FA
 import pl.spcode.navauth.common.shared.qr.QRCodeGenerator
@@ -51,6 +52,7 @@ constructor(
   val userCredentialsService: UserCredentialsService,
   val totpSetupSessionFactory: TotpSetupSessionFactory,
   val totpSetupSessionService: TotpSetupSessionService,
+  val twoFactorAuthConfig: TwoFactorAuthConfig,
 ) {
 
   @Async
@@ -175,9 +177,9 @@ constructor(
       return
     }
 
-    // todo add to config
-    val label = "STARPLAY.PL"
-    val qrData = "otpauth://totp/${sender.username}?secret=${session.secret.value}&issuer=${label}"
+    val issuer = twoFactorAuthConfig.issuer
+    val label = sender.username
+    val qrData = "otpauth://totp/${label}?secret=${session.secret.value}&issuer=${issuer}"
 
     val generator = QRCodeGenerator()
     val matrix = generator.generateQRMatrix(qrData)

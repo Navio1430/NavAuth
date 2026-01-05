@@ -28,10 +28,7 @@ class QRCodeGenerator {
 
   fun generateQRMatrix(data: String): BitMatrix {
     val hints =
-      mapOf(
-        EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.L,
-        EncodeHintType.MARGIN to 1
-      )
+      mapOf(EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.L, EncodeHintType.MARGIN to 1)
     val writer = QRCodeWriter()
     return writer.encode(data, BarcodeFormat.QR_CODE, 1, 1, hints)
   }
