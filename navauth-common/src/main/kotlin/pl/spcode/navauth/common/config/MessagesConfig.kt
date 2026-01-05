@@ -54,9 +54,9 @@ open class MessagesConfig : OkaeriConfig() {
     TextComponent("<red>You've exceeded register time, please try again</red>")
 
   @Comment(
-    "Notices that use multification library.",
+    "Notifications which use multification library.",
     "Here you can use chat messages, action bars, sounds etc. combined.",
-    "To learn more about multification please read https://navio1430.github.io/NavAuth/multification.html.",
+    "To learn more about multification please read https://navio1430.github.io/NavAuth/configuration/multification.html",
   )
   var multification = NoticesConfig()
 
