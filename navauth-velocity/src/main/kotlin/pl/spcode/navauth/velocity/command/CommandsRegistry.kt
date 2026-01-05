@@ -22,15 +22,14 @@ import com.google.inject.Injector
 import pl.spcode.navauth.velocity.command.admin.ForceChangePasswordAdminCommand
 import pl.spcode.navauth.velocity.command.admin.ForceCrackedAdminCommand
 import pl.spcode.navauth.velocity.command.admin.ForcePremiumAdminCommand
-import pl.spcode.navauth.velocity.command.admin.ForceUnregisterAdminCommand
 import pl.spcode.navauth.velocity.command.admin.MigrateUserDataAdminCommand
 import pl.spcode.navauth.velocity.command.root.MigrationRootCommand
 import pl.spcode.navauth.velocity.command.user.ChangePasswordCommand
 import pl.spcode.navauth.velocity.command.user.LoginCommand
 import pl.spcode.navauth.velocity.command.user.PremiumAccountCommand
 import pl.spcode.navauth.velocity.command.user.RegisterCommand
-import pl.spcode.navauth.velocity.command.user.SetupTwoFactorCommand
-import pl.spcode.navauth.velocity.command.user.UnregisterCommand
+import pl.spcode.navauth.velocity.command.user.TwoFactorDisableCommand
+import pl.spcode.navauth.velocity.command.user.TwoFactorSetupCommand
 
 class CommandsRegistry {
 
@@ -40,12 +39,10 @@ class CommandsRegistry {
         // user
         LoginCommand::class,
         RegisterCommand::class,
-        UnregisterCommand::class,
         ChangePasswordCommand::class,
         PremiumAccountCommand::class,
         SetupTwoFactorCommand::class,
         // admin
-        ForceUnregisterAdminCommand::class,
         ForceChangePasswordAdminCommand::class,
         ForceCrackedAdminCommand::class,
         ForcePremiumAdminCommand::class,
