@@ -59,7 +59,7 @@ private constructor(
     return copy(mojangUuid = null, credentialsRequired = true)
   }
 
-  fun withCredentialsRequired() = copy(credentialsRequired = true)
+  fun withCredentialsRequired(required: Boolean = true) = copy(credentialsRequired = required)
 
   override fun toString(): String {
     return "User(id=$uuid, username=$username, mojangUuid=$mojangUuid, credentialsRequired=$credentialsRequired)"

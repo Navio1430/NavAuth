@@ -76,6 +76,19 @@ constructor(
     userRepository.save(user)
   }
 
+  fun deleteUserCredentials(user: User): User {
+    return txService.inTransaction {
+      return@inTransaction deleteUserCredentialsNoTx(user)
+    }
+  }
+
+  private fun deleteUserCredentialsNoTx(user: User): User {
+    val user = user.withCredentialsRequired(false)
+    userRepository.save(user)
+    userCredentialsService.deleteUserCredentials(user)
+    return user
+  }
+
   /**
    * Migrates a non-premium user account to a premium account using the provided Mojang ID. This
    * updates the user's data and ensures proper handling of authentication credentials.
@@ -96,7 +109,7 @@ constructor(
         val newCredentials = credentials.withoutPassword()
         userCredentialsService.storeUserCredentials(premiumUser, newCredentials)
       } else {
-        userCredentialsService.deleteUserCredentials(user)
+        deleteUserCredentialsNoTx(user)
       }
 
       return@inTransaction premiumUser
@@ -209,6 +222,18 @@ constructor(
 
       val newCredentials = credentials.withTotpSecret(totpSecret)
       userCredentialsService.storeUserCredentials(userWithCredentials, newCredentials)
+    }
+  }
+
+  fun disableTwoFactorAuth(user: User) {
+    txService.inTransaction {
+      val credentials = userCredentialsService.findCredentials(user)!!
+      if (credentials.isPasswordRequired) {
+        val newCredentials = credentials.withoutTotpSecret()
+        userCredentialsService.storeUserCredentials(user, newCredentials)
+      } else {
+        deleteUserCredentialsNoTx(user)
+      }
     }
   }
 }

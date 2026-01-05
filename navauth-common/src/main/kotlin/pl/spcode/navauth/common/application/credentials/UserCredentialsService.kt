@@ -43,6 +43,14 @@ constructor(
     return credentialsRepository.findByUser(user)
   }
 
+  /**
+   * Stores the user credentials after validation.
+   *
+   * @param user the user to whom the provided credentials belong
+   * @param userCredentials the credentials to be stored for the user
+   * @throws IllegalArgumentException if the provided credentials do not match the user or if the
+   *   user does not require credentials
+   */
   fun storeUserCredentials(user: User, userCredentials: UserCredentials) {
     require(userCredentials.userUuid == user.uuid) {
       "provided credentials do not belong to the provided user"
@@ -54,7 +62,16 @@ constructor(
     credentialsRepository.save(userCredentials)
   }
 
+  /**
+   * Deletes the credentials associated with the given user.
+   *
+   * @param user the user whose credentials are to be deleted
+   * @throws IllegalArgumentException if the user has the `credentialsRequired` property set to true
+   */
   fun deleteUserCredentials(user: User) {
+    require(!user.credentialsRequired) {
+      "cannot delete credentials for a user with credentials required property"
+    }
     credentialsRepository.deleteByUser(user)
   }
 
