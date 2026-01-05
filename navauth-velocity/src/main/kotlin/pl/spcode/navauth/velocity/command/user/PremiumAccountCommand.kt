@@ -19,6 +19,7 @@
 package pl.spcode.navauth.velocity.command.user
 
 import com.google.inject.Inject
+import com.velocitypowered.api.permission.Tristate
 import com.velocitypowered.api.proxy.Player
 import dev.rollczi.litecommands.annotations.async.Async
 import dev.rollczi.litecommands.annotations.command.Command
@@ -33,8 +34,8 @@ import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.velocity.command.Permissions
 
+// inverted permission
 @Command(name = "premium")
-@Permission(Permissions.USER_CHANGE_TO_PREMIUM_ACCOUNT)
 class PremiumAccountCommand
 @Inject
 constructor(val userService: UserService, val mojangProfileService: MojangProfileService) {
@@ -48,6 +49,15 @@ constructor(val userService: UserService, val mojangProfileService: MojangProfil
     "This command will remove bound **password** and will leave **2FA** secret if enabled.",
   )
   fun changeToPremiumAccount(@Context sender: Player) {
+    // if permission is set explicitly to FALSE
+    if (sender.getPermissionValue(Permissions.USER_CHANGE_TO_PREMIUM_ACCOUNT) == Tristate.FALSE) {
+      // todo unify missing permission handler
+      sender.sendMessage(
+          Component.text("You don't have permission to use this command.", TextColors.RED)
+      )
+      return
+    }
+
     val user = userService.findUserByExactUsername(sender.username)!!
     if (user.isPremium) {
       sender.sendMessage(Component.text("Account is already set as a premium one.", TextColors.RED))
