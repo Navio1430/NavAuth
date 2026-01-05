@@ -77,6 +77,28 @@ open class MessagesConfig : OkaeriConfig() {
     var registerSuccess: Notice = Notice.chat("<green>Successfully registered</green>")
 
     var premiumAuthSuccess: Notice = Notice.chat("<green>Auto-logged in</green>")
+
+    var twoFactorSetupInstruction: Notice =
+      Notice.chat(
+        """
+        <#00ff88><bold>🔐 2FA Setup Started</bold>
+
+        <white><bold>ℹ First add your secret to authenticator app:</bold>
+        <gray>• Google Authenticator, Authy, Microsoft Auth, Aegis, etc.
+        <gray>1. Tap the '<bold><white>+</white></bold>' button → "Enter secret manually"
+        <gray>2. Add label such as your username and server name
+        <gray>3. Complete the setup with → /complete2fa <code>
+
+        <white><bold>YOUR SECRET:</bold>
+        <bold><red>⚠ NEVER share this - even with admins!</red></bold>
+        <yellow>%SECRET%</yellow>
+        
+        <click:run_command:'/generate2faqr'><aqua><b>CLICK HERE TO GENERATE QR CODE</b></click>
+
+        <gray><i>⏱ Time left: %REMAINING_SECONDS%s<gray></i>
+        """
+          .trimIndent()
+      )
   }
 
   @Variable("CONFIG_VERSION")

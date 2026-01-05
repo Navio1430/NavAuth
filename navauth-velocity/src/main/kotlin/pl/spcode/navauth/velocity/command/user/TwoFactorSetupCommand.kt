@@ -33,6 +33,7 @@ import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.component.TextColors
+import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.config.TwoFactorAuthConfig
 import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.infra.crypto.TOTP2FA
@@ -41,11 +42,12 @@ import pl.spcode.navauth.velocity.application.totp.TotpSetupSessionFactory
 import pl.spcode.navauth.velocity.application.totp.TotpSetupSessionService
 import pl.spcode.navauth.velocity.command.Permissions
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
+import pl.spcode.navauth.velocity.multification.VelocityMultification
 
 // we use inverted permission in this command
 // todo generate command aliases in docs
 @RootCommand
-class SetupTwoFactorCommand
+class TwoFactorSetupCommand
 @Inject
 constructor(
   val userService: UserService,
@@ -53,6 +55,8 @@ constructor(
   val totpSetupSessionFactory: TotpSetupSessionFactory,
   val totpSetupSessionService: TotpSetupSessionService,
   val twoFactorAuthConfig: TwoFactorAuthConfig,
+  val messages: MessagesConfig,
+  val velocityMultification: VelocityMultification,
 ) {
 
   @Async
@@ -63,7 +67,7 @@ constructor(
     @Arg(value = "current_password") currentPassword: Optional<String>,
   ) {
     // if permission is set explicitly to FALSE
-    if (sender.getPermissionValue(Permissions.USER_SETUP_TWO_FACTOR) == Tristate.FALSE) {
+    if (sender.getPermissionValue(Permissions.USER_TWO_FACTOR_SETUP) == Tristate.FALSE) {
       // todo unify missing permission handler
       sender.sendMessage(
         Component.text("You don't have permission to use this command.", TextColors.RED)
@@ -102,29 +106,14 @@ constructor(
     totpSetupSessionService.registerSession(UserUuid(sender.uniqueId), session)
 
     val remainingSeconds = TotpSetupSessionService.SESSION_LIFETIME_SECONDS
-    sender.sendMessage(
-      MiniMessage.miniMessage()
-        .deserialize(
-          """
-      <#00ff88><bold>🔐 2FA Setup Started</bold>
+    velocityMultification
+      .create()
+      .player(sender.uniqueId)
+      .notice(messages.multification.twoFactorSetupInstruction)
+      .placeholder("%SECRET%", secret.value)
+      .placeholder("%REMAINING_SECONDS%", remainingSeconds.toString())
+      .send()
 
-      <white><bold>ℹ First add your secret to authenticator app:</bold>
-      <gray>• Google Authenticator, Authy, Microsoft Auth, Aegis, etc.
-      <gray>1. Tap the '<bold><white>+</white></bold>' button → "Enter secret manually"
-      <gray>2. Add label such as your username and server name
-      <gray>3. Complete the setup with → /complete2fa <code>
-
-      <white><bold>YOUR SECRET:</bold>
-      <bold><red>⚠ NEVER share this - even with admins!</red></bold>
-      <yellow>${secret.value}</yellow>
-      
-      <click:run_command:'/generate2faqr'><aqua><b>CLICK HERE TO GENERATE QR CODE</b></click>
-
-      <gray><i>⏱ Time left: ${remainingSeconds}s<gray></i>
-"""
-            .trimIndent()
-        )
-    )
     return
   }
 

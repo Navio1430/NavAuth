@@ -42,6 +42,7 @@ class CommandsRegistry {
         ChangePasswordCommand::class,
         PremiumAccountCommand::class,
         SetupTwoFactorCommand::class,
+        TwoFactorSetupCommand::class,
         // admin
         ForceChangePasswordAdminCommand::class,
         ForceCrackedAdminCommand::class,
