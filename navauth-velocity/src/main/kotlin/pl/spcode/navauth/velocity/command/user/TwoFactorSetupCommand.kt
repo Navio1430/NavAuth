@@ -118,7 +118,7 @@ constructor(
   }
 
   @Async
-  @Execute(name = "complete2fa")
+  @Execute(name = "verify2fa", aliases = ["complete2fa"])
   // todo description
   fun completeTwoFactorSetup(@Context sender: Player, @Arg(value = "2fa_code") code: String) {
     val user = userService.findUserByUuid(UserUuid(sender.uniqueId))!!

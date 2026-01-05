@@ -87,7 +87,7 @@ open class MessagesConfig : OkaeriConfig() {
         <gray>• Google Authenticator, Authy, Microsoft Auth, Aegis, etc.
         <gray>1. Tap the '<bold><white>+</white></bold>' button → "Enter secret manually"
         <gray>2. Add label such as your username and server name
-        <gray>3. Complete the setup with → /complete2fa <code>
+        <gray>3. Complete the setup with → /verify2fa <code>
 
         <white><bold>YOUR SECRET:</bold>
         <bold><red>⚠ NEVER share this - even with admins!</red></bold>
