@@ -25,7 +25,6 @@ import dev.rollczi.litecommands.annotations.async.Async
 import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
-import dev.rollczi.litecommands.annotations.permission.Permission
 import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
@@ -53,7 +52,7 @@ constructor(val userService: UserService, val mojangProfileService: MojangProfil
     if (sender.getPermissionValue(Permissions.USER_CHANGE_TO_PREMIUM_ACCOUNT) == Tristate.FALSE) {
       // todo unify missing permission handler
       sender.sendMessage(
-          Component.text("You don't have permission to use this command.", TextColors.RED)
+        Component.text("You don't have permission to use this command.", TextColors.RED)
       )
       return
     }
