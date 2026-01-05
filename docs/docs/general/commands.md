@@ -6,4 +6,4 @@ you can set the permission value explicitly to false in your permissions plugin 
 For example, to restrict `/register` command set `navauth.user.register` value to `FALSE`.
 
 ## Available commands
-<!--@include: ../../generated/velocity-commands.md-->
+<!--@include: ../generated/velocity-commands.md-->
