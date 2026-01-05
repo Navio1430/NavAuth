@@ -29,11 +29,13 @@ import dev.rollczi.litecommands.annotations.execute.Execute
 import java.util.Optional
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
+import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.infra.crypto.TOTP2FA
+import pl.spcode.navauth.common.shared.qr.QRCodeGenerator
 import pl.spcode.navauth.velocity.application.totp.TotpSetupSessionFactory
 import pl.spcode.navauth.velocity.application.totp.TotpSetupSessionService
 import pl.spcode.navauth.velocity.command.Permissions
@@ -113,7 +115,8 @@ constructor(
       <white><bold>YOUR SECRET:</bold>
       <bold><red>⚠ NEVER share this - even with admins!</red></bold>
       <yellow>${secret.value}</yellow>
-      <gray>(${secret.value.chunked(4).joinToString(" ")})<gray>
+      
+      <click:run_command:'/generate2faqr'><aqua><b>CLICK HERE TO GENERATE QR CODE</b></click>
 
       <gray><i>⏱ Time left: ${remainingSeconds}s<gray></i>
 """
@@ -153,5 +156,35 @@ constructor(
     userService.enableTwoFactorAuth(user, session.secret)
     totpSetupSessionService.closeSession(UserUuid(sender.uniqueId))
     sender.sendMessage(Component.text("2FA successfully enabled!", TextColors.GREEN))
+  }
+
+  @Execute(name = "generate2faqr")
+  @Description(
+    "Command used to generate QR code with otp totp data.",
+    "Available only if 2FA setup session is found.",
+  )
+  fun generateQrCode(@Context sender: Player) {
+    val session = totpSetupSessionService.findSession(UserUuid(sender.uniqueId))
+    if (session == null) {
+      sender.sendMessage(
+        Component.text(
+          "2FA setup session not found. Please try again using /setup2fa command first.",
+          TextColors.RED,
+        )
+      )
+      return
+    }
+
+    // todo add to config
+    val label = "STARPLAY.PL"
+    val qrData = "otpauth://totp/${sender.username}?secret=${session.secret.value}&issuer=${label}"
+
+    val generator = QRCodeGenerator()
+    val matrix = generator.generateQRMatrix(qrData)
+    val grid = generator.bitMatrixToGrid(matrix)
+    val unicodeGrid = generator.gridToMinecraftUnicodeWithMiniMessage(grid)
+
+    val message = MiniMessage.miniMessage().deserialize(unicodeGrid.joinToString("\n"))
+    sender.sendMessage(message)
   }
 }

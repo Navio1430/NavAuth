@@ -34,6 +34,9 @@ dependencies {
   // todo add litecommands version to versions.toml for full compatibility across modules
   compileOnly("dev.rollczi:litecommands-core:3.10.6")
 
+  // qr code generation
+  api("com.google.zxing:core:3.5.4")
+
   // tests
   testImplementation("io.kotest:kotest-runner-junit5:5.8.0")
   testImplementation("io.kotest:kotest-assertions-core:5.8.0")
