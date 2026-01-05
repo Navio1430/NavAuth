@@ -36,8 +36,6 @@ class TOTP2FA {
     private const val SECRET_SIZE_BYTES = 20 // 160 bits (RFC 4226)
     private const val MOD_DIVISOR = 1_000_000
 
-    private val TIMESTAMP_SECONDS: Long = System.currentTimeMillis() / 1000
-
     private val secureRandom = SecureRandom()
   }
 
@@ -77,7 +75,8 @@ class TOTP2FA {
   }
 
   fun verifyTOTP(secret: TOTPSecret, code: String, window: Int = 1): Boolean {
-    val currentStep = TIMESTAMP_SECONDS / TIME_STEP_SECONDS
+    val timestampSeconds = System.currentTimeMillis() / 1000
+    val currentStep = timestampSeconds / TIME_STEP_SECONDS
 
     for (i in -window..window) {
       val stepTime = (currentStep + i) * TIME_STEP_SECONDS
