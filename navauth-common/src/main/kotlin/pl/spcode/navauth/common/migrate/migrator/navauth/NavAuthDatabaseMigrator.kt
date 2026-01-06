@@ -100,9 +100,17 @@ constructor(
   ): Long {
     val sourceDao = sourceDao as Dao<Any, Any>
     val targetDao = targetDao as Dao<Any, Any>
+
     val qb = sourceDao.queryBuilder().offset(offset).limit(limit).prepare()
-    val result = sourceDao.query(qb)
-    targetDao.create(result)
-    return result.size.toLong()
+    val rows = sourceDao.query(qb)
+    if (rows.isEmpty()) return 0
+
+    targetDao.callBatchTasks {
+      for (record in rows) {
+        targetDao.createOrUpdate(record)
+      }
+    }
+
+    return rows.size.toLong()
   }
 }
