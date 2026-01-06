@@ -16,25 +16,15 @@
  *
  */
 
-package pl.spcode.navauth.common.migrate.migrator
+package pl.spcode.navauth.common.migrate
 
-interface Migrator {
-
-  /**
-   * Prepares the migrator for the migration process. This function is called to initialize any
-   * required resources or perform setup operations before the migration can begin.
-   */
-  fun init()
-
-  /** @return the total number of user records in the source database */
-  fun getSourceUsersCount(): Long
-
-  /**
-   * Migrates a chunk of records starting from the specified offset.
-   *
-   * @param offset the starting position of records to migrate
-   * @param limit the maximum number of records to migrate in this operation
-   * @return the number of records successfully migrated
-   */
-  fun migrateNext(offset: Long, limit: Long): Long
+enum class MigrationOriginPluginType {
+  NAVAUTH, // used for database type migration
+  LIBRELOGIN,
+//  JPREMIUM,
+//  AUTHME,
+//  OPENNLOGIN,
+//  FASTLOGIN,
+//  LIMBOAUTH,
+//  MINELOGIN,
 }

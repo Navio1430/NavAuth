@@ -1,6 +1,6 @@
 /*
  * NavAuth
- * Copyright © 2025 Oliwier Fijas (Navio1430)
+ * Copyright © 2026 Oliwier Fijas (Navio1430)
  *
  * NavAuth is free software; You can redistribute it and/or modify it under the terms of:
  * the GNU Affero General Public License version 3 as published by the Free Software Foundation.
@@ -16,14 +16,10 @@
  *
  */
 
-package pl.spcode.navauth.common.migrate
+package pl.spcode.navauth.common.migrate.migrator.navauth
 
-enum class MigratedPluginType {
-  LIBRELOGIN,
-  JPREMIUM,
-  AUTHME,
-  OPENNLOGIN,
-  FASTLOGIN,
-  LIMBOAUTH,
-  MINELOGIN,
+class NavAuthDatabaseMigrator {
+  fun migrateTables() {
+    // todo impl
+  }
 }

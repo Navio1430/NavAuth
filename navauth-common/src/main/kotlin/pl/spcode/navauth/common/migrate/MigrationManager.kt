@@ -22,6 +22,7 @@ import com.google.inject.Inject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.config.MigrationConfig
+import pl.spcode.navauth.common.migrate.migrator.navauth.NavAuthDatabaseMigrator
 
 class MigrationManager
 @Inject
@@ -42,25 +43,12 @@ constructor(private val migrationConfig: MigrationConfig, val migratorFactory: M
       throw IllegalStateException("Migration is already in progress")
     }
 
-    val migrator = migratorFactory.getMigrator(migrationConfig.originPluginType)
-
     isMigrating = true
     try {
-      migrator.init()
-
-      val total = migrator.getSourceRecordsCount()
-      logger.info("Starting migration of $total records")
-
-      var offset = 0L
-      while (true) {
-        val migrated = migrator.migrateNext(offset, migrationConfig.chunkSize)
-        if (migrated <= 0) break
-
-        offset += migrated
-        logger.info("Migrated $offset / $total records")
+      when (migrationConfig.originPluginType) {
+        MigrationOriginPluginType.NAVAUTH -> startDatabaseMigration()
+        else -> startPluginMigration()
       }
-
-      logger.info("Migration finished, migrated $offset records in total")
     } catch (e: Exception) {
       logger.error("Migration failed", e)
       throw e
@@ -68,4 +56,29 @@ constructor(private val migrationConfig: MigrationConfig, val migratorFactory: M
       isMigrating = false
     }
   }
+
+  fun startDatabaseMigration() {
+    NavAuthDatabaseMigrator().migrateTables()
+  }
+
+  fun startPluginMigration() {
+    val migrator = migratorFactory.getMigrator(migrationConfig.originPluginType)
+
+    migrator.init()
+    val total = migrator.getSourceUsersCount()
+    logger.info("Starting migration of $total users")
+
+    var offset = 0L
+    while (true) {
+      val migrated = migrator.migrateNext(offset, migrationConfig.chunkSize)
+      if (migrated <= 0) break
+
+      offset += migrated
+      logger.info("Migrated $offset / $total users")
+    }
+
+    logger.info("Migration finished, migrated $offset users in total")
+  }
+
+
 }

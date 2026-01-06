@@ -25,17 +25,20 @@ import pl.spcode.navauth.common.migrate.migrator.librelogin.LibreLoginMigrator
 
 class MigratorFactory @Inject constructor(val injector: Injector) {
 
-  fun getMigrator(plugin: MigratedPluginType): Migrator {
+  fun getMigrator(plugin: MigrationOriginPluginType): Migrator {
     return when (plugin) {
-      MigratedPluginType.LIBRELOGIN -> {
+      MigrationOriginPluginType.NAVAUTH -> {
+        throw IllegalArgumentException()
+      }
+      MigrationOriginPluginType.LIBRELOGIN -> {
         injector.getInstance(LibreLoginMigrator::class.java)
       }
-      MigratedPluginType.JPREMIUM -> TODO()
-      MigratedPluginType.AUTHME -> TODO()
-      MigratedPluginType.OPENNLOGIN -> TODO()
-      MigratedPluginType.FASTLOGIN -> TODO()
-      MigratedPluginType.LIMBOAUTH -> TODO()
-      MigratedPluginType.MINELOGIN -> TODO()
+//      MigratedPluginType.JPREMIUM -> TODO()
+//      MigratedPluginType.AUTHME -> TODO()
+//      MigratedPluginType.OPENNLOGIN -> TODO()
+//      MigratedPluginType.FASTLOGIN -> TODO()
+//      MigratedPluginType.LIMBOAUTH -> TODO()
+//      MigratedPluginType.MINELOGIN -> TODO()
     }
   }
 }

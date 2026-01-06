@@ -22,7 +22,7 @@ import eu.okaeri.configs.OkaeriConfig
 import eu.okaeri.configs.annotation.Comment
 import eu.okaeri.configs.annotation.Header
 import pl.spcode.navauth.common.infra.database.DatabaseConfig
-import pl.spcode.navauth.common.migrate.MigratedPluginType
+import pl.spcode.navauth.common.migrate.MigrationOriginPluginType
 
 @Header("Database migration config", "This file contains database migration settings.")
 class MigrationConfig : OkaeriConfig() {
@@ -51,5 +51,5 @@ class MigrationConfig : OkaeriConfig() {
     " - LIMBOAUTH",
     " - MINELOGIN",
   )
-  var originPluginType: MigratedPluginType = MigratedPluginType.LIBRELOGIN
+  var originPluginType: MigrationOriginPluginType = MigrationOriginPluginType.LIBRELOGIN
 }

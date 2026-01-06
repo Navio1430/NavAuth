@@ -19,7 +19,7 @@
 package pl.spcode.navauth.docsgen.generator.common
 
 import net.steppschuh.markdowngenerator.table.Table
-import pl.spcode.navauth.common.migrate.MigratedPluginType
+import pl.spcode.navauth.common.migrate.MigrationOriginPluginType
 import pl.spcode.navauth.docsgen.generator.Generator
 
 class MigratedPluginTypesGenerator : Generator {
@@ -30,7 +30,10 @@ class MigratedPluginTypesGenerator : Generator {
         .withAlignments(Table.ALIGN_LEFT, Table.ALIGN_CENTER)
         .addRow("Plugin Name", "Supported")
 
-    MigratedPluginType.entries.forEach { tableBuilder.addRow(it.name, "✅") }
+    MigrationOriginPluginType.entries.forEach {
+      if (it == MigrationOriginPluginType.NAVAUTH) return@forEach
+      tableBuilder.addRow(it.name, "✅")
+    }
 
     val md: StringBuilder = StringBuilder().append(tableBuilder.build())
     return md.toString()

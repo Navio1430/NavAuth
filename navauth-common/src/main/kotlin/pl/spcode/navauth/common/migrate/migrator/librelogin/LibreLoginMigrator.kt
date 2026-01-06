@@ -76,7 +76,7 @@ constructor(
     }
   }
 
-  override fun getSourceRecordsCount(): Long {
+  override fun getSourceUsersCount(): Long {
     return sourceDao.countOf()
   }
 
