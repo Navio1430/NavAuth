@@ -1,6 +1,6 @@
 /*
  * NavAuth
- * Copyright © 2025 Oliwier Fijas (Navio1430)
+ * Copyright © 2026 Oliwier Fijas (Navio1430)
  *
  * NavAuth is free software; You can redistribute it and/or modify it under the terms of:
  * the GNU Affero General Public License version 3 as published by the Free Software Foundation.
@@ -16,17 +16,19 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.auth
+package pl.spcode.navauth.common.domain.user
 
-import pl.spcode.navauth.common.domain.auth.session.AuthSession
-import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
-import pl.spcode.navauth.common.domain.player.PlayerAdapter
+import java.util.Date
+import pl.spcode.navauth.common.domain.common.IPAddress
 
-class PremiumAuthSession<T : PlayerAdapter>(playerAdapter: T) : AuthSession<T>(playerAdapter) {
-
-  override fun getSessionType(): AuthSessionType {
-    return AuthSessionType.PREMIUM
+data class UserActivitySession
+private constructor(val uuid: UserUuid, val joinedAt: Date, val leftAt: Date, val ip: IPAddress) {
+  init {
+    require(joinedAt.before(leftAt)) { "joined at must be before left at" }
   }
 
-  override fun onInvalidate() {}
+  companion object Factory {
+    fun create(uuid: UserUuid, joinedAt: Date, leftAt: Date, ip: IPAddress) =
+      UserActivitySession(uuid, joinedAt, leftAt, ip)
+  }
 }

@@ -23,11 +23,14 @@ import com.google.inject.Singleton
 import java.util.UUID
 import kotlin.reflect.KClass
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
+import pl.spcode.navauth.common.domain.user.UserActivitySessionRepository
 import pl.spcode.navauth.common.domain.user.UserRepository
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.infra.database.EntitiesRegistrar
 import pl.spcode.navauth.common.infra.persistence.ormlite.credentials.UserCredentialsRecord
 import pl.spcode.navauth.common.infra.persistence.ormlite.credentials.UserCredentialsRepositoryImpl
+import pl.spcode.navauth.common.infra.persistence.ormlite.user.UserActivitySessionRecord
+import pl.spcode.navauth.common.infra.persistence.ormlite.user.UserActivitySessionRepositoryImpl
 import pl.spcode.navauth.common.infra.persistence.ormlite.user.UserRecord
 import pl.spcode.navauth.common.infra.persistence.ormlite.user.UserRepositoryImpl
 
@@ -53,6 +56,12 @@ class DataPersistenceModule : AbstractModule() {
         UUID::class,
         UserCredentialsRepository::class.java,
         UserCredentialsRepositoryImpl::class.java,
+      ),
+      Binding(
+        UserActivitySessionRecord::class,
+        UUID::class,
+        UserActivitySessionRepository::class.java,
+        UserActivitySessionRepositoryImpl::class.java,
       ),
     )
 

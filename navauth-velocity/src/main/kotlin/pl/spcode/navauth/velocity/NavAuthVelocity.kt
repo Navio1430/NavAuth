@@ -34,6 +34,7 @@ import java.nio.file.Path
 import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import pl.spcode.navauth.common.application.event.EventDispatcher
 import pl.spcode.navauth.common.command.UserResolveException
 import pl.spcode.navauth.common.command.UserResolveExceptionHandler
 import pl.spcode.navauth.common.command.UsernameOrUuidParser
@@ -41,8 +42,10 @@ import pl.spcode.navauth.common.command.UsernameOrUuidRaw
 import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.config.MigrationConfig
+import pl.spcode.navauth.common.domain.event.UserAuthenticatedEvent
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.module.DataPersistenceModule
+import pl.spcode.navauth.common.module.EventsModule
 import pl.spcode.navauth.common.module.HttpClientModule
 import pl.spcode.navauth.common.module.MigrationModule
 import pl.spcode.navauth.common.module.PluginDirectoryModule
@@ -51,6 +54,7 @@ import pl.spcode.navauth.common.module.YamlConfigModule
 import pl.spcode.navauth.velocity.command.CommandsRegistry
 import pl.spcode.navauth.velocity.component.VelocityAudienceProvider
 import pl.spcode.navauth.velocity.listener.VelocityListenersRegistry
+import pl.spcode.navauth.velocity.listener.application.UserAuthenticatedEventListener
 import pl.spcode.navauth.velocity.module.SchedulerModule
 import pl.spcode.navauth.velocity.module.VelocityMultificationsModule
 import pl.spcode.navauth.velocity.module.VelocityServicesModule
@@ -107,6 +111,7 @@ constructor(
           generalConfigModule,
           messagesConfigModule,
           migrationConfigModule,
+          EventsModule(),
           VelocityMultificationsModule(velocityMultification),
           SchedulerModule(pluginInstance, proxyServer.scheduler),
           HttpClientModule(),
@@ -115,6 +120,12 @@ constructor(
           VelocityServicesModule(),
           MigrationModule(),
         )
+
+      val dispatcher = injector.getInstance(EventDispatcher::class.java)
+      dispatcher.register(
+        UserAuthenticatedEvent::class.java,
+        injector.getInstance(UserAuthenticatedEventListener::class.java),
+      )
 
       connectAndInitDatabase()
 

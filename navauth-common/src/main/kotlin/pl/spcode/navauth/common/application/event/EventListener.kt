@@ -1,6 +1,6 @@
 /*
  * NavAuth
- * Copyright © 2025 Oliwier Fijas (Navio1430)
+ * Copyright © 2026 Oliwier Fijas (Navio1430)
  *
  * NavAuth is free software; You can redistribute it and/or modify it under the terms of:
  * the GNU Affero General Public License version 3 as published by the Free Software Foundation.
@@ -16,18 +16,10 @@
  *
  */
 
-package pl.spcode.navauth.common.domain.player
+package pl.spcode.navauth.common.application.event
 
-import pl.spcode.navauth.common.domain.common.IPAddress
-import pl.spcode.navauth.common.domain.user.UserUuid
+import pl.spcode.navauth.common.domain.event.Event
 
-interface PlayerAdapter {
-
-  fun getIPAddress(): IPAddress
-
-  fun getUuid(): UserUuid
-
-  fun disconnect(reason: DisconnectReason)
-
-  fun isOnline(): Boolean
+interface EventListener<E : Event> {
+  fun handle(event: E)
 }

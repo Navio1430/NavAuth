@@ -29,6 +29,7 @@ import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
+import pl.spcode.navauth.common.application.user.UserActivitySessionService
 import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionState
 import pl.spcode.navauth.velocity.application.server.ServerNotFoundException
@@ -41,6 +42,7 @@ class ConnectionListeners
 constructor(
   val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
   val serverSelectionService: VelocityServerSelectionService,
+  val userActivitySessionService: UserActivitySessionService,
 ) {
 
   val logger: Logger = LoggerFactory.getLogger(ConnectionListeners::class.java)
@@ -48,6 +50,7 @@ constructor(
   @Subscribe
   fun onDisconnect(event: DisconnectEvent) {
     authSessionService.closeSession(VelocityUniqueSessionId(event.player))
+    userActivitySessionService.storePlayerSessionOnLeave(VelocityPlayerAdapter(event.player))
   }
 
   @Subscribe(order = PostOrder.FIRST)

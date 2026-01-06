@@ -22,6 +22,7 @@ import com.velocitypowered.api.proxy.Player
 import com.velocitypowered.api.scheduler.ScheduledTask
 import java.time.Duration
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
+import pl.spcode.navauth.common.application.event.EventDispatcher
 import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
@@ -40,12 +41,14 @@ class VelocityLoginAuthSession(
   val multification: VelocityMultification,
   generalConfig: GeneralConfig,
   val messagesConfig: MessagesConfig,
+  eventDispatcher: EventDispatcher,
 ) :
   LoginAuthSession<VelocityPlayerAdapter>(
     VelocityPlayerAdapter(player),
     userCredentials,
     userCredentialsService,
     generalConfig.maxLoginAttempts,
+    eventDispatcher,
   ) {
 
   val notifyMessageTask: ScheduledTask

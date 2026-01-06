@@ -20,6 +20,7 @@ package pl.spcode.navauth.velocity.infra.auth
 
 import com.velocitypowered.api.proxy.Player
 import java.time.Duration
+import pl.spcode.navauth.common.application.event.EventDispatcher
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.domain.auth.session.AuthSession
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
@@ -32,7 +33,8 @@ class VelocityAutoLoginAuthSession(
   val scheduler: NavAuthScheduler,
   val multification: VelocityMultification,
   val messagesConfig: MessagesConfig,
-) : AuthSession<VelocityPlayerAdapter>(VelocityPlayerAdapter(player)) {
+  eventDispatcher: EventDispatcher,
+) : AuthSession<VelocityPlayerAdapter>(VelocityPlayerAdapter(player), eventDispatcher) {
 
   override fun getSessionType(): AuthSessionType {
     return AuthSessionType.PREMIUM

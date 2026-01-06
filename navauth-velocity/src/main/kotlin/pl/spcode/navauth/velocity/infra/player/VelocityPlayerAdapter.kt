@@ -21,10 +21,20 @@ package pl.spcode.navauth.velocity.infra.player
 import com.velocitypowered.api.proxy.Player
 import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.component.TextColors
+import pl.spcode.navauth.common.domain.common.IPAddress
 import pl.spcode.navauth.common.domain.player.DisconnectReason
 import pl.spcode.navauth.common.domain.player.PlayerAdapter
+import pl.spcode.navauth.common.domain.user.UserUuid
 
 class VelocityPlayerAdapter(val velocityPlayer: Player) : PlayerAdapter {
+
+  override fun getIPAddress(): IPAddress {
+    return IPAddress.fromInetAddress(velocityPlayer.remoteAddress.address)
+  }
+
+  override fun getUuid(): UserUuid {
+    return UserUuid(velocityPlayer.uniqueId)
+  }
 
   override fun disconnect(reason: DisconnectReason) {
     when (reason) {

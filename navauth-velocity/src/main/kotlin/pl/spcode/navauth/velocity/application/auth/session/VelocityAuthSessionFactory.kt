@@ -24,6 +24,7 @@ import com.velocitypowered.api.proxy.Player
 import pl.spcode.navauth.common.application.auth.session.AuthSessionException
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
+import pl.spcode.navauth.common.application.event.EventDispatcher
 import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.domain.user.User
@@ -47,6 +48,7 @@ constructor(
   val multification: VelocityMultification,
   val generalConfig: GeneralConfig,
   val messagesConfig: MessagesConfig,
+  val eventDispatcher: EventDispatcher,
 ) {
 
   fun createLoginAuthSession(
@@ -70,6 +72,7 @@ constructor(
         multification,
         generalConfig,
         messagesConfig,
+        eventDispatcher,
       )
     return authSessionService.registerSession(uniqueSessionId, session)
   }
@@ -85,6 +88,7 @@ constructor(
         velocityEventDispatcher,
         multification,
         messagesConfig,
+        eventDispatcher,
       )
     return authSessionService.registerSession(uniqueSessionId, session)
   }
@@ -93,7 +97,14 @@ constructor(
     player: Player,
     uniqueSessionId: VelocityUniqueSessionId,
   ): VelocityAutoLoginAuthSession {
-    val session = VelocityAutoLoginAuthSession(player, scheduler, multification, messagesConfig)
+    val session =
+      VelocityAutoLoginAuthSession(
+        player,
+        scheduler,
+        multification,
+        messagesConfig,
+        eventDispatcher,
+      )
     return authSessionService.registerSession(uniqueSessionId, session)
   }
 }

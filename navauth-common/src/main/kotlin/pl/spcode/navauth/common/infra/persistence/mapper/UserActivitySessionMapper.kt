@@ -1,6 +1,6 @@
 /*
  * NavAuth
- * Copyright © 2025 Oliwier Fijas (Navio1430)
+ * Copyright © 2026 Oliwier Fijas (Navio1430)
  *
  * NavAuth is free software; You can redistribute it and/or modify it under the terms of:
  * the GNU Affero General Public License version 3 as published by the Free Software Foundation.
@@ -16,18 +16,15 @@
  *
  */
 
-package pl.spcode.navauth.common.domain.player
+package pl.spcode.navauth.common.infra.persistence.mapper
 
 import pl.spcode.navauth.common.domain.common.IPAddress
+import pl.spcode.navauth.common.domain.user.UserActivitySession
 import pl.spcode.navauth.common.domain.user.UserUuid
+import pl.spcode.navauth.common.infra.persistence.ormlite.user.UserActivitySessionRecord
 
-interface PlayerAdapter {
+fun UserActivitySession.toRecord(): UserActivitySessionRecord =
+  UserActivitySessionRecord(uuid.value, joinedAt, leftAt, ip.data)
 
-  fun getIPAddress(): IPAddress
-
-  fun getUuid(): UserUuid
-
-  fun disconnect(reason: DisconnectReason)
-
-  fun isOnline(): Boolean
-}
+fun UserActivitySessionRecord.toDomain(): UserActivitySession =
+  UserActivitySession.create(UserUuid(uuid), joinedAt!!, leftAt!!, IPAddress(ip))
