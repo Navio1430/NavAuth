@@ -2,7 +2,7 @@
 
 TOTP is a time-based one-time password algorithm. You can use it to authenticate your account.
 Use one of the apps on your phone to generate the codes:
-- Authy (preferred)
+- Authy
 - Google Authenticator
 - Microsoft Authenticator
 - other "authenticator" apps
