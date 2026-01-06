@@ -21,10 +21,10 @@ package pl.spcode.navauth.common.migrate
 enum class MigrationOriginPluginType {
   NAVAUTH, // used for database type migration
   LIBRELOGIN,
-//  JPREMIUM,
-//  AUTHME,
-//  OPENNLOGIN,
-//  FASTLOGIN,
-//  LIMBOAUTH,
-//  MINELOGIN,
+  //  JPREMIUM,
+  //  AUTHME,
+  //  OPENNLOGIN,
+  //  FASTLOGIN,
+  //  LIMBOAUTH,
+  //  MINELOGIN,
 }

@@ -22,6 +22,7 @@ import com.google.inject.Inject
 import com.google.inject.Injector
 import pl.spcode.navauth.common.migrate.migrator.Migrator
 import pl.spcode.navauth.common.migrate.migrator.librelogin.LibreLoginMigrator
+import pl.spcode.navauth.common.migrate.migrator.navauth.NavAuthDatabaseMigrator
 
 class MigratorFactory @Inject constructor(val injector: Injector) {
 
@@ -33,12 +34,16 @@ class MigratorFactory @Inject constructor(val injector: Injector) {
       MigrationOriginPluginType.LIBRELOGIN -> {
         injector.getInstance(LibreLoginMigrator::class.java)
       }
-//      MigratedPluginType.JPREMIUM -> TODO()
-//      MigratedPluginType.AUTHME -> TODO()
-//      MigratedPluginType.OPENNLOGIN -> TODO()
-//      MigratedPluginType.FASTLOGIN -> TODO()
-//      MigratedPluginType.LIMBOAUTH -> TODO()
-//      MigratedPluginType.MINELOGIN -> TODO()
+    //      MigratedPluginType.JPREMIUM -> TODO()
+    //      MigratedPluginType.AUTHME -> TODO()
+    //      MigratedPluginType.OPENNLOGIN -> TODO()
+    //      MigratedPluginType.FASTLOGIN -> TODO()
+    //      MigratedPluginType.LIMBOAUTH -> TODO()
+    //      MigratedPluginType.MINELOGIN -> TODO()
     }
+  }
+
+  fun getNavAuthMigrator(): NavAuthDatabaseMigrator {
+    return injector.getInstance(NavAuthDatabaseMigrator::class.java)
   }
 }

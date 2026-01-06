@@ -22,14 +22,18 @@ import kotlin.reflect.KClass
 
 class EntitiesRegistrar {
 
-  private val entityTypes = mutableListOf<KClass<*>>()
+  private val entityTypes = mutableListOf<Pair<KClass<*>, KClass<*>>>()
 
-  fun registerEntity(clazz: KClass<*>): EntitiesRegistrar {
-    entityTypes.add(clazz)
+  fun registerEntity(clazz: KClass<*>, idClass: KClass<*>): EntitiesRegistrar {
+    entityTypes.add(Pair(clazz, idClass))
     return this
   }
 
   fun getTypes(): List<KClass<*>> {
+    return entityTypes.map { it.first }
+  }
+
+  fun getTypesWithIds(): List<Pair<KClass<*>, KClass<*>>> {
     return entityTypes
   }
 }

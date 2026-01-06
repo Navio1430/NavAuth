@@ -58,7 +58,7 @@ constructor(
 
   lateinit var sourceDao: Dao<LibreLoginUser, UUID>
 
-  val entitiesRegistrar = EntitiesRegistrar().registerEntity(LibreLoginUser::class)
+  val entitiesRegistrar = EntitiesRegistrar().registerEntity(LibreLoginUser::class, UUID::class)
 
   val sourceDatabaseManager =
     DatabaseManager(migrationConfig.sourceDatabaseConfig, entitiesRegistrar, pluginDirectory)

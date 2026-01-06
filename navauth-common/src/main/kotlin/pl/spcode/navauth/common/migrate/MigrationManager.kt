@@ -22,7 +22,6 @@ import com.google.inject.Inject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.config.MigrationConfig
-import pl.spcode.navauth.common.migrate.migrator.navauth.NavAuthDatabaseMigrator
 
 class MigrationManager
 @Inject
@@ -58,7 +57,12 @@ constructor(private val migrationConfig: MigrationConfig, val migratorFactory: M
   }
 
   fun startDatabaseMigration() {
-    NavAuthDatabaseMigrator().migrateTables()
+    val migrator = migratorFactory.getNavAuthMigrator()
+    migrator.init()
+
+    logger.info("Starting migration of whole database.")
+    migrator.migrateAll()
+    logger.info("Migration finished.")
   }
 
   fun startPluginMigration() {
@@ -79,6 +83,4 @@ constructor(private val migrationConfig: MigrationConfig, val migratorFactory: M
 
     logger.info("Migration finished, migrated $offset users in total")
   }
-
-
 }

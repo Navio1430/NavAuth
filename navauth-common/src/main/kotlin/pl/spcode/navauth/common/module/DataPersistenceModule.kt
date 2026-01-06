@@ -20,6 +20,7 @@ package pl.spcode.navauth.common.module
 
 import com.google.inject.AbstractModule
 import com.google.inject.Singleton
+import java.util.UUID
 import kotlin.reflect.KClass
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
 import pl.spcode.navauth.common.domain.user.UserRepository
@@ -32,13 +33,24 @@ import pl.spcode.navauth.common.infra.persistence.ormlite.user.UserRepositoryImp
 
 class DataPersistenceModule : AbstractModule() {
 
-  private data class Binding(val entity: KClass<*>, val repo: Class<*>, val impl: Class<*>)
+  private data class Binding(
+    val entity: KClass<*>,
+    val idClass: KClass<*>,
+    val repo: Class<*>,
+    val impl: Class<*>,
+  )
 
   private val bindings =
     listOf(
-      Binding(UserRecord::class, UserRepository::class.java, UserRepositoryImpl::class.java),
+      Binding(
+        UserRecord::class,
+        UUID::class,
+        UserRepository::class.java,
+        UserRepositoryImpl::class.java,
+      ),
       Binding(
         UserCredentialsRecord::class,
+        UUID::class,
         UserCredentialsRepository::class.java,
         UserCredentialsRepositoryImpl::class.java,
       ),
@@ -47,10 +59,10 @@ class DataPersistenceModule : AbstractModule() {
   override fun configure() {
     val entitiesRegistrar = EntitiesRegistrar()
 
-    for ((entity, repo, impl) in bindings) {
+    for ((entity, idClass, repo, impl) in bindings) {
       @Suppress("UNCHECKED_CAST") bind(repo as Class<Any>).to(impl).`in`(Singleton::class.java)
 
-      entitiesRegistrar.registerEntity(entity)
+      entitiesRegistrar.registerEntity(entity, idClass)
     }
 
     bind(EntitiesRegistrar::class.java).toInstance(entitiesRegistrar)

@@ -119,6 +119,15 @@ constructor(
     } as Dao<T, ID>
   }
 
+  @Suppress("UNCHECKED_CAST")
+  fun <T : Any, ID : Any> getDao(entityClass: KClass<T>, idClass: KClass<ID>): Dao<T, ID> {
+
+    // idClass is intentionally unused – JVM cannot enforce it
+    return daoMap.computeIfAbsent(entityClass.java) {
+      DaoManager.createDao(connectionSource, entityClass.java)
+    } as Dao<T, ID>
+  }
+
   private fun initDatabase(entitiesRegistrar: EntitiesRegistrar) {
     entitiesRegistrar.getTypes().forEach {
       TableUtils.createTableIfNotExists(connectionSource, it.java)

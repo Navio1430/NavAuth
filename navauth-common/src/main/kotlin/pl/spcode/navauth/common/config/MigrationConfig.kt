@@ -24,7 +24,11 @@ import eu.okaeri.configs.annotation.Header
 import pl.spcode.navauth.common.infra.database.DatabaseConfig
 import pl.spcode.navauth.common.migrate.MigrationOriginPluginType
 
-@Header("Database migration config", "This file contains database migration settings.")
+@Header(
+  "Database migration config",
+  "This file contains database migration settings.",
+  "Check https://navio1430.github.io/NavAuth/migration/migration.html for more information",
+)
 class MigrationConfig : OkaeriConfig() {
 
   @Comment(
@@ -41,15 +45,6 @@ class MigrationConfig : OkaeriConfig() {
   )
   var sourceDatabaseConfig: DatabaseConfig = DatabaseConfig()
 
-  @Comment(
-    "Origin plugin type. Supported types:",
-    " - LIBRELOGIN",
-    " - JPREMIUM",
-    " - AUTHME",
-    " - OPENNLOGIN",
-    " - FASTLOGIN",
-    " - LIMBOAUTH",
-    " - MINELOGIN",
-  )
+  @Comment("Origin plugin type. Supported types:", " - NAVAUTH", " - LIBRELOGIN")
   var originPluginType: MigrationOriginPluginType = MigrationOriginPluginType.LIBRELOGIN
 }
