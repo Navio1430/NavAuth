@@ -228,11 +228,13 @@ constructor(
   ): PreLoginEvent.PreLoginComponentResult {
 
     val component =
-      messagesConfig.usernameRequiredError
-        .withPlaceholders()
-        .placeholder("USERNAME", connUsername)
-        .placeholder("EXPECTED", requiredUsername)
-        .toComponent()
+      withSupportFooter(
+        messagesConfig.usernameRequiredError
+          .withPlaceholders()
+          .placeholder("USERNAME", connUsername)
+          .placeholder("EXPECTED", requiredUsername)
+          .toComponent()
+      )
 
     return PreLoginEvent.PreLoginComponentResult.denied(component)
   }
@@ -243,11 +245,13 @@ constructor(
   ): PreLoginEvent.PreLoginComponentResult {
 
     val component =
-      messagesConfig.premiumUsernameRequiredError
-        .withPlaceholders()
-        .placeholder("USERNAME", connUsername)
-        .placeholder("EXPECTED", requiredUsername)
-        .toComponent()
+      withSupportFooter(
+        messagesConfig.premiumUsernameRequiredError
+          .withPlaceholders()
+          .placeholder("USERNAME", connUsername)
+          .placeholder("EXPECTED", requiredUsername)
+          .toComponent()
+      )
 
     return PreLoginEvent.PreLoginComponentResult.denied(component)
   }
@@ -255,7 +259,10 @@ constructor(
   private fun usernameConflictDeniedResult(
     connUsername: String
   ): PreLoginEvent.PreLoginComponentResult {
-    val comp = componentWithUsernamePlaceholder(messagesConfig.usernameConflictError, connUsername)
+    val comp =
+      withSupportFooter(
+        componentWithUsernamePlaceholder(messagesConfig.usernameConflictError, connUsername)
+      )
     return PreLoginEvent.PreLoginComponentResult.denied(comp)
   }
 
@@ -263,7 +270,9 @@ constructor(
     username: String
   ): PreLoginEvent.PreLoginComponentResult {
     val comp =
-      componentWithUsernamePlaceholder(messagesConfig.usernameAlreadyTakenConflictError, username)
+      withSupportFooter(
+        componentWithUsernamePlaceholder(messagesConfig.usernameAlreadyTakenConflictError, username)
+      )
     return PreLoginEvent.PreLoginComponentResult.denied(comp)
   }
 
@@ -272,5 +281,9 @@ constructor(
     username: String,
   ): Component {
     return textComponent.withPlaceholders().placeholder("USERNAME", username).toComponent()
+  }
+
+  private fun withSupportFooter(component: Component): Component {
+    return component.append(messagesConfig.supportFooter.toComponent())
   }
 }

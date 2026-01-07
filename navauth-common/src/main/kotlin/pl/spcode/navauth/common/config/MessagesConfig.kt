@@ -31,18 +31,19 @@ import pl.spcode.navauth.common.component.TextComponent
 )
 open class MessagesConfig : OkaeriConfig() {
 
-  // todo create support information message for each disconnect reason
+  var supportFooter =
+    TextComponent("<br><br><gray>For support please join our discord: https://dc.spcode.pl/")
 
   var usernameRequiredError =
     TextComponent(
       "<red>You're trying to join with the username: '%USERNAME%', but we expect it to be '%EXPECTED%'. " +
-        "\n\nPlease change your username and try again."
+        "<br>Please change your username and try again."
     )
 
   var premiumUsernameRequiredError =
     TextComponent(
       "<red>You're trying to join with a premium username. Your current username is '%USERNAME%', but it must be '%EXPECTED%'. " +
-        "\n\nPlease change your username and try again."
+        "<br>Please change your username and try again."
     )
 
   var usernameConflictError = TextComponent("<red>Premium and non-premium username CONFLICT!</red>")
