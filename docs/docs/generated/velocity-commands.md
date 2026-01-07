@@ -13,6 +13,8 @@
 | `/forcecracked`     | navauth.admin.forcecracked     | Forces a premium user account into non-premium (cracked) mode. Generates or assigns a new password and updates the user’s authentication data accordingly.                                                                                                                                      |
 | `/forcepremium`     | navauth.admin.forcepremium     | Does the same thing as `/premium` on specified user, buy forcefully used as admin                                                                                                                                                                                                               |
 | `/migrateuser`      | navauth.admin.migrateuserdata  | Migrates user data from an existing cracked account to a new username. The command validates usernames, checks for conflicts or premium accounts, and safely transfers all stored data to the specified new account. If you want to migrate premium user, then use /forcecracked command first. |
+| `/lookup profile`   | navauth.admin.playerlookup     | No description                                                                                                                                                                                                                                                                                  |
+| `/lookup sessions`  | navauth.admin.playerlookup     | No description                                                                                                                                                                                                                                                                                  |
 | `/migration start`  | navauth.root                   | Starts the account data migration process based on provided migration config. Ensures only console or RCON can run it, prevents parallel executions, and reports whether the migration finished successfully or failed.                                                                         |
 ## /login
 Logs in into account using password (and 2FA code if set). Password parameter is always required (check `/2fa` command which is responsible for 2FA code only). If you want to disable this command for specific group, then set  their `navauth.user.login` permission value to **FALSE**.
@@ -66,6 +68,14 @@ Does the same thing as `/premium` on specified user, buy forcefully used as admi
 Migrates user data from an existing cracked account to a new username. The command validates usernames, checks for conflicts or premium accounts, and safely transfers all stored data to the specified new account. If you want to migrate premium user, then use /forcecracked command first.
 
 **PERM**: navauth.admin.migrateuserdata
+## /lookup profile
+No description
+
+**PERM**: navauth.admin.playerlookup
+## /lookup sessions
+No description
+
+**PERM**: navauth.admin.playerlookup
 ## /migration start
 Starts the account data migration process based on provided migration config. Ensures only console or RCON can run it, prevents parallel executions, and reports whether the migration finished successfully or failed.
 
