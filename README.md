@@ -29,6 +29,18 @@ NavAuth is an **upcoming** plugin and is not released yet. Star the repo, join o
 
 urhatedjack - logo design
 
+Thanks to **Discord support team**:
+- tbd
+
+Thanks to people responsible for **QA**:
+- [Jakub6666](https://github.com/jakmar06)
+- [Helios](https://github.com/Helios3991)
+
+Thanks to people that kept **LibreLoginProd alive** until NavAuth release and keep **Sapphire Hub alive**:
+- [vuxeim](https://github.com/vuxeim) - newest versions supporter
+- [Helios](https://github.com/Helios3991) - support on Discord
+- [Jakub](https://github.com/jakmar06) - support on Discord
+
 ## 📘 Basic info
 
 | Platform | Supported |
