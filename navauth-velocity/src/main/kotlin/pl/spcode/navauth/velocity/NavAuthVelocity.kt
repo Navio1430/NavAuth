@@ -39,6 +39,7 @@ import pl.spcode.navauth.common.command.UserResolveException
 import pl.spcode.navauth.common.command.UserResolveExceptionHandler
 import pl.spcode.navauth.common.command.UsernameOrUuidParser
 import pl.spcode.navauth.common.command.UsernameOrUuidRaw
+import pl.spcode.navauth.common.command.exception.MissingPermissionException
 import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.config.MigrationConfig
@@ -53,9 +54,13 @@ import pl.spcode.navauth.common.module.ServicesModule
 import pl.spcode.navauth.common.module.YamlConfigModule
 import pl.spcode.navauth.velocity.command.CommandsRegistry
 import pl.spcode.navauth.velocity.component.VelocityAudienceProvider
+import pl.spcode.navauth.velocity.infra.command.VelocityInvalidUsageHandler
+import pl.spcode.navauth.velocity.infra.command.VelocityMissingPermissionExceptionHandler
+import pl.spcode.navauth.velocity.infra.command.VelocityMissingPermissionHandler
 import pl.spcode.navauth.velocity.listener.VelocityListenersRegistry
 import pl.spcode.navauth.velocity.listener.application.UserAuthenticatedEventListener
 import pl.spcode.navauth.velocity.module.SchedulerModule
+import pl.spcode.navauth.velocity.module.VelocityCommandsModule
 import pl.spcode.navauth.velocity.module.VelocityMultificationsModule
 import pl.spcode.navauth.velocity.module.VelocityServicesModule
 import pl.spcode.navauth.velocity.multification.VelocityMultification
@@ -113,6 +118,7 @@ constructor(
           migrationConfigModule,
           EventsModule(),
           VelocityMultificationsModule(velocityMultification),
+          VelocityCommandsModule(),
           SchedulerModule(pluginInstance, proxyServer.scheduler),
           HttpClientModule(),
           DataPersistenceModule(),
@@ -155,6 +161,12 @@ constructor(
           UserResolveException::class.java,
           UserResolveExceptionHandler(VelocityAudienceProvider(proxyServer)),
         )
+        .exception(
+          MissingPermissionException::class.java,
+          injector.getInstance(VelocityMissingPermissionExceptionHandler::class.java),
+        )
+        .missingPermission(injector.getInstance(VelocityMissingPermissionHandler::class.java))
+        .invalidUsage(injector.getInstance(VelocityInvalidUsageHandler::class.java))
         .build()
   }
 

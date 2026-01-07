@@ -16,22 +16,6 @@
  *
  */
 
-package pl.spcode.navauth.velocity.component
+package pl.spcode.navauth.common.command.exception
 
-import com.google.inject.Inject
-import com.velocitypowered.api.proxy.ProxyServer
-import java.util.UUID
-import net.kyori.adventure.audience.Audience
-import pl.spcode.navauth.common.component.AudienceProvider
-
-class VelocityAudienceProvider @Inject constructor(val proxyServer: ProxyServer) :
-  AudienceProvider() {
-
-  override fun getConsole(): Audience {
-    return proxyServer.consoleCommandSource
-  }
-
-  override fun getPlayer(identifier: UUID): Audience {
-    return proxyServer.getPlayer(identifier).orElseThrow()
-  }
-}
+class MissingPermissionException(val permission: String) : Exception() {}

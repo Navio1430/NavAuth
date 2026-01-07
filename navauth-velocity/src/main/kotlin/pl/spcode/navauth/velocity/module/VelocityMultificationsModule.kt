@@ -19,12 +19,18 @@
 package pl.spcode.navauth.velocity.module
 
 import com.google.inject.AbstractModule
+import pl.spcode.navauth.common.component.AudienceProvider
+import pl.spcode.navauth.common.component.MultificationProvider
+import pl.spcode.navauth.velocity.component.VelocityAudienceProvider
 import pl.spcode.navauth.velocity.multification.VelocityMultification
+import pl.spcode.navauth.velocity.multification.VelocityMultificationProvider
 
 class VelocityMultificationsModule(val velocityMultification: VelocityMultification) :
   AbstractModule() {
 
   override fun configure() {
     bind(VelocityMultification::class.java).toInstance(velocityMultification)
+    bind(MultificationProvider::class.java).to(VelocityMultificationProvider::class.java)
+    bind(AudienceProvider::class.java).to(VelocityAudienceProvider::class.java)
   }
 }

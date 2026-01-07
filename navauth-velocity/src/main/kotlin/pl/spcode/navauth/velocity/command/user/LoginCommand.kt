@@ -31,6 +31,7 @@ import kotlin.jvm.optionals.getOrNull
 import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
+import pl.spcode.navauth.common.command.exception.MissingPermissionException
 import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 import pl.spcode.navauth.velocity.command.Permissions
@@ -98,11 +99,7 @@ constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
   fun loginViaTwoFactor(@Context sender: Player, @Arg(value = "code") code: String) {
     // if permission is set explicitly to FALSE
     if (sender.getPermissionValue(Permissions.USER_LOGIN) == Tristate.FALSE) {
-      // todo unify missing permission handler
-      sender.sendMessage(
-        Component.text("You don't have permission to use this command.", TextColors.RED)
-      )
-      return
+      throw MissingPermissionException(Permissions.USER_LOGIN)
     }
 
     val uniqueSessionId = VelocityUniqueSessionId(sender)

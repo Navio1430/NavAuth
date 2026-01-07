@@ -61,6 +61,13 @@ open class MessagesConfig : OkaeriConfig() {
   var multification = NoticesConfig()
 
   class NoticesConfig : OkaeriConfig() {
+
+    var missingPermissionError: Notice =
+      Notice.chat("<red>You don't have permission to execute this command.")
+    var invalidUsageError: Notice = Notice.chat("<red>Invalid command usage!")
+    @Comment("single chat component")
+    var invalidUsageLine: TextComponent = TextComponent("<gray> • %SCHEME%")
+
     var loginPasswordOnlyInstruction: Notice =
       Notice.chat("<green>Please login using \"/login <password>\" command.</green>")
     var loginTwoFactorOnlyInstruction: Notice =

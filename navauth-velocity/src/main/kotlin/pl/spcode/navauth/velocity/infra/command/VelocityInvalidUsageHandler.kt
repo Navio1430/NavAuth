@@ -16,22 +16,19 @@
  *
  */
 
-package pl.spcode.navauth.velocity.component
+package pl.spcode.navauth.velocity.infra.command
 
 import com.google.inject.Inject
-import com.velocitypowered.api.proxy.ProxyServer
-import java.util.UUID
-import net.kyori.adventure.audience.Audience
+import com.velocitypowered.api.command.CommandSource
+import pl.spcode.navauth.common.command.handler.InvalidUsageHandler
 import pl.spcode.navauth.common.component.AudienceProvider
+import pl.spcode.navauth.common.config.MessagesConfig
+import pl.spcode.navauth.velocity.multification.VelocityMultificationProvider
 
-class VelocityAudienceProvider @Inject constructor(val proxyServer: ProxyServer) :
-  AudienceProvider() {
-
-  override fun getConsole(): Audience {
-    return proxyServer.consoleCommandSource
-  }
-
-  override fun getPlayer(identifier: UUID): Audience {
-    return proxyServer.getPlayer(identifier).orElseThrow()
-  }
-}
+class VelocityInvalidUsageHandler
+@Inject
+constructor(
+  audienceProvider: AudienceProvider,
+  multificationProvider: VelocityMultificationProvider,
+  messagesConfig: MessagesConfig,
+) : InvalidUsageHandler<CommandSource>(audienceProvider, multificationProvider, messagesConfig) {}

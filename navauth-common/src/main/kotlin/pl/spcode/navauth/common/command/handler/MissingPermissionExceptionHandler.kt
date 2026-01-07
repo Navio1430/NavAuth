@@ -16,22 +16,22 @@
  *
  */
 
-package pl.spcode.navauth.velocity.component
+package pl.spcode.navauth.common.command.handler
 
-import com.google.inject.Inject
-import com.velocitypowered.api.proxy.ProxyServer
-import java.util.UUID
-import net.kyori.adventure.audience.Audience
-import pl.spcode.navauth.common.component.AudienceProvider
+import dev.rollczi.litecommands.handler.exception.ExceptionHandler
+import dev.rollczi.litecommands.handler.result.ResultHandlerChain
+import dev.rollczi.litecommands.invocation.Invocation
+import pl.spcode.navauth.common.command.exception.MissingPermissionException
 
-class VelocityAudienceProvider @Inject constructor(val proxyServer: ProxyServer) :
-  AudienceProvider() {
+open class MissingPermissionExceptionHandler<SENDER>(
+  val missingPermissionHandler: MissingPermissionHandler<SENDER>
+) : ExceptionHandler<SENDER, MissingPermissionException> {
 
-  override fun getConsole(): Audience {
-    return proxyServer.consoleCommandSource
-  }
-
-  override fun getPlayer(identifier: UUID): Audience {
-    return proxyServer.getPlayer(identifier).orElseThrow()
+  override fun handle(
+    invocation: Invocation<SENDER>,
+    exception: MissingPermissionException,
+    chain: ResultHandlerChain<SENDER>,
+  ) {
+    missingPermissionHandler.handle(invocation, exception.permission)
   }
 }
