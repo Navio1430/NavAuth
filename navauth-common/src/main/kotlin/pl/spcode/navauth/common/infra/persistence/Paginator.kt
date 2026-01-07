@@ -16,14 +16,10 @@
  *
  */
 
-package pl.spcode.navauth.common.domain.user
+package pl.spcode.navauth.common.infra.persistence
 
-import pl.spcode.navauth.common.infra.persistence.Paginator
+interface Paginator<T> {
+  fun getPagesCount(): Long
 
-interface UserActivitySessionRepository {
-  fun save(session: UserActivitySession)
-
-  fun findLatestByUuid(uuid: UserUuid): UserActivitySession?
-
-  fun getSessionPaginatorByUuid(uuid: UserUuid, pageSize: Long): Paginator<UserActivitySession>
+  fun paginate(page: Long): List<T>
 }

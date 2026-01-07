@@ -30,7 +30,12 @@ class UserActivitySessionRecord(
   val uuid: UUID = UUID.randomUUID(),
   @DatabaseField(columnName = "joined_at", dataType = DataType.DATE_LONG, canBeNull = false)
   val joinedAt: Date? = null,
-  @DatabaseField(columnName = "left_at", dataType = DataType.DATE_LONG, canBeNull = false)
+  @DatabaseField(
+    columnName = "left_at",
+    index = true,
+    dataType = DataType.DATE_LONG,
+    canBeNull = false,
+  )
   val leftAt: Date? = null,
   @DatabaseField(columnName = "ip") val ip: Long = 0,
 )

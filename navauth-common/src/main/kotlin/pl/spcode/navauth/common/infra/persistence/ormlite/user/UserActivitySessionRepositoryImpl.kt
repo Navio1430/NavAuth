@@ -22,7 +22,10 @@ import com.google.inject.Inject
 import java.util.UUID
 import pl.spcode.navauth.common.domain.user.UserActivitySession
 import pl.spcode.navauth.common.domain.user.UserActivitySessionRepository
+import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.infra.database.DatabaseManager
+import pl.spcode.navauth.common.infra.persistence.Paginator
+import pl.spcode.navauth.common.infra.persistence.mapper.toDomain
 import pl.spcode.navauth.common.infra.persistence.mapper.toRecord
 import pl.spcode.navauth.common.shared.data.OrmLiteCrudRepositoryImpl
 
@@ -35,5 +38,18 @@ class UserActivitySessionRepositoryImpl @Inject constructor(databaseManager: Dat
 
   override fun save(session: UserActivitySession) {
     dao().create(session.toRecord())
+  }
+
+  override fun findLatestByUuid(uuid: UserUuid): UserActivitySession? {
+    return dao().queryBuilder().orderBy("left_at", false).limit(1).queryForFirst()?.toDomain()
+  }
+
+  override fun getSessionPaginatorByUuid(
+    uuid: UserUuid,
+    pageSize: Long,
+  ): Paginator<UserActivitySession> {
+    return UserActivitySessionPaginator(dao(), pageSize, ({ it.where().eq("uuid", uuid.value) })) {
+      it.orderBy("left_at", false)
+    }
   }
 }

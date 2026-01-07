@@ -20,9 +20,15 @@ package pl.spcode.navauth.common.domain.user
 
 import java.util.UUID
 
-@JvmInline value class UserUuid(val value: UUID)
+@JvmInline
+value class UserUuid(val value: UUID) {
+  override fun toString(): String = value.toString()
+}
 
-@JvmInline value class MojangId(val value: UUID)
+@JvmInline
+value class MojangId(val value: UUID) {
+  override fun toString(): String = value.toString()
+}
 
 @JvmInline
 value class Username(val value: String) {

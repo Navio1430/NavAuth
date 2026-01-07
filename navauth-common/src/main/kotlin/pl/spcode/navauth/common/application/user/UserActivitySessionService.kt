@@ -27,8 +27,11 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.domain.common.IPAddress
 import pl.spcode.navauth.common.domain.player.PlayerAdapter
+import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserActivitySession
 import pl.spcode.navauth.common.domain.user.UserActivitySessionRepository
+import pl.spcode.navauth.common.domain.user.UserUuid
+import pl.spcode.navauth.common.infra.persistence.Paginator
 
 @Singleton
 class UserActivitySessionService
@@ -37,6 +40,9 @@ constructor(private val userActivitySessionRepository: UserActivitySessionReposi
 
   private val logger: Logger = LoggerFactory.getLogger(UserActivitySessionService::class.java)
   private val playerJoinedAtMap = ConcurrentHashMap<UUID, PlayerSessionData>()
+
+  // we need to save ip address here because it won't be available on disconnect event
+  private data class PlayerSessionData(val joinedAt: Date, val ip: IPAddress)
 
   fun registerPlayerJoin(playerAdapter: PlayerAdapter) {
     playerJoinedAtMap[playerAdapter.getUuid().value] =
@@ -61,6 +67,11 @@ constructor(private val userActivitySessionRepository: UserActivitySessionReposi
     userActivitySessionRepository.save(session)
   }
 
-  // we need to save ip address here because it won't be available on disconnect event
-  data class PlayerSessionData(val joinedAt: Date, val ip: IPAddress)
+  fun findLatestSession(user: User): UserActivitySession? {
+    return userActivitySessionRepository.findLatestByUuid(user.uuid)
+  }
+
+  fun getSessionPaginatorByUuid(uuid: UserUuid, pageSize: Long): Paginator<UserActivitySession> {
+    return userActivitySessionRepository.getSessionPaginatorByUuid(uuid, pageSize)
+  }
 }
