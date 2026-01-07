@@ -21,15 +21,10 @@ package pl.spcode.navauth.common.application.credentials
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import pl.spcode.navauth.common.domain.common.TransactionService
-import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.infra.crypto.TOTP2FA
-import pl.spcode.navauth.common.infra.crypto.hasher.Argon2CredentialsHasher
-import pl.spcode.navauth.common.infra.crypto.hasher.BCryptCredentialsHasher
-import pl.spcode.navauth.common.infra.crypto.hasher.LibreLoginSHACredentialsHasher
-import pl.spcode.navauth.common.infra.crypto.hasher.SHACredentialsHasher
 
 @Singleton
 class UserCredentialsService
@@ -37,6 +32,7 @@ class UserCredentialsService
 constructor(
   val credentialsRepository: UserCredentialsRepository,
   val transactionService: TransactionService,
+  val credentialsHasherFactory: CredentialsHasherFactory,
 ) {
 
   fun findCredentials(user: User): UserCredentials? {
@@ -80,26 +76,9 @@ constructor(
     require(credentials.hashedPassword != null) { "credentials do not have a password hash" }
 
     val passwordHash = credentials.hashedPassword.passwordHash
+    val hasher = credentialsHasherFactory.createHasher(credentials.hashedPassword.algo)
 
-    val verified =
-      when (credentials.hashedPassword.algo) {
-        HashingAlgorithm.BCRYPT -> {
-          BCryptCredentialsHasher().verify(password, passwordHash)
-        }
-        HashingAlgorithm.ARGON2 -> {
-          Argon2CredentialsHasher().verify(password, passwordHash)
-        }
-        HashingAlgorithm.SHA256,
-        HashingAlgorithm.SHA512 -> {
-          SHACredentialsHasher().verify(password, passwordHash)
-        }
-        HashingAlgorithm.LIBRELOGIN_SHA256,
-        HashingAlgorithm.LIBRELOGIN_SHA512 -> {
-          LibreLoginSHACredentialsHasher().verify(password, passwordHash)
-        }
-      }
-
-    return verified
+    return hasher.verify(password, passwordHash)
   }
 
   fun verifyCode(credentials: UserCredentials, code: String): Boolean {
@@ -119,8 +98,8 @@ constructor(
       val credentials = findCredentials(user)
       require(credentials != null) { "user does not have credentials" }
 
-      // todo use factory instead
-      val hashedPassword = BCryptCredentialsHasher().hash(newPassword)
+      val hasher = credentialsHasherFactory.createDefaultHasher()
+      val hashedPassword = hasher.hash(newPassword)
       val newCredentials = credentials.withNewPassword(hashedPassword)
       storeUserCredentials(user, newCredentials)
     }
