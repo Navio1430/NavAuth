@@ -60,11 +60,7 @@ constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
   ) {
     // if permission is set explicitly to FALSE
     if (sender.getPermissionValue(Permissions.USER_LOGIN) == Tristate.FALSE) {
-      // todo unify missing permission handler
-      sender.sendMessage(
-        Component.text("You don't have permission to use this command.", TextColors.RED)
-      )
-      return
+      throw MissingPermissionException(Permissions.USER_LOGIN)
     }
 
     val uniqueSessionId = VelocityUniqueSessionId(sender)

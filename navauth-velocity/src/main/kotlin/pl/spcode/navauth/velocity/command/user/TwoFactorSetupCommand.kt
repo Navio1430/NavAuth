@@ -32,6 +32,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.user.UserService
+import pl.spcode.navauth.common.command.exception.MissingPermissionException
 import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.config.TwoFactorAuthConfig
@@ -68,11 +69,7 @@ constructor(
   ) {
     // if permission is set explicitly to FALSE
     if (sender.getPermissionValue(Permissions.USER_TWO_FACTOR_SETUP) == Tristate.FALSE) {
-      // todo unify missing permission handler
-      sender.sendMessage(
-        Component.text("You don't have permission to use this command.", TextColors.RED)
-      )
-      return
+      throw MissingPermissionException(Permissions.USER_TWO_FACTOR_SETUP)
     }
 
     val user = userService.findUserByUuid(UserUuid(sender.uniqueId))!!

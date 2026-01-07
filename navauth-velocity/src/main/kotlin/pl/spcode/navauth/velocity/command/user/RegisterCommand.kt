@@ -31,6 +31,7 @@ import net.kyori.adventure.text.format.TextColor
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.user.UserService
+import pl.spcode.navauth.common.command.exception.MissingPermissionException
 import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 import pl.spcode.navauth.common.domain.user.User
@@ -65,11 +66,7 @@ constructor(
   ) {
     // if permission is set explicitly to FALSE
     if (sender.getPermissionValue(Permissions.USER_REGISTER) == Tristate.FALSE) {
-      // todo unify missing permission handler
-      sender.sendMessage(
-        Component.text("You don't have permission to use this command.", TextColors.RED)
-      )
-      return
+      throw MissingPermissionException(Permissions.USER_REGISTER)
     }
 
     val session = authSessionService.findSession(VelocityUniqueSessionId(sender))

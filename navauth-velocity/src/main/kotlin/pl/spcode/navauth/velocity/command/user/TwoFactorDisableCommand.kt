@@ -29,6 +29,7 @@ import dev.rollczi.litecommands.annotations.execute.Execute
 import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.user.UserService
+import pl.spcode.navauth.common.command.exception.MissingPermissionException
 import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.velocity.command.Permissions
@@ -45,11 +46,7 @@ constructor(val userService: UserService, val userCredentialsService: UserCreden
   fun disableTwoFactor(@Context sender: Player, @Arg(value = "2fa_code") code: String) {
     // if permission is set explicitly to FALSE
     if (sender.getPermissionValue(Permissions.USER_TWO_FACTOR_DISABLE) == Tristate.FALSE) {
-      // todo unify missing permission handler
-      sender.sendMessage(
-        Component.text("You don't have permission to use this command.", TextColors.RED)
-      )
-      return
+      throw MissingPermissionException(Permissions.USER_TWO_FACTOR_DISABLE)
     }
 
     val user = userService.findUserByUuid(UserUuid(sender.uniqueId))!!

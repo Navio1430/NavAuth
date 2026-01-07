@@ -29,6 +29,7 @@ import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
+import pl.spcode.navauth.common.command.exception.MissingPermissionException
 import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.velocity.command.Permissions
@@ -50,11 +51,7 @@ constructor(val userService: UserService, val mojangProfileService: MojangProfil
   fun changeToPremiumAccount(@Context sender: Player) {
     // if permission is set explicitly to FALSE
     if (sender.getPermissionValue(Permissions.USER_CHANGE_TO_PREMIUM_ACCOUNT) == Tristate.FALSE) {
-      // todo unify missing permission handler
-      sender.sendMessage(
-        Component.text("You don't have permission to use this command.", TextColors.RED)
-      )
-      return
+      throw MissingPermissionException(Permissions.USER_CHANGE_TO_PREMIUM_ACCOUNT)
     }
 
     val user = userService.findUserByExactUsername(sender.username)!!
