@@ -16,7 +16,7 @@
  *
  */
 
-package pl.spcode.navauth.common.command
+package pl.spcode.navauth.common.command.exception
 
 sealed class UserResolveException : Exception() {
   data class UsernameNotFound(val username: String) : UserResolveException()

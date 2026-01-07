@@ -33,8 +33,8 @@ import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.application.user.UsernameAlreadyTakenException
 import pl.spcode.navauth.common.application.validator.UsernameValidator
-import pl.spcode.navauth.common.command.UserArgumentResolver
-import pl.spcode.navauth.common.command.UsernameOrUuidRaw
+import pl.spcode.navauth.common.command.user.UserArgumentResolver
+import pl.spcode.navauth.common.command.user.UsernameOrUuidRaw
 import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.velocity.command.Permissions

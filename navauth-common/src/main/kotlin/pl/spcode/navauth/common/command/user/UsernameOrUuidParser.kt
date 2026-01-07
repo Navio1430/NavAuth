@@ -16,7 +16,7 @@
  *
  */
 
-package pl.spcode.navauth.common.command
+package pl.spcode.navauth.common.command.user
 
 import com.google.inject.Inject
 import dev.rollczi.litecommands.argument.Argument

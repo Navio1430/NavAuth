@@ -16,12 +16,13 @@
  *
  */
 
-package pl.spcode.navauth.common.command
+package pl.spcode.navauth.common.command.user
 
 import com.google.inject.Inject
 import java.util.UUID
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.application.validator.UsernameValidator
+import pl.spcode.navauth.common.command.exception.UserResolveException
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.shared.utils.UuidUtils
@@ -35,9 +36,12 @@ constructor(val userService: UserService, val usernameValidator: UsernameValidat
    *
    * @param usernameOrUuid the username or UUID string to resolve the user for
    * @return the resolved User object
-   * @throws UserResolveException.UsernameNotFound if the username is not found
-   * @throws UserResolveException.UuidNotFound if the UUID is not found
-   * @throws UserResolveException.InvalidUuid if the input string is not a valid UUID
+   * @throws pl.spcode.navauth.common.command.exception.UserResolveException.UsernameNotFound if the
+   *   username is not found
+   * @throws pl.spcode.navauth.common.command.exception.UserResolveException.UuidNotFound if the
+   *   UUID is not found
+   * @throws pl.spcode.navauth.common.command.exception.UserResolveException.InvalidUuid if the
+   *   input string is not a valid UUID
    */
   fun resolve(usernameOrUuid: UsernameOrUuidRaw): User {
     val raw = usernameOrUuid.value

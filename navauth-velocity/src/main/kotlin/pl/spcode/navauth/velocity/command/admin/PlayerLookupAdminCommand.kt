@@ -33,8 +33,8 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.user.UserActivitySessionService
 import pl.spcode.navauth.common.application.user.UserService
-import pl.spcode.navauth.common.command.UserArgumentResolver
-import pl.spcode.navauth.common.command.UsernameOrUuidRaw
+import pl.spcode.navauth.common.command.user.UserArgumentResolver
+import pl.spcode.navauth.common.command.user.UsernameOrUuidRaw
 import pl.spcode.navauth.velocity.command.Permissions
 
 @Command(name = "lookup")

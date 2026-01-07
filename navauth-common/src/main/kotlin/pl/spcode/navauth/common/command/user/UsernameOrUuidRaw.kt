@@ -16,6 +16,6 @@
  *
  */
 
-package pl.spcode.navauth.common.command
+package pl.spcode.navauth.common.command.user
 
 data class UsernameOrUuidRaw(val value: String)

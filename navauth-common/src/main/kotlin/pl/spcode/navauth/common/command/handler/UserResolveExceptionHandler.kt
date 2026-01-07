@@ -16,12 +16,13 @@
  *
  */
 
-package pl.spcode.navauth.common.command
+package pl.spcode.navauth.common.command.handler
 
 import dev.rollczi.litecommands.handler.exception.ExceptionHandler
 import dev.rollczi.litecommands.handler.result.ResultHandlerChain
 import dev.rollczi.litecommands.invocation.Invocation
 import net.kyori.adventure.text.Component
+import pl.spcode.navauth.common.command.exception.UserResolveException
 import pl.spcode.navauth.common.component.AudienceProvider
 import pl.spcode.navauth.common.component.TextColors
 
@@ -37,17 +38,17 @@ class UserResolveExceptionHandler<SENDER>(val audienceProvider: AudienceProvider
     when (exception) {
       is UserResolveException.InvalidUuid -> {
         audience.sendMessage(
-          Component.text("UUID '${exception.uuid}' is not valid", TextColors.RED)
+          Component.text("UUID '${exception.uuid}' is not valid", TextColors.Companion.RED)
         )
       }
       is UserResolveException.UsernameNotFound -> {
         audience.sendMessage(
-          Component.text("User '${exception.username}' not found", TextColors.RED)
+          Component.text("User '${exception.username}' not found", TextColors.Companion.RED)
         )
       }
       is UserResolveException.UuidNotFound -> {
         audience.sendMessage(
-          Component.text("User with '${exception.uuid}' UUID not found", TextColors.RED)
+          Component.text("User with '${exception.uuid}' UUID not found", TextColors.Companion.RED)
         )
       }
     }
