@@ -53,10 +53,10 @@ import pl.spcode.navauth.common.module.PluginDirectoryModule
 import pl.spcode.navauth.common.module.ServicesModule
 import pl.spcode.navauth.common.module.YamlConfigModule
 import pl.spcode.navauth.velocity.command.CommandsRegistry
-import pl.spcode.navauth.velocity.component.VelocityAudienceProvider
 import pl.spcode.navauth.velocity.infra.command.VelocityInvalidUsageHandler
 import pl.spcode.navauth.velocity.infra.command.VelocityMissingPermissionExceptionHandler
 import pl.spcode.navauth.velocity.infra.command.VelocityMissingPermissionHandler
+import pl.spcode.navauth.velocity.infra.component.VelocityAudienceProvider
 import pl.spcode.navauth.velocity.listener.VelocityListenersRegistry
 import pl.spcode.navauth.velocity.listener.application.UserAuthenticatedEventListener
 import pl.spcode.navauth.velocity.module.SchedulerModule

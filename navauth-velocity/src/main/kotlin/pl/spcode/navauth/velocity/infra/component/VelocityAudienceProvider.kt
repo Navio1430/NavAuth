@@ -16,7 +16,7 @@
  *
  */
 
-package pl.spcode.navauth.velocity.component
+package pl.spcode.navauth.velocity.infra.component
 
 import com.google.inject.Inject
 import com.velocitypowered.api.proxy.ProxyServer
