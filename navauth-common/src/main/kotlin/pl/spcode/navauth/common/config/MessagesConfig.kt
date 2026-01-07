@@ -47,6 +47,11 @@ open class MessagesConfig : OkaeriConfig() {
 
   var usernameConflictError = TextComponent("<red>Premium and non-premium username CONFLICT!</red>")
 
+  var usernameAlreadyTakenConflictError =
+    TextComponent(
+      "<red>Username '%USERNAME%' is already taken! Administrator needs to resolve the conflict.</red>"
+    )
+
   var loginTimeExceededError =
     TextComponent("<red>You've exceeded login time, please try again</red>")
 

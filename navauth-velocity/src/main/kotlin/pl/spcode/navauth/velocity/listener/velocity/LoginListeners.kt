@@ -106,7 +106,7 @@ constructor(
               usernameConflictDeniedResult(failureReason.premiumUsername)
             }
             is UsernameResFailureReason.UsernameMigrationFailedUsernameAlreadyTaken -> {
-              usernameMigrationFailedUsernameAlreadyTakenResult(failureReason.username)
+              usernameMigrationFailedUsernameAlreadyTakenConflictResult(failureReason.username)
             }
           }
       }
@@ -255,19 +255,22 @@ constructor(
   private fun usernameConflictDeniedResult(
     connUsername: String
   ): PreLoginEvent.PreLoginComponentResult {
-
-    val component =
-      messagesConfig.usernameConflictError
-        .withPlaceholders()
-        .placeholder("USERNAME", connUsername)
-        .toComponent()
-
-    return PreLoginEvent.PreLoginComponentResult.denied(component)
+    val comp = componentWithUsernamePlaceholder(messagesConfig.usernameConflictError, connUsername)
+    return PreLoginEvent.PreLoginComponentResult.denied(comp)
   }
 
-  private fun usernameMigrationFailedUsernameAlreadyTakenResult(
+  private fun usernameMigrationFailedUsernameAlreadyTakenConflictResult(
     username: String
   ): PreLoginEvent.PreLoginComponentResult {
-    TODO()
+    val comp =
+      componentWithUsernamePlaceholder(messagesConfig.usernameAlreadyTakenConflictError, username)
+    return PreLoginEvent.PreLoginComponentResult.denied(comp)
+  }
+
+  private fun componentWithUsernamePlaceholder(
+    textComponent: pl.spcode.navauth.common.component.TextComponent,
+    username: String,
+  ): Component {
+    return textComponent.withPlaceholders().placeholder("USERNAME", username).toComponent()
   }
 }
