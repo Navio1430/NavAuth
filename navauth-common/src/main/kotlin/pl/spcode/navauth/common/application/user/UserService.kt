@@ -21,6 +21,7 @@ package pl.spcode.navauth.common.application.user
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import pl.spcode.navauth.api.event.NavAuthEventBus
+import pl.spcode.navauth.api.event.user.UserNonPremiumMigrationEvent
 import pl.spcode.navauth.api.event.user.UserPremiumMigrationEvent
 import pl.spcode.navauth.api.event.user.UserUsernameMigrationEvent
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
@@ -140,18 +141,24 @@ constructor(
   fun migrateToNonPremium(user: User, newPassword: HashedPassword): User {
     require(user.isPremium) { "cannot migrate non-premium user to non-premium" }
 
-    return txService.inTransaction {
-      // make sure the user has credentials required
-      val nonPremiumUser = user.toNonPremium()
-      userRepository.save(nonPremiumUser)
+    val user =
+      txService.inTransaction {
+        // make sure the user has credentials required
+        val nonPremiumUser = user.toNonPremium()
+        userRepository.save(nonPremiumUser)
 
-      val newCredentials =
-        userCredentialsService.findCredentials(nonPremiumUser)?.withNewPassword(newPassword)
-          ?: UserCredentials.create(nonPremiumUser, newPassword, null)
-      userCredentialsService.storeUserCredentials(nonPremiumUser, newCredentials)
+        val newCredentials =
+          userCredentialsService.findCredentials(nonPremiumUser)?.withNewPassword(newPassword)
+            ?: UserCredentials.create(nonPremiumUser, newPassword, null)
+        userCredentialsService.storeUserCredentials(nonPremiumUser, newCredentials)
 
-      return@inTransaction nonPremiumUser
-    }
+        return@inTransaction nonPremiumUser
+      }
+
+    eventBus as NavAuthEventBusInternal
+    eventBus.post(UserNonPremiumMigrationEvent(user.toAuthUser()))
+
+    return user
   }
 
   /**

@@ -22,11 +22,11 @@ import pl.spcode.navauth.api.domain.AuthUser;
 import pl.spcode.navauth.api.event.NavAuthEvent;
 
 @SuppressWarnings("ClassCanBeRecord")
-public class UserPremiumMigrationEvent implements NavAuthEvent {
+public class UserNonPremiumMigrationEvent implements NavAuthEvent {
 
   private final AuthUser user;
 
-  public UserPremiumMigrationEvent(AuthUser user) {
+  public UserNonPremiumMigrationEvent(AuthUser user) {
     this.user = user;
   }
 
