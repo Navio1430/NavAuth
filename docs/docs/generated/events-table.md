@@ -3,10 +3,10 @@
 | CommandExecuteEvent            | FIRST          |
 | PlayerAvailableCommandsEvent   | FIRST          |
 | PlayerChatEvent                | FIRST          |
-| PlayerChooseInitialServerEvent | NORMAL         |
 | DisconnectEvent                | NORMAL         |
 | PlayerChooseInitialServerEvent | FIRST          |
 | ServerPreConnectEvent          | FIRST          |
+| PlayerChooseInitialServerEvent | NORMAL         |
 | PlayerChooseInitialServerEvent | NORMAL         |
 | GameProfileRequestEvent        | NORMAL         |
 | PostLoginEvent                 | FIRST          |
