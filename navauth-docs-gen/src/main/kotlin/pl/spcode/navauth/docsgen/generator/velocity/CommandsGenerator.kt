@@ -57,7 +57,9 @@ class CommandsGenerator : Generator {
         val descriptionAnnotation = function.findAnnotation<Description>()
         val description = descriptionAnnotation?.value?.joinToString(" ") ?: "No description"
 
-        commands.add(CommandInfo(fullCommandName, executeAnnotation.aliases.asList(), permission, description))
+        commands.add(
+          CommandInfo(fullCommandName, executeAnnotation.aliases.asList(), permission, description)
+        )
       }
     }
 
@@ -74,7 +76,8 @@ class CommandsGenerator : Generator {
         commandName += "<br>(" + it.aliases.joinToString(", ") + ")"
       }
 
-      tableBuilder.addRow(commandName, it.perm, it.desc) }
+      tableBuilder.addRow(commandName, it.perm, it.desc)
+    }
     md.appendLine(tableBuilder.build())
 
     listOf<String>()
@@ -82,9 +85,11 @@ class CommandsGenerator : Generator {
     commands.forEach { it ->
       md.appendLine("## /${it.name}")
       if (it.aliases.isNotEmpty()) {
-        md.appendLine("**Aliases**: ${it.aliases.joinToString(", ") {
+        md.appendLine(
+          "**Aliases**: ${it.aliases.joinToString(", ") {
           "`$it`"
-        }}")
+        }}"
+        )
       }
       md.appendLine("\n${it.desc}")
       md.appendLine("\n**PERM**: `${it.perm}`")
@@ -97,5 +102,10 @@ class CommandsGenerator : Generator {
     return "velocity-commands.md"
   }
 
-  private class CommandInfo(val name: String, val aliases: List<String>, val perm: String, val desc: String)
+  private class CommandInfo(
+    val name: String,
+    val aliases: List<String>,
+    val perm: String,
+    val desc: String,
+  )
 }
