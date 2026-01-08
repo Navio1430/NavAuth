@@ -25,6 +25,13 @@ import java.util.Optional;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import pl.spcode.navauth.api.event.NavAuthEvent;
 
+/**
+ * Represents an event that occurs after a player is connected and authenticated,
+ * (either by auto-login or manual login) providing information about
+ * the player and the initial server they are directed to.
+ * The initial server associated with this event can be modified during event
+ * processing to redirect the player to a different server.
+ */
 public class AuthenticatedInitialServerEvent implements NavAuthEvent {
 
   private final Player player;
