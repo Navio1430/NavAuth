@@ -41,6 +41,6 @@ public class NavAuthListeners implements NavAuthEventListener {
 
   @Subscribe
   public void handleAuthenticatedInitialServerEvent(AuthenticatedInitialServerEvent event) {
-    event.setInitialServer(null); // will disconnect the user with a proper error message
+    // event.setInitialServer(null); // will disconnect the user with a proper error message
   }
 }
