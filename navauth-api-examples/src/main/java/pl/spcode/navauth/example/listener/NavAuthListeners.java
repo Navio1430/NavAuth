@@ -47,6 +47,6 @@ public class NavAuthListeners implements NavAuthEventListener {
 
   @Subscribe
   public void handleUnauthenticatedLimboServerEvent(UnauthenticatedInitialLimboEvent event) {
-    event.setInitialLimbo(null); // will disconnect the user with a proper error message
+    // event.setInitialLimbo(null); // will disconnect the user with a proper error message
   }
 }
