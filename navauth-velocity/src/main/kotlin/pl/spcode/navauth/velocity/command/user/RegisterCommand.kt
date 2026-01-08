@@ -32,6 +32,7 @@ import pl.spcode.navauth.api.domain.auth.AuthSessionType
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.user.UserService
+import pl.spcode.navauth.common.application.validator.PasswordValidator
 import pl.spcode.navauth.common.command.exception.MissingPermissionException
 import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.user.User
@@ -49,6 +50,7 @@ class RegisterCommand
 constructor(
   val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
   val userService: UserService,
+  val passwordValidator: PasswordValidator,
 ) {
 
   @Async
@@ -72,6 +74,11 @@ constructor(
     val session = authSessionService.findSession(VelocityUniqueSessionId(sender))
     if (session?.getSessionType() != AuthSessionType.REGISTER || session.isAuthenticated) {
       sender.sendMessage(Component.text("Can't use this command right now.", TextColors.RED))
+      return
+    }
+
+    if (!passwordValidator.isValid(password)) {
+      sender.sendMessage(Component.text("Password is invalid.", TextColors.RED))
       return
     }
 

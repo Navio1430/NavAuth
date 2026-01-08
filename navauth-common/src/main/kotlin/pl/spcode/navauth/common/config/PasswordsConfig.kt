@@ -30,4 +30,14 @@ class PasswordsConfig : OkaeriConfig() {
     " - BCRYPT",
   )
   var hashingAlgorithm: HashingAlgorithm = HashingAlgorithm.BCRYPT
+
+  @Comment("Minimum length") var minLength: Int = 5
+
+  @Comment("Require uppercase letters?") var requireUppercase: Boolean = false
+
+  @Comment("Require lowercase letters?") var requireLowercase: Boolean = true
+
+  @Comment("Require digits?") var requireDigit: Boolean = true
+
+  @Comment("Require special chars?", "e.g. !@#$%^&*") var requireSpecial: Boolean = false
 }
