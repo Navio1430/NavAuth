@@ -24,6 +24,7 @@ import module.TestsConfigModule
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.TestInstancePostProcessor
 import pl.spcode.navauth.common.module.DataPersistenceModule
+import pl.spcode.navauth.common.module.EventsModule
 import pl.spcode.navauth.common.module.HttpClientModule
 import pl.spcode.navauth.common.module.ServicesModule
 import utils.GuiceUtils
@@ -32,6 +33,7 @@ class ApplicationTestExtension : TestInstancePostProcessor {
 
   var injector: Injector =
     Guice.createInjector(
+      EventsModule(),
       TestsConfigModule(),
       HttpClientModule(),
       DataPersistenceModule(),
