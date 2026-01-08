@@ -25,13 +25,17 @@ import com.velocitypowered.api.event.connection.DisconnectEvent
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent
 import com.velocitypowered.api.event.player.ServerPreConnectEvent
 import com.velocitypowered.api.proxy.server.RegisteredServer
+import kotlin.jvm.optionals.getOrNull
 import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import pl.spcode.navauth.api.event.NavAuthEventBus
+import pl.spcode.navauth.api.event.velocity.AuthenticatedInitialServerEvent
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.user.UserActivitySessionService
 import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionState
+import pl.spcode.navauth.common.infra.NavAuthEventBusInternal
 import pl.spcode.navauth.velocity.application.server.ServerNotFoundException
 import pl.spcode.navauth.velocity.application.server.VelocityServerSelectionService
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
@@ -43,6 +47,7 @@ constructor(
   val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
   val serverSelectionService: VelocityServerSelectionService,
   val userActivitySessionService: UserActivitySessionService,
+  val eventBus: NavAuthEventBus,
 ) {
 
   val logger: Logger = LoggerFactory.getLogger(ConnectionListeners::class.java)
@@ -163,18 +168,27 @@ constructor(
    */
   private fun setInitialServerAuthenticated(event: PlayerChooseInitialServerEvent) {
     val player = event.player
-    val backend: RegisteredServer?
     try {
-      backend = serverSelectionService.getInitialServer(player)
+      var initialServer = serverSelectionService.getInitialServer(player)
 
-      if (backend != null) {
-        logger.debug(
-          "set user '{}' initial server to '{}'",
-          player.username,
-          backend.serverInfo.name,
-        )
-        event.setInitialServer(backend)
+      // fire API event
+      val apiEvent = AuthenticatedInitialServerEvent(event.player, initialServer)
+      eventBus as NavAuthEventBusInternal
+      eventBus.post(apiEvent)
+      initialServer = apiEvent.initialServer.getOrNull()
+
+      if (initialServer == null) {
+        logger.debug("no initial server was found for user '{}'", player.username)
+        player.disconnect(Component.text("NavAuth: initial server not found.", TextColors.RED))
+        return
       }
+
+      logger.debug(
+        "set user '{}' initial server to '{}'",
+        player.username,
+        initialServer.serverInfo.name,
+      )
+      event.setInitialServer(initialServer)
     } catch (ex: ServerNotFoundException) {
       logger.debug(
         "PlayerChooseInitialServer: initial server not found for an authenticated user '${player.username}'",

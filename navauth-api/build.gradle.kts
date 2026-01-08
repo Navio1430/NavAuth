@@ -10,12 +10,9 @@ repositories {
 }
 
 dependencies {
-  testImplementation(kotlin("test"))
+  compileOnly(libs.velocitypowered.velocity.api)
 }
 
-tasks.test {
-  useJUnitPlatform()
-}
 kotlin {
   jvmToolchain(21)
 }

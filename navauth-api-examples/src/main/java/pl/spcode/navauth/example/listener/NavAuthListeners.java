@@ -24,6 +24,7 @@ import net.kyori.adventure.text.Component;
 import pl.spcode.navauth.api.event.NavAuthEventListener;
 import pl.spcode.navauth.api.event.Subscribe;
 import pl.spcode.navauth.api.event.user.UserAuthenticatedEvent;
+import pl.spcode.navauth.api.event.velocity.AuthenticatedInitialServerEvent;
 
 public class NavAuthListeners implements NavAuthEventListener {
 
@@ -36,5 +37,10 @@ public class NavAuthListeners implements NavAuthEventListener {
         .get()
         .sendMessage(
             Component.text("You are now logged in! Session type: " + event.getSessionType()));
+  }
+
+  @Subscribe
+  public void handleAuthenticatedInitialServerEvent(AuthenticatedInitialServerEvent event) {
+    event.setInitialServer(null); // will disconnect the user with a proper error message
   }
 }
