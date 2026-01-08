@@ -50,7 +50,7 @@ dependencies {
 
   implementation(project(":navauth-common"))
 
-  implementation("dev.rollczi:litecommands-velocity:3.10.6")
+  implementation(libs.litecommands.velocity)
 
   compileOnly(libs.velocitypowered.velocity.api)
   annotationProcessor(libs.velocitypowered.velocity.api)

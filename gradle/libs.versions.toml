@@ -5,9 +5,12 @@ velocity-api = "3.4.0-SNAPSHOT"
 shadow = "9.2.0"
 blossom = "1.2.0"
 spotless = "8.0.0"
+litecommands = "3.10.6"
 
 [libraries]
 velocitypowered-velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "velocity-api" }
+litecommands-core = { module = "dev.rollczi:litecommands-core", version.ref = "litecommands" }
+litecommands-velocity = { module = "dev.rollczi:litecommands-velocity", version.ref = "litecommands" }
 
 [plugins]
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }

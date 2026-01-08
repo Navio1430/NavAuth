@@ -33,8 +33,7 @@ dependencies {
   runtimeOnly("org.xerial:sqlite-jdbc:3.51.1.0")
 
   // litecommands core (compileOnly because it is platform-dependent)
-  // todo add litecommands version to versions.toml for full compatibility across modules
-  compileOnly("dev.rollczi:litecommands-core:3.10.6")
+  compileOnly(libs.litecommands.core)
 
   // qr code generation
   api("com.google.zxing:core:3.5.4")
