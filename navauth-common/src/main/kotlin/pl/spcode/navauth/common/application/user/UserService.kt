@@ -20,6 +20,8 @@ package pl.spcode.navauth.common.application.user
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import pl.spcode.navauth.api.event.NavAuthEventBus
+import pl.spcode.navauth.api.event.user.UserUsernameMigrationEvent
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.domain.common.TransactionService
@@ -30,6 +32,7 @@ import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserRepository
 import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.domain.user.Username
+import pl.spcode.navauth.common.infra.NavAuthEventBusInternal
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
 
 @Singleton
@@ -40,6 +43,7 @@ constructor(
   val userCredentialsService: UserCredentialsService,
   val profileService: MojangProfileService,
   val txService: TransactionService,
+  val eventBus: NavAuthEventBus,
 ) {
 
   fun findUserByExactUsername(username: String): User? {
@@ -154,9 +158,16 @@ constructor(
    * @throws IllegalArgumentException if the new username is the same as the existing username.
    */
   fun migrateUsername(user: User, newUsername: Username): User {
-    return txService.inTransaction {
-      return@inTransaction migrateUsernameNoTx(user, newUsername)
-    }
+    val oldUsername = user.username
+    val user =
+      txService.inTransaction {
+        return@inTransaction migrateUsernameNoTx(user, newUsername)
+      }
+
+    eventBus as NavAuthEventBusInternal
+    eventBus.post(UserUsernameMigrationEvent(user.toAuthUser(), oldUsername.value))
+
+    return user
   }
 
   /**

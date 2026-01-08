@@ -19,6 +19,7 @@
 package pl.spcode.navauth.common.domain.user
 
 import java.util.UUID
+import pl.spcode.navauth.api.domain.AuthUser
 
 @JvmInline
 value class UserUuid(val value: UUID) {
@@ -66,6 +67,22 @@ private constructor(
   }
 
   fun withCredentialsRequired(required: Boolean = true) = copy(credentialsRequired = required)
+
+  fun toAuthUser(): AuthUser {
+    return object : AuthUser {
+      override fun getUUID(): UUID {
+        return this@User.uuid.value
+      }
+
+      override fun getMojangUUID(): UUID? {
+        return this@User.mojangUuid?.value
+      }
+
+      override fun getUsername(): String {
+        return this@User.username.value
+      }
+    }
+  }
 
   override fun toString(): String {
     return "User(id=$uuid, username=$username, mojangUuid=$mojangUuid, credentialsRequired=$credentialsRequired)"
