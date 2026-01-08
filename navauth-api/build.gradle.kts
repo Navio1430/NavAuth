@@ -3,7 +3,7 @@ plugins {
   id("maven-publish")
 }
 
-group = "pl.spcode.navauth.api"
+group = "pl.spcode.navauth"
 
 repositories {
   mavenCentral()
