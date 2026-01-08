@@ -31,8 +31,7 @@ jobs:
       - name: Build shadow JAR
         run: ./gradlew shadowJar
 
-      - name: Upload JARs to release (for release trigger)
-        if: github.event_name == 'release'
+      - name: Upload JARs to release
         uses: softprops/action-gh-release@v2
         with:
           files: target/*.jar
