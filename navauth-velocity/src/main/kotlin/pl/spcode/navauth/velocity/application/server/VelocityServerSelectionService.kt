@@ -34,8 +34,7 @@ constructor(val proxyServer: ProxyServer, val generalConfig: GeneralConfig) {
 
   private val logger: Logger = LoggerFactory.getLogger(VelocityServerSelectionService::class.java)
 
-  /** @throws ServerNotFoundException if no registered limbo was found */
-  fun getLimboServer(player: Player): RegisteredServer {
+  fun getLimboServer(player: Player): RegisteredServer? {
 
     // todo send event
     // todo impl loadbalancer
@@ -63,8 +62,8 @@ constructor(val proxyServer: ProxyServer, val generalConfig: GeneralConfig) {
   }
 
   /**
-   * @return if server was found then RegisteredServer, otherwise null
-   * @throws ServerNotFoundException if initial server was set and not found as registered one
+   * @return if server was found, then RegisteredServer, otherwise null
+   * @throws ServerNotFoundException if the initial server was set in configuration and not found as a registered one
    */
   fun getInitialServer(player: Player): RegisteredServer? {
 

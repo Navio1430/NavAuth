@@ -24,6 +24,7 @@ import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.connection.DisconnectEvent
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent
 import com.velocitypowered.api.event.player.ServerPreConnectEvent
+import com.velocitypowered.api.proxy.Player
 import com.velocitypowered.api.proxy.server.RegisteredServer
 import kotlin.jvm.optionals.getOrNull
 import net.kyori.adventure.text.Component
@@ -31,9 +32,11 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.api.event.NavAuthEventBus
 import pl.spcode.navauth.api.event.velocity.AuthenticatedInitialServerEvent
+import pl.spcode.navauth.api.event.velocity.UnauthenticatedInitialLimboEvent
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.user.UserActivitySessionService
 import pl.spcode.navauth.common.component.TextColors
+import pl.spcode.navauth.common.domain.auth.session.AuthSession
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionState
 import pl.spcode.navauth.common.infra.NavAuthEventBusInternal
 import pl.spcode.navauth.velocity.application.server.ServerNotFoundException
@@ -126,39 +129,7 @@ constructor(
     if (authSession.isAuthenticated) {
       setInitialServerAuthenticated(event)
     } else {
-      if (authSession.state != AuthSessionState.WAITING_FOR_ALLOCATION) {
-        logger.warn(
-          "PlayerChooseInitialServerEvent: server tried to choose initial server for user {}:{} with a bad auth state: {}",
-          player.username,
-          player.uniqueId,
-          authSession.toString(),
-        )
-        player.disconnect(
-          Component.text(
-            "NavAuth: can't choose an initial server with a bad auth state",
-            TextColors.RED,
-          )
-        )
-        return
-      }
-      try {
-        val limbo = getLimboServerUnauthenticated(event)
-        event.setInitialServer(limbo)
-        logger.debug(
-          "set user '{}' initial server to limbo server named {}",
-          player.username,
-          limbo.serverInfo.name,
-        )
-
-        authSession.state = AuthSessionState.WAITING_FOR_HANDLER
-      } catch (ex: ServerNotFoundException) {
-        logger.warn(
-          "PlayerChooseInitialServer: failed to get limbo server for unauthenticated user '${player.username}'",
-          ex,
-        )
-        player.disconnect(Component.text("NavAuth: limbo server not found", TextColors.RED))
-        return
-      }
+      setInitialLimboUnauthenticated(event, authSession)
     }
   }
 
@@ -201,15 +172,52 @@ constructor(
     }
   }
 
-  /**
-   * @return RegisteredServer if found, otherwise null if server has not been found and player was
-   *   disconnected
-   * @throws ServerNotFoundException if no registered limbo was found
-   */
-  private fun getLimboServerUnauthenticated(
-    event: PlayerChooseInitialServerEvent
-  ): RegisteredServer {
+  private fun getLimboServerUnauthenticated(player: Player): RegisteredServer? {
+    val limbo = serverSelectionService.getLimboServer(player)
+
+    // fire API event
+    val event = UnauthenticatedInitialLimboEvent(player, limbo)
+    eventBus as NavAuthEventBusInternal
+    eventBus.post(event)
+
+    return event.initialLimbo.getOrNull()
+  }
+
+  fun setInitialLimboUnauthenticated(
+    event: PlayerChooseInitialServerEvent,
+    authSession: AuthSession<VelocityPlayerAdapter>,
+  ) {
     val player = event.player
-    return serverSelectionService.getLimboServer(player)
+    if (authSession.state != AuthSessionState.WAITING_FOR_ALLOCATION) {
+      logger.warn(
+        "PlayerChooseInitialServerEvent: server tried to choose initial limbo for unauthenticated user {}:{} with a bad auth state: {}",
+        player.username,
+        player.uniqueId,
+        authSession.toString(),
+      )
+      player.disconnect(
+        Component.text(
+          "NavAuth: can't choose an initial limbo with a bad auth state",
+          TextColors.RED,
+        )
+      )
+      return
+    }
+
+    val limbo = getLimboServerUnauthenticated(player)
+    if (limbo == null) {
+      logger.debug("no initial limbo was found for unauthenticated user '{}'", player.username)
+      player.disconnect(Component.text("NavAuth: initial limbo server not found.", TextColors.RED))
+      return
+    }
+
+    event.setInitialServer(limbo)
+    logger.debug(
+      "set user '{}' initial server to limbo server named {}",
+      player.username,
+      limbo.serverInfo.name,
+    )
+
+    authSession.state = AuthSessionState.WAITING_FOR_HANDLER
   }
 }
