@@ -12,7 +12,7 @@ hero:
   actions:
     - theme: brand
       text: View docs
-      link: /markdown-examples
+      link: /offer
     - theme: alt
       text: Visit project GitHub page
       link: https://github.com/Navio1430/NavAuth
@@ -38,11 +38,11 @@ features:
       src: https://pngimg.com/d/discord_PNG3.png
     title: Need support?
     details: Join our Discord server!
-    link: /todo - discord
+    link: https://discord.com/invite/WTtEQneRJb
   - icon: 🤝
     title: Contribute
     details: Learn how to contribute and build the future of Minecraft Authentication!
-    link: /todo - discord
+    link: https://discord.com/invite/WTtEQneRJb
 ---
 
 
