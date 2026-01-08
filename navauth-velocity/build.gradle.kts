@@ -58,3 +58,14 @@ dependencies {
   // Tribufu-Rcon used for containers
   compileOnly("com.tribufu:Tribufu-VelocityRcon:1.2.0")
 }
+
+tasks.compileJava {
+  options.compilerArgs.add("-parameters")
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+  compilerOptions {
+    freeCompilerArgs.add("-java-parameters")
+  }
+}
+

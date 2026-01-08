@@ -33,7 +33,9 @@ class Permissions {
 
     const val ADMIN_BASE = "$BASE.admin"
     //    const val ADMIN_FORCE_UNREGISTER = "$ADMIN_BASE.forceunregister"
-    const val ADMIN_PLAYER_LOOKUP = "$ADMIN_BASE.playerlookup"
+    const val ADMIN_PLAYER_LOOKUP_BASE = "$ADMIN_BASE.playerlookup"
+    const val ADMIN_PLAYER_LOOKUP_PROFILE = "$ADMIN_PLAYER_LOOKUP_BASE.profile"
+    const val ADMIN_PLAYER_LOOKUP_SESSIONS = "$ADMIN_PLAYER_LOOKUP_BASE.sessions"
     const val ADMIN_FORCE_SET_PASSWORD = "$ADMIN_BASE.forcesetpassword"
     const val ADMIN_FORCE_CRACKED = "$ADMIN_BASE.forcecracked"
     const val ADMIN_FORCE_PREMIUM = "$ADMIN_BASE.forcepremium"

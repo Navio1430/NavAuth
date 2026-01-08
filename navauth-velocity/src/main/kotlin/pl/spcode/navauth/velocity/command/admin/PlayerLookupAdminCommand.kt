@@ -30,6 +30,7 @@ import java.text.SimpleDateFormat
 import java.time.Duration
 import java.util.Optional
 import net.kyori.adventure.text.minimessage.MiniMessage
+import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.user.UserActivitySessionService
 import pl.spcode.navauth.common.application.user.UserService
@@ -38,7 +39,7 @@ import pl.spcode.navauth.common.command.user.UsernameOrUuidRaw
 import pl.spcode.navauth.velocity.command.Permissions
 
 @Command(name = "lookup")
-@Permission(Permissions.ADMIN_PLAYER_LOOKUP)
+@Permission(Permissions.ADMIN_PLAYER_LOOKUP_BASE)
 class PlayerLookupAdminCommand
 @Inject
 constructor(
@@ -51,7 +52,9 @@ constructor(
   val dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
 
   @Async
+  @Permission(Permissions.ADMIN_PLAYER_LOOKUP_PROFILE)
   @Execute(name = "profile")
+  @Description("Displays information about specified user.")
   fun lookupProfile(
     @Context sender: Player,
     @Arg(value = "username|uuid") usernameOrUuidRaw: UsernameOrUuidRaw,
@@ -92,11 +95,13 @@ $mojangLine
   }
 
   @Async
+  @Permission(Permissions.ADMIN_PLAYER_LOOKUP_SESSIONS)
   @Execute(name = "sessions", aliases = ["session"])
+  @Description("Displays sessions of specified user.")
   fun lookupSession(
     @Context sender: Player,
     @Arg(value = "username|uuid") usernameOrUuidRaw: UsernameOrUuidRaw,
-    @Arg pageNumber: Optional<Long>,
+    @Arg(value = "page") pageNumber: Optional<Long>,
   ) {
     val user = userArgumentResolver.resolve(usernameOrUuidRaw)
 
