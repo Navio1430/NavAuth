@@ -18,15 +18,13 @@
 
 package pl.spcode.navauth.common.infra.auth
 
-import pl.spcode.navauth.common.application.event.EventDispatcher
+import pl.spcode.navauth.api.domain.auth.AuthSessionType
+import pl.spcode.navauth.api.event.NavAuthEventBus
 import pl.spcode.navauth.common.domain.auth.session.AuthSession
-import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 import pl.spcode.navauth.common.domain.player.PlayerAdapter
 
-open class RegisterAuthSession<T : PlayerAdapter>(
-  playerAdapter: T,
-  eventDispatcher: EventDispatcher,
-) : AuthSession<T>(playerAdapter, eventDispatcher) {
+open class RegisterAuthSession<T : PlayerAdapter>(playerAdapter: T, eventBus: NavAuthEventBus) :
+  AuthSession<T>(playerAdapter, eventBus) {
 
   override fun getSessionType(): AuthSessionType {
     return AuthSessionType.REGISTER

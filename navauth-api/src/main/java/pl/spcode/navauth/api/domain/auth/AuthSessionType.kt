@@ -16,8 +16,10 @@
  *
  */
 
-package pl.spcode.navauth.common.domain.event
+package pl.spcode.navauth.api.domain.auth
 
-import pl.spcode.navauth.common.domain.player.PlayerAdapter
-
-class UserAuthenticatedEvent(val playerAdapter: PlayerAdapter) : Event {}
+enum class AuthSessionType {
+  LOGIN,
+  REGISTER,
+  PREMIUM,
+}

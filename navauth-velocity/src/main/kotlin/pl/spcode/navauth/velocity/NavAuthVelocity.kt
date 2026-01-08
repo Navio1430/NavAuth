@@ -34,7 +34,8 @@ import java.nio.file.Path
 import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import pl.spcode.navauth.common.application.event.EventDispatcher
+import pl.spcode.navauth.api.NavAuthAPI
+import pl.spcode.navauth.api.event.NavAuthEventBus
 import pl.spcode.navauth.common.command.exception.MissingPermissionException
 import pl.spcode.navauth.common.command.exception.UserResolveException
 import pl.spcode.navauth.common.command.handler.UserResolveExceptionHandler
@@ -43,7 +44,6 @@ import pl.spcode.navauth.common.command.user.UsernameOrUuidRaw
 import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.config.MigrationConfig
-import pl.spcode.navauth.common.domain.event.UserAuthenticatedEvent
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.module.DataPersistenceModule
 import pl.spcode.navauth.common.module.EventsModule
@@ -127,13 +127,13 @@ constructor(
           MigrationModule(),
         )
 
-      val dispatcher = injector.getInstance(EventDispatcher::class.java)
-      dispatcher.register(
-        UserAuthenticatedEvent::class.java,
-        injector.getInstance(UserAuthenticatedEventListener::class.java),
-      )
+      val eventBus = injector.getInstance(NavAuthEventBus::class.java)
+      eventBus.register(injector.getInstance(UserAuthenticatedEventListener::class.java))
 
       connectAndInitDatabase()
+
+      val apiImpl = injector.getInstance(NavAuthApiImpl::class.java)
+      NavAuthAPI.setAPIInstance(apiImpl)
 
       registerListeners(injector)
       registerCommands(injector)

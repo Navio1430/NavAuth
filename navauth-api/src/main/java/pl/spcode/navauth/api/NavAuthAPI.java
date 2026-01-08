@@ -1,6 +1,6 @@
 /*
  * NavAuth
- * Copyright © 2025 Oliwier Fijas (Navio1430)
+ * Copyright © 2026 Oliwier Fijas (Navio1430)
  *
  * NavAuth is free software; You can redistribute it and/or modify it under the terms of:
  * the GNU Affero General Public License version 3 as published by the Free Software Foundation.
@@ -16,24 +16,25 @@
  *
  */
 
-package pl.spcode.navauth.common.domain.player
+package pl.spcode.navauth.api;
 
-import java.util.UUID
-import pl.spcode.navauth.api.domain.AuthPlayer
-import pl.spcode.navauth.common.domain.common.IPAddress
-import pl.spcode.navauth.common.domain.user.UserUuid
+import pl.spcode.navauth.api.event.NavAuthEventBus;
 
-interface PlayerAdapter : AuthPlayer {
+public abstract class NavAuthAPI {
 
-  override fun getIdentifier(): UUID {
-    return getUuid().value
+  private static NavAuthAPI instance;
+
+  protected abstract NavAuthEventBus provideEventBus();
+
+  public NavAuthEventBus getEventBus() {
+    return provideEventBus();
   }
 
-  fun getIPAddress(): IPAddress
+  public static NavAuthAPI getInstance() {
+    return instance;
+  }
 
-  fun getUuid(): UserUuid
-
-  fun disconnect(reason: DisconnectReason)
-
-  fun isOnline(): Boolean
+  public static void setAPIInstance(NavAuthAPI instance) {
+    NavAuthAPI.instance = instance;
+  }
 }

@@ -3,6 +3,8 @@ dependencies {
 
   // todo: move dependencies to libs.toml
 
+  api(project(":navauth-api"))
+
   // EternalCode Multification
   api("com.eternalcode:multification-core:1.2.2")
   api("com.eternalcode:multification-okaeri:1.2.2")

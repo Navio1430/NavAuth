@@ -16,15 +16,25 @@
  *
  */
 
-package pl.spcode.navauth.common.module
+package pl.spcode.navauth.example.listener;
 
-import com.google.inject.AbstractModule
-import pl.spcode.navauth.api.event.NavAuthEventBus
-import pl.spcode.navauth.common.infra.NavAuthEventBusInternal
+import com.google.inject.Inject;
+import com.velocitypowered.api.proxy.ProxyServer;
+import net.kyori.adventure.text.Component;
+import pl.spcode.navauth.api.event.NavAuthEventListener;
+import pl.spcode.navauth.api.event.Subscribe;
+import pl.spcode.navauth.api.event.user.UserAuthenticatedEvent;
 
-class EventsModule : AbstractModule() {
+public class NavAuthListeners implements NavAuthEventListener {
 
-  override fun configure() {
-    bind(NavAuthEventBus::class.java).to(NavAuthEventBusInternal::class.java)
+  @Inject private ProxyServer server;
+
+  @Subscribe
+  public void handleUserAuthenticatedEvent(UserAuthenticatedEvent event) {
+    server
+        .getPlayer(event.getPlayer().getIdentifier())
+        .get()
+        .sendMessage(
+            Component.text("You are now logged in! Session type: " + event.getSessionType()));
   }
 }

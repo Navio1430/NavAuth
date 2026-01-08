@@ -21,7 +21,7 @@ package pl.spcode.navauth.velocity.infra.auth
 import com.velocitypowered.api.proxy.Player
 import com.velocitypowered.api.scheduler.ScheduledTask
 import java.time.Duration
-import pl.spcode.navauth.common.application.event.EventDispatcher
+import pl.spcode.navauth.api.event.NavAuthEventBus
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.infra.auth.RegisterAuthSession
 import pl.spcode.navauth.velocity.application.event.VelocityEventDispatcher
@@ -35,8 +35,8 @@ class VelocityRegisterAuthSession(
   val velocityEventDispatcher: VelocityEventDispatcher,
   val multification: VelocityMultification,
   val messagesConfig: MessagesConfig,
-  eventDispatcher: EventDispatcher,
-) : RegisterAuthSession<VelocityPlayerAdapter>(VelocityPlayerAdapter(player), eventDispatcher) {
+  eventBus: NavAuthEventBus,
+) : RegisterAuthSession<VelocityPlayerAdapter>(VelocityPlayerAdapter(player), eventBus) {
 
   val notifyMessageTask: ScheduledTask
   val disconnectPlayerTask: ScheduledTask

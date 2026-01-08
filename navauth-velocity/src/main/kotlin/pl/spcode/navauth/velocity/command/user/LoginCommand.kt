@@ -29,11 +29,11 @@ import dev.rollczi.litecommands.annotations.execute.Execute
 import java.util.Optional
 import kotlin.jvm.optionals.getOrNull
 import net.kyori.adventure.text.Component
+import pl.spcode.navauth.api.domain.auth.AuthSessionType
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.command.exception.MissingPermissionException
 import pl.spcode.navauth.common.component.TextColors
-import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 import pl.spcode.navauth.velocity.command.Permissions
 import pl.spcode.navauth.velocity.infra.auth.VelocityLoginAuthSession
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId

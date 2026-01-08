@@ -18,10 +18,10 @@
 
 package pl.spcode.navauth.common.infra.auth
 
+import pl.spcode.navauth.api.domain.auth.AuthSessionType
+import pl.spcode.navauth.api.event.NavAuthEventBus
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
-import pl.spcode.navauth.common.application.event.EventDispatcher
 import pl.spcode.navauth.common.domain.auth.session.AuthSession
-import pl.spcode.navauth.common.domain.auth.session.AuthSessionType
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.player.DisconnectReason
 import pl.spcode.navauth.common.domain.player.PlayerAdapter
@@ -30,9 +30,9 @@ open class LoginAuthSession<T : PlayerAdapter>(
   playerAdapter: T,
   val userCredentials: UserCredentials,
   val userCredentialsService: UserCredentialsService,
-  val maxLoginAttempts: Int,
-  eventDispatcher: EventDispatcher,
-) : AuthSession<T>(playerAdapter, eventDispatcher) {
+  maxLoginAttempts: Int,
+  eventBus: NavAuthEventBus,
+) : AuthSession<T>(playerAdapter, eventBus) {
 
   private var attemptsLeft = maxLoginAttempts
 

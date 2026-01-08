@@ -16,10 +16,12 @@
  *
  */
 
-package pl.spcode.navauth.common.application.event
+package pl.spcode.navauth.api.event;
 
-import pl.spcode.navauth.common.domain.event.Event
-
-interface EventListener<E : Event> {
-  fun handle(event: E)
+public class EventPriority {
+  static final int LOWEST = 0;
+  static final int LOW = 10;
+  static final int NORMAL = 20;
+  static final int HIGH = 30;
+  static final int HIGHEST = 40;
 }

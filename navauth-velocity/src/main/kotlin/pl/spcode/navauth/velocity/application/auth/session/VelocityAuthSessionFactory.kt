@@ -21,10 +21,10 @@ package pl.spcode.navauth.velocity.application.auth.session
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.velocitypowered.api.proxy.Player
+import pl.spcode.navauth.api.event.NavAuthEventBus
 import pl.spcode.navauth.common.application.auth.session.AuthSessionException
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
-import pl.spcode.navauth.common.application.event.EventDispatcher
 import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.domain.user.User
@@ -48,7 +48,7 @@ constructor(
   val multification: VelocityMultification,
   val generalConfig: GeneralConfig,
   val messagesConfig: MessagesConfig,
-  val eventDispatcher: EventDispatcher,
+  val eventBus: NavAuthEventBus,
 ) {
 
   fun createLoginAuthSession(
@@ -72,7 +72,7 @@ constructor(
         multification,
         generalConfig,
         messagesConfig,
-        eventDispatcher,
+        eventBus,
       )
     return authSessionService.registerSession(uniqueSessionId, session)
   }
@@ -88,7 +88,7 @@ constructor(
         velocityEventDispatcher,
         multification,
         messagesConfig,
-        eventDispatcher,
+        eventBus,
       )
     return authSessionService.registerSession(uniqueSessionId, session)
   }
@@ -98,13 +98,7 @@ constructor(
     uniqueSessionId: VelocityUniqueSessionId,
   ): VelocityAutoLoginAuthSession {
     val session =
-      VelocityAutoLoginAuthSession(
-        player,
-        scheduler,
-        multification,
-        messagesConfig,
-        eventDispatcher,
-      )
+      VelocityAutoLoginAuthSession(player, scheduler, multification, messagesConfig, eventBus)
     return authSessionService.registerSession(uniqueSessionId, session)
   }
 }

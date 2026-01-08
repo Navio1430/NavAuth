@@ -19,15 +19,20 @@
 package pl.spcode.navauth.velocity.listener.application
 
 import com.google.inject.Inject
-import pl.spcode.navauth.common.application.event.EventListener
+import pl.spcode.navauth.api.event.NavAuthEventListener
+import pl.spcode.navauth.api.event.Subscribe
+import pl.spcode.navauth.api.event.user.UserAuthenticatedEvent
 import pl.spcode.navauth.common.application.user.UserActivitySessionService
-import pl.spcode.navauth.common.domain.event.UserAuthenticatedEvent
+import pl.spcode.navauth.common.domain.event.UserAuthenticatedEventInternal
+import pl.spcode.navauth.common.domain.player.PlayerAdapter
 
 class UserAuthenticatedEventListener
 @Inject
-constructor(val userActivitySessionService: UserActivitySessionService) :
-  EventListener<UserAuthenticatedEvent> {
-  override fun handle(event: UserAuthenticatedEvent) {
-    userActivitySessionService.registerPlayerJoin(event.playerAdapter)
+constructor(val userActivitySessionService: UserActivitySessionService) : NavAuthEventListener {
+
+  @Subscribe
+  fun handleUserAuthenticatedEvent(event: UserAuthenticatedEvent) {
+    event as UserAuthenticatedEventInternal
+    userActivitySessionService.registerPlayerJoin(event.player as PlayerAdapter)
   }
 }
