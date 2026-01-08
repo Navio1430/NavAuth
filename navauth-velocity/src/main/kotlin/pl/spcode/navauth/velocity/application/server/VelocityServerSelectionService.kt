@@ -23,72 +23,64 @@ import com.google.inject.Singleton
 import com.velocitypowered.api.proxy.Player
 import com.velocitypowered.api.proxy.ProxyServer
 import com.velocitypowered.api.proxy.server.RegisteredServer
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import kotlin.jvm.optionals.getOrNull
+import pl.spcode.navauth.api.event.NavAuthEventBus
+import pl.spcode.navauth.api.event.velocity.AuthenticatedInitialServerEvent
+import pl.spcode.navauth.api.event.velocity.UnauthenticatedInitialLimboEvent
 import pl.spcode.navauth.common.config.GeneralConfig
+import pl.spcode.navauth.common.infra.NavAuthEventBusInternal
 
 @Singleton
 class VelocityServerSelectionService
 @Inject
-constructor(val proxyServer: ProxyServer, val generalConfig: GeneralConfig) {
-
-  private val logger: Logger = LoggerFactory.getLogger(VelocityServerSelectionService::class.java)
+constructor(
+  val proxyServer: ProxyServer,
+  val generalConfig: GeneralConfig,
+  val eventBus: NavAuthEventBus,
+) {
 
   fun getLimboServer(player: Player): RegisteredServer? {
+    val servers = generalConfig.limboServers.mapNotNull { proxyServer.getServer(it).getOrNull() }
 
-    // todo send event
-    // todo impl loadbalancer
-    val serverName: String =
-      when {
-        !generalConfig.limboServers.isEmpty() -> {
-          generalConfig.limboServers.first()
-        }
-        else -> ""
+    val server =
+      if (servers.isEmpty()) {
+        null
+      } else {
+        getByLeastConn(servers)
       }
 
-    if (serverName.isEmpty()) {
-      throw ServerNotFoundException("no limbo server found, please fix your configuration")
-    }
+    // fire API event
+    val event = UnauthenticatedInitialLimboEvent(player, server)
+    eventBus as NavAuthEventBusInternal
+    eventBus.post(event)
 
-    val limbo = proxyServer.getServer(serverName)
-    if (limbo.isEmpty) {
-      throw ServerNotFoundException(
-        "limbo backend server with name '$serverName' not found",
-        serverName,
-      )
-    }
-
-    return limbo.get()
+    return event.initialLimbo.getOrNull()
   }
 
   /**
    * @return if server was found, then RegisteredServer, otherwise null
-   * @throws ServerNotFoundException if the initial server was set in configuration and not found as a registered one
+   * @throws ServerNotFoundException if the initial server was set in configuration and not found as
+   *   a registered one
    */
   fun getInitialServer(player: Player): RegisteredServer? {
+    val servers = generalConfig.initialServers.mapNotNull { proxyServer.getServer(it).getOrNull() }
 
-    // todo send event
-    // todo get server from loadbalancer
-    val serverName: String? =
-      when {
-        !generalConfig.initialServers.isEmpty() -> {
-          generalConfig.initialServers.first()
-        }
-        else -> null
+    val server =
+      if (servers.isEmpty()) {
+        null
+      } else {
+        getByLeastConn(servers)
       }
 
-    if (serverName == null) {
-      return null
-    }
+    // fire API event
+    val event = AuthenticatedInitialServerEvent(player, server)
+    eventBus as NavAuthEventBusInternal
+    eventBus.post(event)
 
-    val server = proxyServer.getServer(serverName)
-    if (server.isEmpty) {
-      throw ServerNotFoundException(
-        "initial server (the one after authentication) with name '$serverName' not found",
-        serverName,
-      )
-    }
+    return event.initialServer.getOrNull()
+  }
 
-    return server.get()
+  private fun getByLeastConn(servers: List<RegisteredServer>): RegisteredServer {
+    return servers.minBy { it.playersConnected.size }
   }
 }

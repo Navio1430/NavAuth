@@ -25,6 +25,7 @@ import pl.spcode.navauth.api.event.NavAuthEventListener;
 import pl.spcode.navauth.api.event.Subscribe;
 import pl.spcode.navauth.api.event.user.UserAuthenticatedEvent;
 import pl.spcode.navauth.api.event.velocity.AuthenticatedInitialServerEvent;
+import pl.spcode.navauth.api.event.velocity.UnauthenticatedInitialLimboEvent;
 
 public class NavAuthListeners implements NavAuthEventListener {
 
@@ -42,5 +43,10 @@ public class NavAuthListeners implements NavAuthEventListener {
   @Subscribe
   public void handleAuthenticatedInitialServerEvent(AuthenticatedInitialServerEvent event) {
     // event.setInitialServer(null); // will disconnect the user with a proper error message
+  }
+
+  @Subscribe
+  public void handleUnauthenticatedLimboServerEvent(UnauthenticatedInitialLimboEvent event) {
+     event.setInitialLimbo(null); // will disconnect the user with a proper error message
   }
 }
