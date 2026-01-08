@@ -21,6 +21,7 @@ package pl.spcode.navauth.common.application.user
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import pl.spcode.navauth.api.event.NavAuthEventBus
+import pl.spcode.navauth.api.event.user.UserPremiumMigrationEvent
 import pl.spcode.navauth.api.event.user.UserUsernameMigrationEvent
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
@@ -102,22 +103,28 @@ constructor(
    * @return The updated user with premium account status.
    */
   fun migrateToPremium(user: User, mojangId: MojangId): User {
-    return txService.inTransaction {
-      val credentials = userCredentialsService.findCredentials(user)!!
-      // require credentials only if there's 2FA enabled
-      val requireCredentials = credentials.isTwoFactorEnabled
-      val premiumUser = User.premium(user.uuid, user.username, mojangId, requireCredentials)
+    val user =
+      txService.inTransaction {
+        val credentials = userCredentialsService.findCredentials(user)!!
+        // require credentials only if there's 2FA enabled
+        val requireCredentials = credentials.isTwoFactorEnabled
+        val premiumUser = User.premium(user.uuid, user.username, mojangId, requireCredentials)
 
-      userRepository.save(premiumUser)
-      if (requireCredentials) {
-        val newCredentials = credentials.withoutPassword()
-        userCredentialsService.storeUserCredentials(premiumUser, newCredentials)
-      } else {
-        deleteUserCredentialsNoTx(user)
+        userRepository.save(premiumUser)
+        if (requireCredentials) {
+          val newCredentials = credentials.withoutPassword()
+          userCredentialsService.storeUserCredentials(premiumUser, newCredentials)
+        } else {
+          deleteUserCredentialsNoTx(user)
+        }
+
+        return@inTransaction premiumUser
       }
 
-      return@inTransaction premiumUser
-    }
+    eventBus as NavAuthEventBusInternal
+    eventBus.post(UserPremiumMigrationEvent(user.toAuthUser()))
+
+    return user
   }
 
   /**
