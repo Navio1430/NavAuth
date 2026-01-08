@@ -32,11 +32,11 @@ import me.uniodex.velocityrcon.commandsource.IRconCommandSource
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import pl.spcode.navauth.common.annotation.Description
+import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.user.UserArgumentResolver
 import pl.spcode.navauth.common.command.user.UsernameOrUuidRaw
 import pl.spcode.navauth.common.component.TextColors
-import pl.spcode.navauth.common.infra.crypto.hasher.BCryptCredentialsHasher
 import pl.spcode.navauth.common.shared.utils.StringUtils.Companion.generateRandomString
 import pl.spcode.navauth.velocity.command.Permissions
 
@@ -44,7 +44,11 @@ import pl.spcode.navauth.velocity.command.Permissions
 @Permission(Permissions.ADMIN_FORCE_CRACKED)
 class ForceCrackedAdminCommand
 @Inject
-constructor(val userService: UserService, val userArgumentResolver: UserArgumentResolver) {
+constructor(
+  val userService: UserService,
+  val userArgumentResolver: UserArgumentResolver,
+  val userCredentialsService: UserCredentialsService,
+) {
 
   @Async
   @Execute
@@ -68,8 +72,8 @@ constructor(val userService: UserService, val userArgumentResolver: UserArgument
 
     val newPassword = newPasswordOpt.orElseGet { generateRandomString(8) }
 
-    // todo use hasher factory instead
-    userService.migrateToNonPremium(user, BCryptCredentialsHasher().hash(newPassword))
+    val hashedPassword = userCredentialsService.hashPassword(newPassword)
+    userService.migrateToNonPremium(user, hashedPassword)
 
     val passwordText =
       if (sender is ConsoleCommandSource || sender is IRconCommandSource) {

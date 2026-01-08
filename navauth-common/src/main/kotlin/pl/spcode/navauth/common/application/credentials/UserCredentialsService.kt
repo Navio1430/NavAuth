@@ -24,6 +24,7 @@ import pl.spcode.navauth.common.domain.common.TransactionService
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
 import pl.spcode.navauth.common.domain.user.User
+import pl.spcode.navauth.common.infra.crypto.HashedPassword
 import pl.spcode.navauth.common.infra.crypto.TOTP2FA
 
 @Singleton
@@ -79,6 +80,10 @@ constructor(
     val hasher = credentialsHasherFactory.createHasher(credentials.hashedPassword.algo)
 
     return hasher.verify(password, passwordHash)
+  }
+
+  fun hashPassword(password: String): HashedPassword {
+    return credentialsHasherFactory.createDefaultHasher().hash(password)
   }
 
   fun verifyCode(credentials: UserCredentials, code: String): Boolean {
