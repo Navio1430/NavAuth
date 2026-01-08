@@ -27,6 +27,7 @@ import dev.rollczi.litecommands.annotations.command.RootCommand
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import net.kyori.adventure.text.Component
+import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.exception.MissingPermissionException
@@ -42,7 +43,7 @@ constructor(val userService: UserService, val userCredentialsService: UserCreden
 
   @Async
   @Execute(name = "disable2fa")
-  // todo description
+  @Description("Disables 2FA after successful verification.")
   fun disableTwoFactor(@Context sender: Player, @Arg(value = "2fa_code") code: String) {
     // if permission is set explicitly to FALSE
     if (sender.getPermissionValue(Permissions.USER_TWO_FACTOR_DISABLE) == Tristate.FALSE) {

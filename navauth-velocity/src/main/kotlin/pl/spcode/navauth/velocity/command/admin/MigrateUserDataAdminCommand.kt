@@ -106,8 +106,6 @@ constructor(
       return
     }
 
-    // todo send api event
-
     proxyServer.getPlayer(user.username.value).ifPresent {
       it.disconnect(
         Component.text("Your account data has been migrated to '${newUsername}'.", TextColors.GREEN)
