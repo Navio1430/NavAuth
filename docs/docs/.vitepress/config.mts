@@ -6,6 +6,7 @@ let basePath = '/NavAuth';
 // https://vitepress.dev/reference/site-config
 const vitePressOptions = {
   base: basePath,
+  outDir: '../dist/docs',
 
   head: [['link', { rel: 'icon', href: basePath + '/navauth-logo.svg' }]],
   title: "NavAuth Docs",

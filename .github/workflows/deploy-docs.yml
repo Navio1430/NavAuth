@@ -56,9 +56,40 @@ jobs:
           name: generated-docs
           path: docs/docs/generated
 
+  run-generate-javadoc-task:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    env:
+      USERNAME: ${{ github.actor }}
+      TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Grant execute permission
+        run: chmod +x ./gradlew
+
+      - name: Execute Gradle javadoc on navauth-api module
+        run: ./gradlew navauth-api:javadoc # builds to docs/dist/javadoc
+
+      - name: Upload generated javadoc
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-javadoc
+          path: docs/dist/javadoc
+
+
   # Build job
   build:
-    needs: run-generate-docs-task
+    needs: [run-generate-docs-task, run-generate-javadoc-task]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -82,16 +113,21 @@ jobs:
         with:
           name: generated-docs
           path: docs/docs/generated
+      - name: Download generated javadoc
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-javadoc
+          path: docs/javadoc
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Install dependencies
         run: pnpm install
       - name: Build with VitePress
-        run: pnpm docs:build
+        run: pnpm docs:build # builds to docs/dist/docs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/docs/.vitepress/dist
+          path: docs/dist
 
   # Deployment job
   deploy:

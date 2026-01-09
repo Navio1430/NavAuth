@@ -44,33 +44,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  publish-api-javadoc:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
-          server-id: github
-          settings-path: ${{ github.workspace }}
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-      - name: Grant execute permission
-        run: chmod +x ./gradlew
-
-      - name: Execute Gradle javadoc on navauth-api module
-        run: ./gradlew navauth-api:javadoc
-
-      - name: Deploy JavaDoc 🚀
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./navauth-api/build/docs/javadoc
-          publish_branch: javadoc

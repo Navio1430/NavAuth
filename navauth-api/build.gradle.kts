@@ -30,3 +30,8 @@ publishing {
     }
   }
 }
+
+tasks.named<Javadoc>("javadoc") {
+  destinationDir = file("../docs/dist/javadoc")
+  options.encoding = "UTF-8"
+}
