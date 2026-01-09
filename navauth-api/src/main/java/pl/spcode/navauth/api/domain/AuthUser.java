@@ -31,8 +31,8 @@ public interface AuthUser {
   UUID getUUID();
 
   /**
-   * Retrieves the Mojang UUID associated with the user, if available. </br> NOTE: User can have a
-   * premium username with non-premium status.
+   * Retrieves the Mojang UUID associated with the user, if available. NOTE: User can have a premium
+   * username with non-premium status.
    *
    * @return the Mojang UUID of the user, or {@code null} if the user does not have one.
    */
@@ -47,8 +47,8 @@ public interface AuthUser {
   String getUsername();
 
   /**
-   * Checks whether the user is considered premium based on the presence of a Mojang UUID. </br>
-   * NOTE: User can have a premium username with non-premium status.
+   * Checks whether the user is considered premium based on the presence of a Mojang UUID. NOTE:
+   * User can have a premium username with non-premium status.
    *
    * @return {@code true} if the user has a Mojang UUID, indicating premium status; {@code false}
    *     otherwise.
