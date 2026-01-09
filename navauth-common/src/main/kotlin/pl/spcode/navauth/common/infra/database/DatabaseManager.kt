@@ -64,16 +64,22 @@ constructor(
     val jdbcUrl: String =
       when (driverType) {
         DatabaseDriverType.H2_MEM,
+        DatabaseDriverType.H2_FILE,
         DatabaseDriverType.SQLITE -> {
           val dbFilename = pluginDirectory.path.resolve(config.database).toAbsolutePath().toString()
 
-          val supportedExtensions = listOf(".sqlite", ".sqlite3", ".db", ".db3", ".s3db", ".sl3")
+          val supportedExtensions =
+            listOf(".sqlite", ".sqlite3", ".db", ".db3", ".s3db", ".sl3", ".h2.db", ".mv.db")
 
           val finalFilename =
             if (supportedExtensions.any { dbFilename.endsWith(it, ignoreCase = true) }) {
               dbFilename
             } else {
-              "$dbFilename.db"
+              if (driverType == DatabaseDriverType.H2_FILE) {
+                dbFilename
+              } else {
+                "$dbFilename.db"
+              }
             }
 
           driverJdbcFormat.format(finalFilename)

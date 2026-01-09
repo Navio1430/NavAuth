@@ -23,6 +23,9 @@ enum class DatabaseDriverType(val driverClassName: String, val jdbcUrlFormat: St
   /** in-memory database, jdbc:h2:mem:database_name */
   H2_MEM("org.h2.Driver", "jdbc:h2:mem:%s"),
 
+  /** file-based database, jdbc:h2:database_path */
+  H2_FILE("org.h2.Driver", "jdbc:h2:%s"),
+
   /** works for both mysql and mariadb */
   MYSQL("com.mysql.cj.jdbc.Driver", "jdbc:mysql://%s:%s/%s?sslMode=%s"),
   MARIADB(MYSQL.driverClassName, MYSQL.jdbcUrlFormat),

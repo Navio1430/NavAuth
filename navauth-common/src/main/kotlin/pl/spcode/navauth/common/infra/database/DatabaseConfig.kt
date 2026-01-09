@@ -25,13 +25,13 @@ open class DatabaseConfig : OkaeriConfig() {
 
   @Comment(
     "Database driver type. Available drivers:",
-    " - H2_MEM (H2 memory-based database, ONLY FOR TESTING)",
-    " - SQLITE (File-based database, ONLY FOR TESTING OR SMALL ENVIRONMENTS)",
+    " - H2_FILE (File-based database, USE FOR SMALL ENVIRONMENTS OR TESTING)",
+    " - SQLITE (File-based database, USE FOR SMALL ENVIRONMENTS OR TESTING)",
     " - MYSQL",
     " - MARIADB (We use the same driver as for MYSQL. Both should be protocol compatible)",
     " - POSTGRESQL",
   )
-  var driverType: DatabaseDriverType = DatabaseDriverType.H2_MEM
+  var driverType: DatabaseDriverType = DatabaseDriverType.H2_FILE
     protected set
 
   @Comment("Connection pool size")
@@ -53,13 +53,13 @@ open class DatabaseConfig : OkaeriConfig() {
   var password: String = "password"
     protected set
 
-  @Comment("Hostname (ip/domain) of the database.", "Not applicable for H2_MEM.")
+  @Comment("Hostname (ip/domain) of the database.", "Not applicable for H2_FILE or SQLITE.")
   var hostname: String = "localhost"
     protected set
 
   @Comment(
     "Port number of the database server. Common ports:",
-    " - H2_MEM: Not applicable (memory based)",
+    " - H2_FILE: Not applicable",
     " - SQLITE: Not applicable",
     " - MYSQL: 3306",
     " - MARIADB: 3306",
@@ -73,7 +73,8 @@ open class DatabaseConfig : OkaeriConfig() {
 
   @Comment(
     "Database name.",
-    " - SQLITE: If you're using SQLite, this property",
+    " - H2_FILE:",
+    " - SQLITE: If you're using SQLite or H2, this property",
     "   specifies the database filename e.g., database.db",
   )
   var database: String = "default"

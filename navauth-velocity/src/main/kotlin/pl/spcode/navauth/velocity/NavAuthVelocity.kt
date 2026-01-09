@@ -32,6 +32,7 @@ import dev.rollczi.litecommands.LiteCommands
 import dev.rollczi.litecommands.velocity.LiteVelocityFactory
 import java.nio.file.Path
 import net.kyori.adventure.text.Component
+import org.bstats.velocity.Metrics
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.api.NavAuthAPI
@@ -45,13 +46,7 @@ import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.config.MigrationConfig
 import pl.spcode.navauth.common.infra.database.DatabaseManager
-import pl.spcode.navauth.common.module.DataPersistenceModule
-import pl.spcode.navauth.common.module.EventsModule
-import pl.spcode.navauth.common.module.HttpClientModule
-import pl.spcode.navauth.common.module.MigrationModule
-import pl.spcode.navauth.common.module.PluginDirectoryModule
-import pl.spcode.navauth.common.module.ServicesModule
-import pl.spcode.navauth.common.module.YamlConfigModule
+import pl.spcode.navauth.common.module.*
 import pl.spcode.navauth.velocity.command.CommandsRegistry
 import pl.spcode.navauth.velocity.infra.command.VelocityInvalidUsageHandler
 import pl.spcode.navauth.velocity.infra.command.VelocityMissingPermissionExceptionHandler
@@ -73,6 +68,7 @@ constructor(
   val parentInjector: Injector,
   val proxyServer: ProxyServer,
   @param:DataDirectory val dataDirectory: Path,
+  val metricsFactory: Metrics.Factory,
 ) {
 
   private val logger: Logger = LoggerFactory.getLogger(NavAuthVelocity::class.java)
@@ -86,6 +82,10 @@ constructor(
     try {
       logger.info("Initializing NavAuth plugin...")
       this.pluginInstance = pluginInstance
+
+      // initialize bstats
+      val pluginId = 28777
+      metricsFactory.make(pluginInstance, pluginId)
 
       // register self as listener because of the shutdown event
       proxyServer.eventManager.register(pluginInstance, this)
