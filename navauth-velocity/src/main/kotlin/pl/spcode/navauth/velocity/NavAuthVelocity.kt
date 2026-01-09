@@ -85,7 +85,7 @@ constructor(
 
       // initialize bstats
       val pluginId = 28777
-      metricsFactory.make(this, pluginId)
+      metricsFactory.make(pluginInstance, pluginId)
 
       // register self as listener because of the shutdown event
       proxyServer.eventManager.register(pluginInstance, this)
