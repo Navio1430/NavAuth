@@ -44,16 +44,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  publish-javadoc:
+  publish-api-javadoc:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Grant execute permission
+        run: chmod +x ./gradlew
+
+      - name: Execute Gradle javadoc on navauth-api module
+        run: ./gradlew navauth-api:javadoc
+
       - name: Deploy JavaDoc 🚀
-        uses: MathieuSoysal/Javadoc-publisher.yml@v3.0.2
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          javadoc-branch: javadoc
-          java-version: 21
-          target-folder: javadoc
-          project: gradle
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./navauth-api/build/docs/javadoc
+          publish_branch: javadoc
