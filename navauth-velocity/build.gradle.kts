@@ -6,18 +6,48 @@ plugins {
 
 val projectName = "navauth"
 
+var prefix = "pl.spcode.${projectName.lowercase()}.lib";
+fun com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar.relocatePrefixed(pkg: String) {
+  relocate(pkg, "${prefix}.$pkg")
+}
+
 tasks.shadowJar {
   destinationDirectory.set(file("../target"))
 
   archiveBaseName.set("${projectName}-velocity")
   archiveClassifier = null
 
-  var prefix = "pl.spcode.${projectName.lowercase()}.lib";
-  relocate("kotlin", "${prefix}.kotlin")
-  // todo: relocate gson lib
-  relocate("org.bstats", "${prefix}.org.bstats")
+  relocate("com.google", "$prefix.com.google") {
+    exclude("com/google/inject/**")
+    exclude("com/google/gson/**")
+  }
 
   exclude("com/google/inject/**")
+  exclude("com/google/gson/**")
+
+  exclude("org.slf4j")
+
+  relocatePrefixed("kotlin")
+  relocatePrefixed("org.bstats")
+  relocatePrefixed("at.favre")
+  relocatePrefixed("com.eternalcode")
+  relocatePrefixed("com.j256")
+  relocatePrefixed("com.mysql")
+  relocatePrefixed("com.zaxxer")
+  relocatePrefixed("dev.rollczi")
+  relocatePrefixed("eu.okaeri")
+  relocatePrefixed("google.protobuf")
+  relocatePrefixed("jakarta.inject")
+  relocatePrefixed("javax.annotation")
+  relocatePrefixed("org.aopalliance")
+  relocatePrefixed("org.bouncycastle")
+  relocatePrefixed("org.checkerframework")
+  relocatePrefixed("org.h2")
+  relocatePrefixed("org.intellij")
+  relocatePrefixed("org.jetbrains")
+  relocatePrefixed("org.postgresql")
+  relocatePrefixed("org.sqlite")
+  relocatePrefixed("org.yaml")
 
   doLast {
     val pluginsDir = file("./run/velocity/plugins")
