@@ -1,7 +1,7 @@
 import { withBase, defineConfig } from 'vitepress';
 import { withSidebar } from 'vitepress-sidebar';
 
-let basePath = '/NavAuth';
+let basePath = '/NavAuth/docs';
 
 // https://vitepress.dev/reference/site-config
 const vitePressOptions = {
