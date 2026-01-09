@@ -3,7 +3,6 @@ plugins {
 }
 
 group = "pl.spcode.navauth.example"
-version = "0.1.0-SNAPSHOT"
 
 repositories {
   mavenCentral()
