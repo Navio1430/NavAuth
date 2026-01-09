@@ -1,0 +1,5 @@
+pl.spcode.navauth.api
+pl.spcode.navauth.api.domain
+pl.spcode.navauth.api.event
+pl.spcode.navauth.api.event.user
+pl.spcode.navauth.api.event.velocity

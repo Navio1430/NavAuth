@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"pl.spcode.navauth.api"},{"l":"pl.spcode.navauth.api.domain"},{"l":"pl.spcode.navauth.api.event"},{"l":"pl.spcode.navauth.api.event.user"},{"l":"pl.spcode.navauth.api.event.velocity"}];updateSearchResults();
