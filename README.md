@@ -1,7 +1,7 @@
 
-# ❗❗❗ NAVAUTH IS NOT RELEASED YET ❗❗❗
-NavAuth is an **upcoming** plugin and is not released yet. Star the repo, join our discord and stay tuned until first release. 
-
+# ❗❗❗ NAVAUTH IS NOT FULLY RELEASED YET ❗❗❗
+As of now, only an alpha version is available.
+We are working on additional configuration options and other improvements to prepare for the release of NavAuth 1.0.
 <div align="center">
 
   <h1>NavAuth 🔐 - autologin plugin</h1>
@@ -30,7 +30,9 @@ NavAuth is an **upcoming** plugin and is not released yet. Star the repo, join o
 urhatedjack - logo design
 
 Thanks to **Discord support team**:
-- tbd
+- [Blavez](https://github.com/Blavezz)
+- [Jakub](https://github.com/jakmar06)
+- 403
 
 Thanks to people responsible for **QA**:
 - [Jakub6666](https://github.com/jakmar06)
@@ -61,12 +63,11 @@ NavAuth is licensed under the GNU AGPL v3. See the license file for more informa
 [![GNU AGPL Logo](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/agpl-3.0.en.html)
 
 ## 💡 TODO List
-More planned features are available in [Documentation](https://navio1430.github.io/NavAuth/offer.html#%F0%9F%9A%80-planned-features)
+More planned features are described in [Documentation](https://navio1430.github.io/NavAuth/offer.html#%F0%9F%9A%80-planned-features)
 - readme:
    - add banner
 - github/gh actions:
    - modrinth CD
-   - github CD
    - issue template:
       - bug report
       - feature request
