@@ -15,6 +15,7 @@ tasks.shadowJar {
   var prefix = "pl.spcode.${projectName.lowercase()}.lib";
   relocate("kotlin", "${prefix}.kotlin")
   // todo: relocate gson lib
+  relocate("org.bstats", "${prefix}.org.bstats")
 
   exclude("com/google/inject/**")
 
@@ -54,6 +55,9 @@ dependencies {
 
   compileOnly(libs.velocitypowered.velocity.api)
   annotationProcessor(libs.velocitypowered.velocity.api)
+
+  // bstats
+  implementation("org.bstats:bstats-velocity:3.1.0")
 
   // Tribufu-Rcon used for containers
   compileOnly("com.tribufu:Tribufu-VelocityRcon:1.2.0")
