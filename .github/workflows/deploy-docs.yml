@@ -117,7 +117,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: generated-javadoc
-          path: docs/dist/avadoc
+          path: docs/dist/javadoc
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Install dependencies
