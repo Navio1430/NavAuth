@@ -10,10 +10,13 @@ We are working on additional configuration options and other improvements to pre
   [![Velocity](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/supported/velocity_vector.svg)](https://modrinth.com/plugin/navauth)
   [![Modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg)](https://modrinth.com/plugin/navauth)
   [![Github](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/github_vector.svg)](https://github.com/Navio1430/NavAuth)
-  
+
   [![Gradle](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/built-with/gradle_vector.svg)](https://gradle.org/)
   [![Kotlin](assets/built_with_kotlin.svg)](https://kotlinlang.org/docs/home.html)
   ![Java](assets/built_with_java.svg)
+
+  [![Documentation](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/documentation/generic_vector.svg)](https://navio1430.github.io/NavAuth/docs)
+  [![Kotlin](assets/read_javadoc.svg)](https://navio1430.github.io/NavAuth/javadoc)
 
 </div>
 <br>
