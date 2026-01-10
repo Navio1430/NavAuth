@@ -7,7 +7,9 @@ let basePath = '/NavAuth/docs';
 const vitePressOptions = {
   base: basePath,
   outDir: '../dist/docs',
-
+  ignoreDeadLinks: [
+    /\/javadoc\//
+  ],
   head: [['link', { rel: 'icon', href: basePath + '/navauth-logo.svg' }]],
   title: "NavAuth Docs",
   description: "Official NavAuth auth & auto-login plugin docs.",
