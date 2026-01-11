@@ -25,15 +25,15 @@ features:
   - icon: ⚡
     title: Setup & Run the plugin
     details: Go through the detailed description about how to configure and run NavAuth.
-    link: /setup
+    link: /setup # todo
   - icon: 🚀
     title: Migrate now
     details: Check how to migrate from other plugins like LibreLogin, AuthMe and FastLogin.
-    link: /migration
+    link: /migration/migration
   - icon: 🧩
     title: Requirements
     details: Check the requirements needed to run NavAuth.
-    link: /requirements
+    link: /requirements # todo
   - icon:
       src: https://pngimg.com/d/discord_PNG3.png
     title: Need support?
