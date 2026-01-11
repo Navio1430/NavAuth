@@ -105,24 +105,30 @@ constructor(
       return
     }
 
-    val targetUser =
-      if (isPremium) {
-        User.premium(userUuid, username, MojangId(lUser.premiumUuid!!), twoFactorEnabled)
-      } else {
-        User.nonPremium(userUuid, username)
-      }
-
     val hashedPassword = getHashedPassword(lUser)
     if (!isPremium && hashedPassword == null && lUser.secret == null) {
       logger.info(
         "Non-Premium user ${lUser.lastNickname}:${lUser.uuid} has no password or 2FA secret which is an invalid record. Skipping record..."
       )
       return
-    } else {
+    }
+
+    val credentialsRequired: Boolean
+    if (lUser.secret != null || hashedPassword != null) {
       val totpSecret = lUser.secret?.let { TOTPSecret(it) }
       val credentials = UserCredentials.create(userUuid, hashedPassword, totpSecret)
       userCredentialsRepository.save(credentials)
+      credentialsRequired = true
+    } else {
+      credentialsRequired = false
     }
+
+    val targetUser =
+      if (isPremium) {
+        User.premium(userUuid, username, MojangId(lUser.premiumUuid!!), credentialsRequired)
+      } else {
+        User.nonPremium(userUuid, username)
+      }
 
     userRepository.save(targetUser)
   }
