@@ -73,4 +73,4 @@ public class UserAuthenticatedListener implements NavAuthEventListener {
 ## Check available events in the API javadoc
 
 If you want to check what events are available in the API,
-visit the [Javadoc](../../javadoc/) for the `navauth-api` module.
+visit the [Javadoc](https://navio1430.github.io/NavAuth/javadoc/) for the `navauth-api` module.
