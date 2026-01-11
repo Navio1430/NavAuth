@@ -7,6 +7,10 @@ Multification library was created by [**EternalCode**](https://github.com/Eterna
 
 ### 📝 Example usage (copy of original lib docs)
 
+::: tip
+You can use EternalCode's multification generator here https://eternalcode.pl/notification-generator.
+:::
+
 Syntax for sending notifications:
 
 #### Chat + Multiline chat
