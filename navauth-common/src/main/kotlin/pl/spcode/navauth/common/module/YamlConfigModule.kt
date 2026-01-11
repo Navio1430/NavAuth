@@ -23,6 +23,7 @@ import com.eternalcode.multification.okaeri.MultificationSerdesPack
 import com.google.inject.AbstractModule
 import eu.okaeri.configs.ConfigManager
 import eu.okaeri.configs.OkaeriConfig
+import eu.okaeri.configs.serdes.commons.SerdesCommons
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer
 import java.io.File
 import kotlin.reflect.KClass
@@ -45,6 +46,7 @@ class YamlConfigModule<T : OkaeriConfig>(
           } else {
             opt.configurer(
               YamlSnakeYamlConfigurer(),
+              SerdesCommons(),
               MultificationSerdesPack(multification.noticeRegistry),
               TextComponentSerdesPack(),
             )
