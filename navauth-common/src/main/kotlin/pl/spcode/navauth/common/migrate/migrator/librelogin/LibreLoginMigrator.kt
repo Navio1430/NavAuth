@@ -118,7 +118,9 @@ constructor(
         "Non-Premium user ${lUser.lastNickname}:${lUser.uuid} has no password or 2FA secret which is an invalid record. Skipping record..."
       )
       return
-    } else {
+    }
+
+    if (lUser.secret != null || hashedPassword != null) {
       val totpSecret = lUser.secret?.let { TOTPSecret(it) }
       val credentials = UserCredentials.create(userUuid, hashedPassword, totpSecret)
       userCredentialsRepository.save(credentials)
