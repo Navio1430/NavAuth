@@ -105,13 +105,6 @@ constructor(
       return
     }
 
-    val targetUser =
-      if (isPremium) {
-        User.premium(userUuid, username, MojangId(lUser.premiumUuid!!), twoFactorEnabled)
-      } else {
-        User.nonPremium(userUuid, username)
-      }
-
     val hashedPassword = getHashedPassword(lUser)
     if (!isPremium && hashedPassword == null && lUser.secret == null) {
       logger.info(
@@ -120,11 +113,22 @@ constructor(
       return
     }
 
+    val credentialsRequired: Boolean
     if (lUser.secret != null || hashedPassword != null) {
       val totpSecret = lUser.secret?.let { TOTPSecret(it) }
       val credentials = UserCredentials.create(userUuid, hashedPassword, totpSecret)
       userCredentialsRepository.save(credentials)
+      credentialsRequired = true
+    } else {
+      credentialsRequired = false
     }
+
+    val targetUser =
+      if (isPremium) {
+        User.premium(userUuid, username, MojangId(lUser.premiumUuid!!), credentialsRequired)
+      } else {
+        User.nonPremium(userUuid, username)
+      }
 
     userRepository.save(targetUser)
   }
