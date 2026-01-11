@@ -24,12 +24,15 @@ import pl.spcode.navauth.common.component.MultificationProvider
 import pl.spcode.navauth.velocity.infra.component.VelocityAudienceProvider
 import pl.spcode.navauth.velocity.multification.VelocityMultification
 import pl.spcode.navauth.velocity.multification.VelocityMultificationProvider
+import pl.spcode.navauth.velocity.multification.VelocityViewerProvider
 
-class VelocityMultificationsModule(val velocityMultification: VelocityMultification) :
+class VelocityMultificationsModule(val velocityViewerProvider: VelocityViewerProvider) :
   AbstractModule() {
 
   override fun configure() {
-    bind(VelocityMultification::class.java).toInstance(velocityMultification)
+    bind(VelocityViewerProvider::class.java).toInstance(velocityViewerProvider)
+    bind(VelocityMultification::class.java)
+
     bind(MultificationProvider::class.java).to(VelocityMultificationProvider::class.java)
     bind(AudienceProvider::class.java).to(VelocityAudienceProvider::class.java)
   }

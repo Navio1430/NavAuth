@@ -22,6 +22,7 @@ import com.eternalcode.multification.Multification
 import com.eternalcode.multification.adventure.AudienceConverter
 import com.eternalcode.multification.translation.TranslationProvider
 import com.eternalcode.multification.viewer.ViewerProvider
+import com.google.inject.Inject
 import com.velocitypowered.api.command.CommandSource
 import com.velocitypowered.api.proxy.Player
 import net.kyori.adventure.text.Component
@@ -29,10 +30,10 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.ComponentSerializer
 import pl.spcode.navauth.common.config.MessagesConfig
 
-open class VelocityMultification(
-  private val config: MessagesConfig,
-  private val provider: VelocityViewerProvider,
-) : Multification<CommandSource, MessagesConfig>() {
+open class VelocityMultification
+@Inject
+constructor(private val config: MessagesConfig, private val provider: VelocityViewerProvider) :
+  Multification<CommandSource, MessagesConfig>() {
 
   override fun viewerProvider(): ViewerProvider<CommandSource> {
     return provider

@@ -18,7 +18,7 @@
 
 package pl.spcode.navauth.common.module
 
-import com.eternalcode.multification.Multification
+import com.eternalcode.multification.notice.resolver.NoticeResolverDefaults
 import com.eternalcode.multification.okaeri.MultificationSerdesPack
 import com.google.inject.AbstractModule
 import eu.okaeri.configs.ConfigManager
@@ -32,25 +32,22 @@ import pl.spcode.navauth.common.config.serdes.TextComponentSerdesPack
 class YamlConfigModule<T : OkaeriConfig>(
   val configClass: KClass<T>,
   val configFile: File,
-  val multification: Multification<*, *>? = null,
   val autoBindSubconfigs: Boolean = false,
 ) : AbstractModule() {
 
   override fun configure() {
 
+    val noticeRegistry = NoticeResolverDefaults.createRegistry()
+
     val configInstance =
       ConfigManager.create(configClass.java) {
         it.configure { opt ->
-          if (multification == null) {
-            opt.configurer(YamlSnakeYamlConfigurer())
-          } else {
-            opt.configurer(
-              YamlSnakeYamlConfigurer(),
-              SerdesCommons(),
-              MultificationSerdesPack(multification.noticeRegistry),
-              TextComponentSerdesPack(),
-            )
-          }
+          opt.configurer(
+            YamlSnakeYamlConfigurer(),
+            SerdesCommons(),
+            MultificationSerdesPack(noticeRegistry),
+            TextComponentSerdesPack(),
+          )
           opt.bindFile(configFile)
         }
         it.saveDefaults()
