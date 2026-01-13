@@ -88,6 +88,7 @@ constructor(
         velocityEventDispatcher,
         multification,
         messagesConfig,
+        generalConfig,
         eventBus,
       )
     return authSessionService.registerSession(uniqueSessionId, session)

@@ -21,6 +21,7 @@ package pl.spcode.navauth.common.config
 import eu.okaeri.configs.OkaeriConfig
 import eu.okaeri.configs.annotation.Comment
 import eu.okaeri.configs.annotation.Variable
+import java.time.Duration
 import pl.spcode.navauth.common.infra.database.DatabaseConfig
 
 open class GeneralConfig : OkaeriConfig() {
@@ -47,6 +48,11 @@ open class GeneralConfig : OkaeriConfig() {
 
   @Comment("Maximum number of login attempts before kicking the player.")
   var maxLoginAttempts: Int = 3
+
+  @Comment("Maximum time of registration.")
+  var maxRegistrationDuration: Duration = Duration.ofSeconds(30)
+
+  @Comment("Maximum time of login.") var maxLoginDuration: Duration = Duration.ofSeconds(20)
 
   @Comment("Usernames config") var usernamesConfig: UsernamesConfig = UsernamesConfig()
 

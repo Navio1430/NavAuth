@@ -60,7 +60,7 @@ class VelocityLoginAuthSession(
         .buildTask(
           Runnable { player.disconnect(messagesConfig.loginTimeExceededError.toComponent()) }
         )
-        .delay(Duration.ofSeconds(5))
+        .delay(generalConfig.maxLoginDuration)
         .schedule()
 
     val notification =
@@ -78,7 +78,7 @@ class VelocityLoginAuthSession(
           Runnable { multification.create().notice(notification).player(player.uniqueId).send() }
         )
         .delay(Duration.ofSeconds(1))
-        .repeat(Duration.ofSeconds(1))
+        .repeat(Duration.ofSeconds(3))
         .schedule()
   }
 

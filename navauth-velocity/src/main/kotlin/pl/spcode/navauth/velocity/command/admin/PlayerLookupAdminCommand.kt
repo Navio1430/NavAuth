@@ -143,7 +143,7 @@ $mojangLine
     val template =
       """
 
-👤 Player <blue><b>N4vio</blue> sessions
+👤 Player <blue><b>${user.username.value}</blue> sessions
 <white><b><st>━━━━━━━━━━━━━━━━━━━</st></b></white>
 
 <dark_gray>   Join date               Session duration

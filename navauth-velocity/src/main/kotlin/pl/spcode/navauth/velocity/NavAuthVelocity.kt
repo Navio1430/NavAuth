@@ -58,7 +58,6 @@ import pl.spcode.navauth.velocity.module.SchedulerModule
 import pl.spcode.navauth.velocity.module.VelocityCommandsModule
 import pl.spcode.navauth.velocity.module.VelocityMultificationsModule
 import pl.spcode.navauth.velocity.module.VelocityServicesModule
-import pl.spcode.navauth.velocity.multification.VelocityMultification
 import pl.spcode.navauth.velocity.multification.VelocityViewerProvider
 
 @Singleton
@@ -98,13 +97,8 @@ constructor(
         )
 
       val velocityViewerProvider = VelocityViewerProvider(proxyServer)
-      val velocityMultification = VelocityMultification(MessagesConfig(), velocityViewerProvider)
       val messagesConfigModule =
-        YamlConfigModule(
-          MessagesConfig::class,
-          dataDirectory.resolve("messages.yml").toFile(),
-          velocityMultification,
-        )
+        YamlConfigModule(MessagesConfig::class, dataDirectory.resolve("messages.yml").toFile())
 
       val migrationConfigModule =
         YamlConfigModule(MigrationConfig::class, dataDirectory.resolve("migration.yml").toFile())
@@ -117,7 +111,7 @@ constructor(
           messagesConfigModule,
           migrationConfigModule,
           EventsModule(),
-          VelocityMultificationsModule(velocityMultification),
+          VelocityMultificationsModule(velocityViewerProvider),
           VelocityCommandsModule(),
           SchedulerModule(pluginInstance, proxyServer.scheduler),
           HttpClientModule(),
