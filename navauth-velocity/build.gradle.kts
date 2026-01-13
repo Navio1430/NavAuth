@@ -25,7 +25,7 @@ tasks.shadowJar {
   exclude("com/google/inject/**")
   exclude("com/google/gson/**")
 
-  exclude("org.slf4j")
+  exclude("org/slf4j/**")
 
   relocatePrefixed("kotlin")
   relocatePrefixed("org.bstats")
@@ -46,7 +46,8 @@ tasks.shadowJar {
   relocatePrefixed("org.intellij")
   relocatePrefixed("org.jetbrains")
   relocatePrefixed("org.postgresql")
-  relocatePrefixed("org.sqlite")
+  // todo make sure we relocate this or something
+//  relocatePrefixed("org.sqlite")
   relocatePrefixed("org.yaml")
 
   doLast {
