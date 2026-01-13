@@ -11,7 +11,7 @@ repositories {
 
 allprojects {
   group = "pl.spcode.navauth"
-  version = "0.1.2-SNAPSHOT"
+  version = "0.1.3-SNAPSHOT"
 }
 
 tasks.register("formatAll") {
