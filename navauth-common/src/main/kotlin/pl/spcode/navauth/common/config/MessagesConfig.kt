@@ -71,7 +71,7 @@ open class MessagesConfig : OkaeriConfig() {
     var missingPermissionError: Notice =
       Notice.chat("<red>You don't have permission to execute this command.")
     var invalidUsageError: Notice = Notice.chat("<red>Invalid command usage!")
-    @Comment("single chat component")
+    @Comment("Invalid usage scheme line (single text component only).")
     var invalidUsageLine: TextComponent = TextComponent("<gray> • %SCHEME%")
 
     var loginPasswordOnlyInstruction: Notice =

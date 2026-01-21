@@ -1,7 +1,8 @@
 
-# ❗❗❗ NAVAUTH IS NOT FULLY RELEASED YET ❗❗❗
+# ❗ NAVAUTH IS NOT FULLY RELEASED YET❗
 As of now, only an alpha version is available.
 We are working on additional configuration options and other improvements to prepare for the release of NavAuth 1.0.
+You can use the current version and give us a feedback about what needs to be changed etc. on our Discord.
 <div align="center">
 
   <h1>NavAuth 🔐 - autologin plugin</h1>

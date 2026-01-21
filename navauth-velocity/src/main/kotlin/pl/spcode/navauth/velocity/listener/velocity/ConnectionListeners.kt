@@ -28,10 +28,10 @@ import com.velocitypowered.api.proxy.Player
 import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import pl.spcode.navauth.api.event.NavAuthEventBus
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.user.UserActivitySessionService
 import pl.spcode.navauth.common.component.TextColors
+import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.domain.auth.session.AuthSession
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionState
 import pl.spcode.navauth.velocity.application.server.VelocityServerSelectionService
@@ -44,7 +44,7 @@ constructor(
   val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
   val serverSelectionService: VelocityServerSelectionService,
   val userActivitySessionService: UserActivitySessionService,
-  val eventBus: NavAuthEventBus,
+  val generalConfig: GeneralConfig,
 ) {
 
   val logger: Logger = LoggerFactory.getLogger(ConnectionListeners::class.java)
@@ -86,6 +86,17 @@ constructor(
           )
           player.disconnect(
             Component.text("NavAuth: bad auth state on server connect", TextColors.RED)
+          )
+          event.result = ServerPreConnectEvent.ServerResult.denied()
+          return@disconnectOnUnexpectedError
+        }
+
+        if (!generalConfig.limboServers.contains(event.originalServer.serverInfo.name)) {
+          player.disconnect(
+            Component.text(
+              "NavAuth: Tried to connect into different server than limbo, while waiting for limbo handler.",
+              TextColors.RED,
+            )
           )
           event.result = ServerPreConnectEvent.ServerResult.denied()
           return@disconnectOnUnexpectedError
