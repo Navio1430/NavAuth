@@ -7,25 +7,61 @@ Here we will cover how to use the NavAuth API.
 Include the NavAuth API in your Maven or Gradle build files.
 
 ### Maven
+You need to update your .m2/settings.xml file. Please check [GitHub Maven registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry) page for more info.
 
+```xml
+<repository>
+  <id>github</id>
+  <url>https://maven.pkg.github.com/Navio1430/NavAuth</url>
+  <snapshots>
+    <enabled>true</enabled>
+  </snapshots>
+</repository>
+```
 ```xml
 <dependency>
   <groupId>pl.spcode.navauth</groupId>
   <artifactId>navauth-api</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <!-- check the latest version on github -->
+  <version>0.1.0-SNAPSHOT</version> 
 </dependency>
 ```
 
-### Gradle (Groovy)
+### Gradle
+You need to update your .gradle/gradle.properties file. Please check [GitHub Gradle registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-gradle-registry) page for more info.
+
+#### Gradle (Groovy)
 ```groovy
+repositories {
+  maven {
+    url = uri("https://maven.pkg.github.com/Navio1430/NavAuth")
+    credentials {
+      username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+      password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+    }
+  }
+}
+
 dependencies {
+  // check the latest version on github
   compileOnly 'pl.spcode.navauth:navauth-api:0.1.0-SNAPSHOT'
 }
 ```
 
-### Gradle (Kotlin DSL)
+#### Gradle (Kotlin DSL)
 ```kotlin
+repositories {
+  maven {
+    url = uri("https://maven.pkg.github.com/Navio1430/NavAuth")
+    credentials {
+      username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
+      password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
+    }
+  }
+}
+
 dependencies {
+  // check the latest version on github
   compileOnly("pl.spcode.navauth:navauth-api:0.1.0-SNAPSHOT")
 }
 ```
