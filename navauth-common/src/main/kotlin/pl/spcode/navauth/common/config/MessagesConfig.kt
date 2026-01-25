@@ -62,7 +62,7 @@ open class MessagesConfig : OkaeriConfig() {
   @Comment(
     "Notifications which use multification library.",
     "Here you can use chat messages, action bars, sounds etc. combined.",
-    "To learn more about multification please read https://navio1430.github.io/NavAuth/configuration/multification.html",
+    "To learn more about multification please read https://navio1430.github.io/NavAuth/docs/configuration/multification.html",
   )
   var multification = NoticesConfig()
 

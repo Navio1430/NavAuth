@@ -67,7 +67,7 @@ NavAuth is licensed under the GNU AGPL v3. See the license file for more informa
 [![GNU AGPL Logo](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/agpl-3.0.en.html)
 
 ## 💡 TODO List
-More planned features are described in [Documentation](https://navio1430.github.io/NavAuth/offer.html#%F0%9F%9A%80-planned-features)
+More planned features are described in [Documentation](https://navio1430.github.io/NavAuth/docs/offer.html#%F0%9F%9A%80-planned-features)
 - readme:
    - add banner
 - github/gh actions:
