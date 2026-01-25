@@ -26,15 +26,12 @@ import dev.rollczi.litecommands.annotations.async.Async
 import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.TextColor
 import pl.spcode.navauth.api.domain.auth.AuthSessionType
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.application.validator.PasswordValidator
 import pl.spcode.navauth.common.command.exception.MissingPermissionException
-import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.domain.user.Username
@@ -42,6 +39,7 @@ import pl.spcode.navauth.common.infra.crypto.hasher.BCryptCredentialsHasher
 import pl.spcode.navauth.velocity.command.Permissions
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
+import pl.spcode.navauth.velocity.multification.VelocityMultification
 
 // we use inverted permission in this command
 @Command(name = "register")
@@ -51,6 +49,7 @@ constructor(
   val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
   val userService: UserService,
   val passwordValidator: PasswordValidator,
+  val multification: VelocityMultification,
 ) {
 
   @Async
@@ -73,17 +72,17 @@ constructor(
 
     val session = authSessionService.findSession(VelocityUniqueSessionId(sender))
     if (session?.getSessionType() != AuthSessionType.REGISTER || session.isAuthenticated) {
-      sender.sendMessage(Component.text("Can't use this command right now.", TextColors.RED))
+      multification.send(sender) { it.multification.cantUseThisCommandNowError }
       return
     }
 
     if (!passwordValidator.isValid(password)) {
-      sender.sendMessage(Component.text("Password is invalid.", TextColors.RED))
+      multification.send(sender) { it.multification.registerPasswordInvalidError }
       return
     }
 
     if (password != repeatPassword) {
-      sender.sendMessage(Component.text("Both passwords must match.", TextColors.RED))
+      multification.send(sender) { it.multification.registerPasswordsMustMatchError }
       return
     }
 
@@ -91,8 +90,7 @@ constructor(
       User.nonPremium(UserUuid(sender.uniqueId), Username(sender.username)),
       BCryptCredentialsHasher().hash(password),
     )
+    // register session will send success message
     session.authenticate()
-
-    sender.sendMessage(Component.text("Account created", TextColor.color(0, 200, 0)))
   }
 }

@@ -68,11 +68,38 @@ open class MessagesConfig : OkaeriConfig() {
 
   class NoticesConfig : OkaeriConfig() {
 
+    val twoFactorCodeRequiredError: Notice =
+      Notice.chat("<red>Please provide two-factor authentication code.")
+    val twoFactorEnabledSuccess: Notice = Notice.chat("<green>2FA is now enabled!")
+    val twoFactorSessionNotFound: Notice =
+      Notice.chat(
+        "<red>2FA setup session not found. Please try again using /setup2fa command first."
+      )
+    val passwordRequiredError: Notice = Notice.chat("<red>Please provide your current password.")
+    val twoFactorAlreadyEnabledError: Notice =
+      Notice.chat("<red>Your account has 2FA enabled already!")
+
     var missingPermissionError: Notice =
       Notice.chat("<red>You don't have permission to execute this command.")
     var invalidUsageError: Notice = Notice.chat("<red>Invalid command usage!")
     @Comment("Invalid usage scheme line (single text component only).")
     var invalidUsageLine: TextComponent = TextComponent("<gray> • %SCHEME%")
+
+    var cantUseThisCommandNowError: Notice = Notice.chat("<red>Can't use this command right now.")
+    val commandPasswordNotSetForAccountError: Notice =
+      Notice.chat("<red>Can't execute this command right now: your account has no password set.")
+    val commandNoPremiumAccountWithUsername: Notice =
+      Notice.chat(
+        "<red>Can't set this account as premium because there's no premium account with username '%USERNAME%'."
+      )
+    val accountAlreadyPremiumError: Notice =
+      Notice.chat("<red>Account is already set as a premium one.")
+
+    val registerPasswordInvalidError: Notice =
+      Notice.chat(
+        "<red>The password is invalid. It must be at least 5 characters long and contain at least one uppercase letter and one digit."
+      )
+    val registerPasswordsMustMatchError: Notice = Notice.chat("<red>Both passwords must match.")
 
     var loginPasswordOnlyInstruction: Notice =
       Notice.chat("<green>Please login using \"/login <password>\" command.</green>")
@@ -86,10 +113,19 @@ open class MessagesConfig : OkaeriConfig() {
 
     var loginSuccess: Notice =
       Notice.chat("<green>You have been authenticated successfully.</green>")
-
     var registerSuccess: Notice = Notice.chat("<green>Successfully registered</green>")
-
     var premiumAuthSuccess: Notice = Notice.chat("<green>Auto-logged in</green>")
+
+    val accountMigrationSuccess: Notice = Notice.chat("<green>Account migrated successfully!")
+    val newPasswordSetSuccess: Notice = Notice.chat("<green>Success! New password set.")
+
+    val twoFactorDisabledSuccess: Notice = Notice.chat("<green>2FA is now disabled!")
+
+    val wrongCredentialsError: Notice = Notice.chat("<red>Wrong credentials provided!")
+
+    val twoFactorWrongCodeError: Notice = Notice.chat("<red>Wrong 2FA code!")
+    val twoFactorAlreadyDisabledError: Notice =
+      Notice.chat("<red>Your account has 2FA disabled already.")
 
     var twoFactorSetupInstruction: Notice =
       Notice.chat(

@@ -27,13 +27,11 @@ import dev.rollczi.litecommands.annotations.command.RootCommand
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import java.util.Optional
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.exception.MissingPermissionException
-import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.config.TwoFactorAuthConfig
 import pl.spcode.navauth.common.domain.user.UserUuid
@@ -57,7 +55,7 @@ constructor(
   val totpSetupSessionService: TotpSetupSessionService,
   val twoFactorAuthConfig: TwoFactorAuthConfig,
   val messages: MessagesConfig,
-  val velocityMultification: VelocityMultification,
+  val multification: VelocityMultification,
 ) {
 
   @Async
@@ -75,25 +73,20 @@ constructor(
     val user = userService.findUserByUuid(UserUuid(sender.uniqueId))!!
     val credentials = userCredentialsService.findCredentials(user)
     if (credentials?.isTwoFactorEnabled == true) {
-      sender.sendMessage(
-        Component.text(
-          "Can't execute this command right now: your account has 2FA enabled already.",
-          TextColors.RED,
-        )
-      )
+      multification.send(sender) { it.multification.twoFactorAlreadyEnabledError }
       return
     }
 
     if (credentials?.isPasswordRequired == true) {
       if (currentPassword.isEmpty) {
-        sender.sendMessage(Component.text("Please provide your current password.", TextColors.RED))
+        multification.send(sender) { it.multification.passwordRequiredError }
         return
       }
 
       val isCorrectPassword =
         userCredentialsService.verifyPassword(credentials, currentPassword.get())
       if (!isCorrectPassword) {
-        sender.sendMessage(Component.text("Wrong password!", TextColors.RED))
+        multification.send(sender) { it.multification.wrongCredentialsError }
         return
       }
     }
@@ -103,7 +96,7 @@ constructor(
     totpSetupSessionService.registerSession(UserUuid(sender.uniqueId), session)
 
     val remainingSeconds = TotpSetupSessionService.SESSION_LIFETIME_SECONDS
-    velocityMultification
+    multification
       .create()
       .player(sender.uniqueId)
       .notice(messages.multification.twoFactorSetupInstruction)
@@ -121,29 +114,24 @@ constructor(
     val user = userService.findUserByUuid(UserUuid(sender.uniqueId))!!
 
     if (userCredentialsService.findCredentials(user)?.isTwoFactorEnabled == true) {
-      sender.sendMessage(Component.text("2FA is already enabled for this account.", TextColors.RED))
+      multification.send(sender) { it.multification.twoFactorAlreadyEnabledError }
       return
     }
 
     val session = totpSetupSessionService.findSession(UserUuid(sender.uniqueId))
     if (session == null) {
-      sender.sendMessage(
-        Component.text(
-          "2FA setup session not found. Please try again using /setup2fa command first.",
-          TextColors.RED,
-        )
-      )
+      multification.send(sender) { it.multification.twoFactorSessionNotFound }
       return
     }
 
     if (!TOTP2FA().verifyTOTP(session.secret, code)) {
-      sender.sendMessage(Component.text("Invalid 2FA code!", TextColors.RED))
+      multification.send(sender) { it.multification.twoFactorWrongCodeError }
       return
     }
 
     userService.enableTwoFactorAuth(user, session.secret)
     totpSetupSessionService.closeSession(UserUuid(sender.uniqueId))
-    sender.sendMessage(Component.text("2FA successfully enabled!", TextColors.GREEN))
+    multification.send(sender) { it.multification.twoFactorEnabledSuccess }
   }
 
   @Execute(name = "generate2faqr")
@@ -154,12 +142,7 @@ constructor(
   fun generateQrCode(@Context sender: Player) {
     val session = totpSetupSessionService.findSession(UserUuid(sender.uniqueId))
     if (session == null) {
-      sender.sendMessage(
-        Component.text(
-          "2FA setup session not found. Please try again using /setup2fa command first.",
-          TextColors.RED,
-        )
-      )
+      multification.send(sender) { it.multification.twoFactorSessionNotFound }
       return
     }
 

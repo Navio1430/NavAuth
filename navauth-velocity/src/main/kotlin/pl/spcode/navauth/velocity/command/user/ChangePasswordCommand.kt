@@ -26,18 +26,21 @@ import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
-import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.user.UserService
-import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.velocity.command.Permissions
+import pl.spcode.navauth.velocity.multification.VelocityMultification
 
 @Command(name = "changepassword")
 @Permission(Permissions.USER_CHANGE_PASSWORD)
 class ChangePasswordCommand
 @Inject
-constructor(val userService: UserService, val userCredentialsService: UserCredentialsService) {
+constructor(
+  val userService: UserService,
+  val userCredentialsService: UserCredentialsService,
+  val multification: VelocityMultification,
+) {
 
   @Async
   @Execute
@@ -48,23 +51,20 @@ constructor(val userService: UserService, val userCredentialsService: UserCreden
     @Arg(value = "new_password") newPassword: String,
   ) {
     val user = userService.findUserByExactUsername(sender.username)!!
-    if (user.isPremium) {
-      sender.sendMessage(
-        Component.text(
-          "Can't execute this command right now: your account is set to premium mode.",
-          TextColors.RED,
-        )
-      )
+    val credentials = userCredentialsService.findCredentials(user)!!
+
+    if (!credentials.isPasswordRequired) {
+      multification.send(sender) { it.multification.commandPasswordNotSetForAccountError }
       return
     }
-    val credentials = userCredentialsService.findCredentials(user)!!
+
     val isCorrectPassword = userCredentialsService.verifyPassword(credentials, currentPassword)
     if (!isCorrectPassword) {
-      sender.sendMessage(Component.text("Wrong password!", TextColors.RED))
+      multification.send(sender) { it.multification.wrongCredentialsError }
       return
     }
 
     userCredentialsService.updatePassword(user, newPassword)
-    sender.sendMessage(Component.text("Success! New password set.", TextColors.GREEN))
+    multification.send(sender) { it.multification.newPasswordSetSuccess }
   }
 }

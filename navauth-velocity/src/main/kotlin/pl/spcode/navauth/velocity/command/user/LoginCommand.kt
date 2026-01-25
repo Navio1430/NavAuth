@@ -28,22 +28,24 @@ import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import java.util.Optional
 import kotlin.jvm.optionals.getOrNull
-import net.kyori.adventure.text.Component
 import pl.spcode.navauth.api.domain.auth.AuthSessionType
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.command.exception.MissingPermissionException
-import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.velocity.command.Permissions
 import pl.spcode.navauth.velocity.infra.auth.VelocityLoginAuthSession
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
+import pl.spcode.navauth.velocity.multification.VelocityMultification
 
 // we use inverted permission in this command
 @RootCommand
 class LoginCommand
 @Inject
-constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
+constructor(
+  val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
+  val multification: VelocityMultification,
+) {
 
   @Async
   @Execute(name = "login")
@@ -66,7 +68,7 @@ constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
     val uniqueSessionId = VelocityUniqueSessionId(sender)
     val session = authSessionService.findSession(uniqueSessionId)
     if (session?.getSessionType() != AuthSessionType.LOGIN || session.isAuthenticated) {
-      sender.sendMessage(Component.text("Can't use this command right now.", TextColors.RED))
+      multification.send(sender) { it.multification.cantUseThisCommandNowError }
       return
     }
 
@@ -74,9 +76,7 @@ constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
 
     if (session.userCredentials.isTwoFactorEnabled) {
       if (!twoFactorCode.isPresent) {
-        sender.sendMessage(
-          Component.text("Please provide two-factor authentication code.", TextColors.RED)
-        )
+        multification.send(sender) { it.multification.twoFactorCodeRequiredError }
         return
       }
     }
@@ -101,16 +101,14 @@ constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
     val uniqueSessionId = VelocityUniqueSessionId(sender)
     val session = authSessionService.findSession(uniqueSessionId)
     if (session?.getSessionType() != AuthSessionType.LOGIN || session.isAuthenticated) {
-      sender.sendMessage(Component.text("Can't use this command right now.", TextColors.RED))
+      multification.send(sender) { it.multification.cantUseThisCommandNowError }
       return
     }
 
     session as VelocityLoginAuthSession
 
     if (!session.userCredentials.isTwoFactorEnabled || session.userCredentials.isPasswordRequired) {
-      sender.sendMessage(
-        Component.text("Can't use 2fa command right now. Please use /login command.")
-      )
+      multification.send(sender) { it.multification.cantUseThisCommandNowError }
       return
     }
 
@@ -124,10 +122,9 @@ constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
     code: String?,
   ) {
     if (session.auth(password, code)) {
-      sender.sendMessage(Component.text("Logged in!", TextColors.GREEN))
       return
     }
 
-    sender.sendMessage(Component.text("Wrong credentials!", TextColors.RED))
+    multification.send(sender) { it.multification.wrongCredentialsError }
   }
 }
