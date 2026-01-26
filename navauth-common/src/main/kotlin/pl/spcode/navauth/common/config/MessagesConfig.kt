@@ -59,6 +59,12 @@ open class MessagesConfig : OkaeriConfig() {
   var registerTimeExceededError =
     TextComponent("<red>You've exceeded register time, please try again</red>")
 
+  var adminCopyPasswordText =
+    "<aqua><bold><click:copy_to_clipboard:%PASSWORD%>CLICK HERE TO COPY</click>"
+
+  var yourAccountDataHasBeenMigrated =
+    TextComponent("<green>Your account data has been migrated to '%USERNAME%'.")
+
   @Comment(
     "Notifications which use multification library.",
     "Here you can use chat messages, action bars, sounds etc. combined.",
@@ -68,13 +74,6 @@ open class MessagesConfig : OkaeriConfig() {
 
   class NoticesConfig : OkaeriConfig() {
 
-    val twoFactorCodeRequiredError: Notice =
-      Notice.chat("<red>Please provide two-factor authentication code.")
-    val twoFactorEnabledSuccess: Notice = Notice.chat("<green>2FA is now enabled!")
-    val twoFactorSessionNotFound: Notice =
-      Notice.chat(
-        "<red>2FA setup session not found. Please try again using /setup2fa command first."
-      )
     val passwordRequiredError: Notice = Notice.chat("<red>Please provide your current password.")
     val twoFactorAlreadyEnabledError: Notice =
       Notice.chat("<red>Your account has 2FA enabled already!")
@@ -119,10 +118,16 @@ open class MessagesConfig : OkaeriConfig() {
     val accountMigrationSuccess: Notice = Notice.chat("<green>Account migrated successfully!")
     val newPasswordSetSuccess: Notice = Notice.chat("<green>Success! New password set.")
 
-    val twoFactorDisabledSuccess: Notice = Notice.chat("<green>2FA is now disabled!")
-
     val wrongCredentialsError: Notice = Notice.chat("<red>Wrong credentials provided!")
 
+    val twoFactorDisabledSuccess: Notice = Notice.chat("<green>2FA is now disabled!")
+    val twoFactorEnabledSuccess: Notice = Notice.chat("<green>2FA is now enabled!")
+    val twoFactorCodeRequiredError: Notice =
+      Notice.chat("<red>Please provide two-factor authentication code.")
+    val twoFactorSessionNotFound: Notice =
+      Notice.chat(
+        "<red>2FA setup session not found. Please try again using /setup2fa command first."
+      )
     val twoFactorWrongCodeError: Notice = Notice.chat("<red>Wrong 2FA code!")
     val twoFactorAlreadyDisabledError: Notice =
       Notice.chat("<red>Your account has 2FA disabled already.")
@@ -148,6 +153,39 @@ open class MessagesConfig : OkaeriConfig() {
         """
           .trimIndent()
       )
+
+    val adminCmdUsernameIsInvalid: Notice =
+      Notice.chat("<red>Provided username '%USERNAME%' is invalid.")
+    val adminCmdAccountIsPremiumError: Notice =
+      Notice.chat("<red>Can't execute the command! Account '%USERNAME%' is set to premium mode.")
+    val adminCmdAccountIsAlreadyNonPremiumError: Notice =
+      Notice.chat("<red>Account '%USERNAME%' is already a non-premium account.")
+    val adminCmdUseForceCrackedFirst: Notice = Notice.chat("<red>Use /forcecracked command first.")
+    val adminCmdCantMigrateToExistingPremiumAccount: Notice =
+      Notice.chat(
+        "<red>Provided username '%USERNAME%' is found as Mojang premium profile. Can't migrate to premium account."
+      )
+    val adminCmdUsernameAlreadyTakenError: Notice =
+      Notice.chat(
+        "<red>Username '%USERNAME%' is already taken. Please try again with a different username."
+      )
+    val adminCmdUsernameNotPremiumError: Notice =
+      Notice.chat(
+        "<red>Can't find '%USERNAME%' user in Mojang database. This player can't be migrated to premium mode."
+      )
+
+    val adminCmdPasswordSetSuccess: Notice =
+      Notice.chat("<green>Success! User '%USERNAME%' password was set.")
+    val adminCmdAccountMigratedToNonPremiumSuccess: Notice =
+      Notice.chat(
+        "<green>User '%USERNAME%' has been successfully migrated to non-premium mode. Their new password is: %PASSWORD_TEXT%"
+      )
+    val adminCmdUserDataMigratedSuccess: Notice =
+      Notice.chat(
+        "<green>Success! User '%OLD_USERNAME%' data has been migrated to '%NEW_USERNAME%'."
+      )
+    val adminCmdUserPremiumMigrationSuccess: Notice =
+      Notice.chat("<green>User '%USERNAME%' successfully migrated to premium mode.")
   }
 
   @Variable("CONFIG_VERSION")

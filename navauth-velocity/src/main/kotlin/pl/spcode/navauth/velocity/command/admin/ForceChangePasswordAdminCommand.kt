@@ -26,14 +26,13 @@ import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
-import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.user.UserArgumentResolver
 import pl.spcode.navauth.common.command.user.UsernameOrUuidRaw
-import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.velocity.command.Permissions
+import pl.spcode.navauth.velocity.multification.VelocityMultification
 
 @Command(name = "forcesetpassword")
 @Permission(Permissions.ADMIN_FORCE_SET_PASSWORD)
@@ -43,6 +42,7 @@ constructor(
   val userService: UserService,
   val userCredentialsService: UserCredentialsService,
   val userArgumentResolver: UserArgumentResolver,
+  val multification: VelocityMultification,
 ) {
 
   @Async
@@ -58,18 +58,17 @@ constructor(
     val user = userArgumentResolver.resolve(usernameOrUuidRaw)
 
     if (user.isPremium) {
-      sender.sendMessage(
-        Component.text(
-          "Can't execute the command! Account '${user.username}' is set to premium mode.",
-          TextColors.RED,
-        )
-      )
+      multification
+        .create(sender) { it.multification.adminCmdAccountIsPremiumError }
+        .placeholder("%USERNAME%", user.username.value)
+        .send()
       return
     }
 
     userCredentialsService.updatePassword(user, password)
-    sender.sendMessage(
-      Component.text("Success! User '${user.username}' credentials set.", TextColors.GREEN)
-    )
+    multification
+      .create(sender) { it.multification.adminCmdPasswordSetSuccess }
+      .placeholder("%USERNAME%", user.username.value)
+      .send()
   }
 }
