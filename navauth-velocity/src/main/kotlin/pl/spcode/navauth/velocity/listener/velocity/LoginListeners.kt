@@ -45,6 +45,7 @@ import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.velocity.application.auth.session.VelocityAuthSessionFactory
+import pl.spcode.navauth.velocity.extension.PlayerDisconnectExtension.Companion.disconnectIfActive
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 
 class LoginListeners
@@ -139,7 +140,7 @@ constructor(
         player.uniqueId,
       )
       // there must be an auth session for specified user, otherwise abort
-      player.disconnect(
+      player.disconnectIfActive(
         Component.text("NavAuth: Auth session expired, please try again", TextColors.RED)
       )
       return
@@ -213,7 +214,7 @@ constructor(
       player.uniqueId,
       handshakeSession.toString(),
     )
-    player.disconnect(Component.text("NavAuth: Bad auth state", TextColors.RED))
+    player.disconnectIfActive(Component.text("NavAuth: Bad auth state", TextColors.RED))
   }
 
   private fun createAndStorePremiumUser(player: Player) {
