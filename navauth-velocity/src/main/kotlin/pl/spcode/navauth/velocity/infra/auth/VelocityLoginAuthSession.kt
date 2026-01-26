@@ -99,6 +99,10 @@ class VelocityLoginAuthSession(
     cancelTasks()
   }
 
+  override fun onTooManyLoginAttempts() {
+    player.disconnectIfActive(messagesConfig.loginTooManyAttemptsError.toComponent())
+  }
+
   fun cancelTasks() {
     notifyMessageTask.cancel()
     disconnectPlayerTask.cancel()

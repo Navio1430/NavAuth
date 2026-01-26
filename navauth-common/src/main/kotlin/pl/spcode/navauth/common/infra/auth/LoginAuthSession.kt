@@ -42,6 +42,10 @@ open class LoginAuthSession<T : PlayerAdapter>(
 
   override fun onInvalidate() {}
 
+  open fun onTooManyLoginAttempts() {
+    playerAdapter.disconnect(DisconnectReason.TOO_MANY_LOGIN_ATTEMPTS)
+  }
+
   /**
    * Authenticates a user using a combination of password and two-factor authentication code if
    * required.
@@ -58,7 +62,7 @@ open class LoginAuthSession<T : PlayerAdapter>(
     if (!result) {
       attemptsLeft -= 1
       if (attemptsLeft <= 0) {
-        playerAdapter.disconnect(DisconnectReason.TOO_MANY_LOGIN_ATTEMPTS)
+        onTooManyLoginAttempts()
       }
     }
     return result

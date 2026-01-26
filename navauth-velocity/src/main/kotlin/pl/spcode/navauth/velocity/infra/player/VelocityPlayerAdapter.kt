@@ -49,9 +49,12 @@ class VelocityPlayerAdapter(val velocityPlayer: Player) : PlayerAdapter {
           )
         )
       DisconnectReason.TOO_MANY_LOGIN_ATTEMPTS ->
-        // todo add this reason to messages config
+        // this is handled by VelocityLoginAuthSession itself
         velocityPlayer.disconnect(
-          Component.text("Too many login attempts. Please try again later.", TextColors.RED)
+          Component.text(
+            "NavAuth: Too many login attempts. Please try again later.",
+            TextColors.RED,
+          )
         )
     }
   }

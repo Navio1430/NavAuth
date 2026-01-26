@@ -32,7 +32,9 @@ import pl.spcode.navauth.common.component.TextComponent
 open class MessagesConfig : OkaeriConfig() {
 
   var supportFooter =
-    TextComponent("<br><br><gray>For support please join our discord: https://dc.spcode.pl/")
+    TextComponent("<br><br><gray>For support please join our discord: https://dc.yourwebsite.net/")
+
+  var invalidUsernameError = TextComponent("<red>Invalid username.")
 
   var usernameRequiredError =
     TextComponent(
@@ -58,6 +60,9 @@ open class MessagesConfig : OkaeriConfig() {
 
   var registerTimeExceededError =
     TextComponent("<red>You've exceeded register time, please try again</red>")
+
+  val loginTooManyAttemptsError =
+    TextComponent("<red>Too many login attempts. Please try again later.")
 
   var adminCopyPasswordText =
     "<aqua><bold><click:copy_to_clipboard:%PASSWORD%>CLICK HERE TO COPY</click>"

@@ -68,9 +68,8 @@ constructor(
     val connUsername = event.username
 
     if (usernameValidator.isValid(connUsername).not()) {
-      // todo send error message
-      event.result =
-        PreLoginEvent.PreLoginComponentResult.denied(Component.text("Invalid username"))
+      val reason = messagesConfig.invalidUsernameError.toComponent()
+      event.result = PreLoginEvent.PreLoginComponentResult.denied(reason)
       return
     }
 
