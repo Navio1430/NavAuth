@@ -16,7 +16,7 @@
  *
  */
 
-package pl.spcode.navauth.common.shared.data
+package pl.spcode.navauth.common.infra.persistence.ormlite
 
 import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.stmt.DeleteBuilder
