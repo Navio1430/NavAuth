@@ -26,14 +26,13 @@ import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
-import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.user.UserArgumentResolver
 import pl.spcode.navauth.common.command.user.UsernameOrUuidRaw
-import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.velocity.command.Permissions
+import pl.spcode.navauth.velocity.multification.VelocityMultification
 
 @Command(name = "forcepremium")
 @Permission(Permissions.ADMIN_FORCE_PREMIUM)
@@ -43,6 +42,7 @@ constructor(
   val userService: UserService,
   val profileService: MojangProfileService,
   val userArgumentResolver: UserArgumentResolver,
+  val multification: VelocityMultification,
 ) {
 
   @Execute
@@ -55,27 +55,26 @@ constructor(
     val user = userArgumentResolver.resolve(usernameOrUuidRaw)
 
     if (user.isPremium) {
-      sender.sendMessage(Component.text("User is already premium.", TextColors.RED))
+      multification
+        .create(sender) { it.multification.adminCmdAccountIsPremiumError }
+        .placeholder("%USERNAME%", user.username.value)
+        .send()
       return
     }
 
     val profile = profileService.fetchProfileInfo(user.username)
     if (profile == null) {
-      sender.sendMessage(
-        Component.text(
-          "Can't find '${user.username}' user in Mojang database. This player can't be migrated to premium mode.",
-          TextColors.RED,
-        )
-      )
+      multification
+        .create(sender) { it.multification.adminCmdUsernameNotPremiumError }
+        .placeholder("%USERNAME%", user.username.value)
+        .send()
       return
     }
 
     userService.migrateToPremium(user, profile.uuid)
-    sender.sendMessage(
-      Component.text(
-        "User '${user.username}' successfully migrated to premium mode.",
-        TextColors.GREEN,
-      )
-    )
+    multification
+      .create(sender) { it.multification.adminCmdUserPremiumMigrationSuccess }
+      .placeholder("%USERNAME%", user.username.value)
+      .send()
   }
 }

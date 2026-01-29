@@ -28,7 +28,7 @@ import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.infra.persistence.mapper.toDomain
 import pl.spcode.navauth.common.infra.persistence.mapper.toRecord
-import pl.spcode.navauth.common.shared.data.OrmLiteCrudRepositoryImpl
+import pl.spcode.navauth.common.infra.persistence.ormlite.OrmLiteCrudRepositoryImpl
 
 class UserRepositoryImpl @Inject constructor(databaseManager: DatabaseManager) :
   OrmLiteCrudRepositoryImpl<UserRecord, UUID>(databaseManager, UserRecord::class), UserRepository {

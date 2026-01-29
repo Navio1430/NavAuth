@@ -35,6 +35,7 @@ import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.domain.auth.session.AuthSession
 import pl.spcode.navauth.common.domain.auth.session.AuthSessionState
 import pl.spcode.navauth.velocity.application.server.VelocityServerSelectionService
+import pl.spcode.navauth.velocity.extension.PlayerDisconnectExtension.Companion.disconnectIfActive
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 
@@ -66,7 +67,7 @@ constructor(
         logger.warn(
           "OnServerConnect: player ${player.username} tried to connect without an auth session, disconnecting the player..."
         )
-        player.disconnect(
+        player.disconnectIfActive(
           Component.text(
             "NavAuth: user tried to connect into a server without an auth session",
             TextColors.RED,
@@ -84,7 +85,7 @@ constructor(
             player.uniqueId,
             authSession.toString(),
           )
-          player.disconnect(
+          player.disconnectIfActive(
             Component.text("NavAuth: bad auth state on server connect", TextColors.RED)
           )
           event.result = ServerPreConnectEvent.ServerResult.denied()
@@ -92,7 +93,7 @@ constructor(
         }
 
         if (!generalConfig.limboServers.contains(event.originalServer.serverInfo.name)) {
-          player.disconnect(
+          player.disconnectIfActive(
             Component.text(
               "NavAuth: Tried to connect into different server than limbo, while waiting for limbo handler.",
               TextColors.RED,
@@ -116,7 +117,7 @@ constructor(
         logger.warn(
           "PlayerChooseInitialServer: server tried to pick initial server for ${player.username} user without an auth session, disconnecting the player..."
         )
-        player.disconnect(
+        player.disconnectIfActive(
           Component.text(
             "NavAuth: server tried to choose an initial server for you without an auth session",
             TextColors.RED,
@@ -173,7 +174,7 @@ constructor(
         player.uniqueId,
         authSession.toString(),
       )
-      player.disconnect(
+      player.disconnectIfActive(
         Component.text(
           "NavAuth: can't choose an initial limbo with a bad auth state",
           TextColors.RED,
@@ -188,7 +189,9 @@ constructor(
         "PlayerChooseInitialServerEvent: no initial limbo was found for unauthenticated user '{}'",
         player.username,
       )
-      player.disconnect(Component.text("NavAuth: initial limbo server not found.", TextColors.RED))
+      player.disconnectIfActive(
+        Component.text("NavAuth: initial limbo server not found.", TextColors.RED)
+      )
       return
     }
 
@@ -206,7 +209,7 @@ constructor(
     try {
       block()
     } catch (e: Throwable) {
-      player.disconnect(Component.text("NavAuth: internal error", TextColors.RED))
+      player.disconnectIfActive(Component.text("NavAuth: internal error", TextColors.RED))
       logger.error("unexpected internal error occurred", e)
     }
   }

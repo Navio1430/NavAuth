@@ -20,6 +20,8 @@ package pl.spcode.navauth.velocity.multification
 
 import com.eternalcode.multification.Multification
 import com.eternalcode.multification.adventure.AudienceConverter
+import com.eternalcode.multification.notice.Notice
+import com.eternalcode.multification.notice.NoticeBroadcast
 import com.eternalcode.multification.translation.TranslationProvider
 import com.eternalcode.multification.viewer.ViewerProvider
 import com.google.inject.Inject
@@ -32,8 +34,24 @@ import pl.spcode.navauth.common.config.MessagesConfig
 
 open class VelocityMultification
 @Inject
-constructor(private val config: MessagesConfig, private val provider: VelocityViewerProvider) :
+constructor(val config: MessagesConfig, private val provider: VelocityViewerProvider) :
   Multification<CommandSource, MessagesConfig>() {
+
+  fun send(sender: CommandSource, notice: (config: MessagesConfig) -> Notice) {
+    create(sender, notice).send()
+  }
+
+  fun create(
+    sender: CommandSource,
+    notice: (config: MessagesConfig) -> Notice,
+  ): NoticeBroadcast<*, *, *> {
+    val notification = notice(config)
+    return if (sender !is Player) {
+      create().notice(notification).console()
+    } else {
+      create().notice(notification).player(sender.uniqueId)
+    }
+  }
 
   override fun viewerProvider(): ViewerProvider<CommandSource> {
     return provider

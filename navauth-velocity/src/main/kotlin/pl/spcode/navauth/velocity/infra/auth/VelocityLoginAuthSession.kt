@@ -28,6 +28,7 @@ import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.infra.auth.LoginAuthSession
 import pl.spcode.navauth.velocity.application.event.VelocityEventDispatcher
+import pl.spcode.navauth.velocity.extension.PlayerDisconnectExtension.Companion.disconnectIfActive
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 import pl.spcode.navauth.velocity.multification.VelocityMultification
 import pl.spcode.navauth.velocity.scheduler.NavAuthScheduler
@@ -58,7 +59,9 @@ class VelocityLoginAuthSession(
     disconnectPlayerTask =
       scheduler
         .buildTask(
-          Runnable { player.disconnect(messagesConfig.loginTimeExceededError.toComponent()) }
+          Runnable {
+            player.disconnectIfActive(messagesConfig.loginTimeExceededError.toComponent())
+          }
         )
         .delay(generalConfig.maxLoginDuration)
         .schedule()
@@ -94,6 +97,10 @@ class VelocityLoginAuthSession(
 
   override fun onInvalidate() {
     cancelTasks()
+  }
+
+  override fun onTooManyLoginAttempts() {
+    player.disconnectIfActive(messagesConfig.loginTooManyAttemptsError.toComponent())
   }
 
   fun cancelTasks() {

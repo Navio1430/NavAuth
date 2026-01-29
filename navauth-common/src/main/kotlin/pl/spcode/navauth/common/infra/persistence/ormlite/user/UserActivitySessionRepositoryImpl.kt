@@ -27,7 +27,7 @@ import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.infra.persistence.Paginator
 import pl.spcode.navauth.common.infra.persistence.mapper.toDomain
 import pl.spcode.navauth.common.infra.persistence.mapper.toRecord
-import pl.spcode.navauth.common.shared.data.OrmLiteCrudRepositoryImpl
+import pl.spcode.navauth.common.infra.persistence.ormlite.OrmLiteCrudRepositoryImpl
 
 class UserActivitySessionRepositoryImpl @Inject constructor(databaseManager: DatabaseManager) :
   OrmLiteCrudRepositoryImpl<UserActivitySessionRecord, UUID>(

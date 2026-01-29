@@ -46,11 +46,13 @@ class VelocityAutoLoginAuthSession(
     scheduler
       .buildTask(
         Runnable {
-          multification
-            .create()
-            .player(player.uniqueId)
-            .notice(messagesConfig.multification.premiumAuthSuccess)
-            .send()
+          if (player.isActive) {
+            multification
+              .create()
+              .player(player.uniqueId)
+              .notice(messagesConfig.multification.premiumAuthSuccess)
+              .send()
+          }
         }
       )
       .delay(Duration.ofSeconds(1))

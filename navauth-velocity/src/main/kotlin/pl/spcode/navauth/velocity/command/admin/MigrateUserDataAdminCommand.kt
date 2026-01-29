@@ -27,7 +27,6 @@ import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
-import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
@@ -35,9 +34,9 @@ import pl.spcode.navauth.common.application.user.UsernameAlreadyTakenException
 import pl.spcode.navauth.common.application.validator.UsernameValidator
 import pl.spcode.navauth.common.command.user.UserArgumentResolver
 import pl.spcode.navauth.common.command.user.UsernameOrUuidRaw
-import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.velocity.command.Permissions
+import pl.spcode.navauth.velocity.multification.VelocityMultification
 
 @Command(name = "migrateuser")
 @Permission(Permissions.ADMIN_MIGRATE_USER_DATA)
@@ -49,6 +48,7 @@ constructor(
   val profileService: MojangProfileService,
   val userArgumentResolver: UserArgumentResolver,
   val usernameValidator: UsernameValidator,
+  val multification: VelocityMultification,
 ) {
 
   @Async
@@ -67,56 +67,54 @@ constructor(
     val user = userArgumentResolver.resolve(usernameOrUuidRaw)
 
     if (user.isPremium) {
-      sender.sendMessage(
-        Component.text(
-          "Can't execute the command! Account '${user.username}' is set to premium mode. Use /forcecracked command first.",
-          TextColors.RED,
-        )
-      )
+      multification
+        .create(sender) { it.multification.adminCmdAccountIsPremiumError }
+        .placeholder("%USERNAME%", user.username.value)
+        .send()
+      multification.send(sender) { it.multification.adminCmdUseForceCrackedFirst }
       return
     }
 
     if (!usernameValidator.isValid(newUsername)) {
-      sender.sendMessage(
-        Component.text("Provided username '${newUsername}' is invalid.", TextColors.RED)
-      )
+      multification
+        .create(sender) { it.multification.adminCmdUsernameIsInvalid }
+        .placeholder("%USERNAME%", newUsername)
+        .send()
       return
     }
 
     val premiumMojangProfile = profileService.fetchProfileInfo(Username(newUsername))
     if (premiumMojangProfile != null) {
-      sender.sendMessage(
-        Component.text(
-          "Provided username '${user.username}' is found as Mojang premium profile. Can't migrate to premium account.",
-          TextColors.RED,
-        )
-      )
+      multification
+        .create(sender) { it.multification.adminCmdCantMigrateToExistingPremiumAccount }
+        .placeholder("%USERNAME%", user.username.value)
+        .send()
       return
     }
 
     try {
       userService.migrateData(user, Username(newUsername))
     } catch (e: UsernameAlreadyTakenException) {
-      sender.sendMessage(
-        Component.text(
-          "Username '${newUsername}' is already taken. Please try again with different username.",
-          TextColors.RED,
-        )
-      )
+      multification
+        .create(sender) { it.multification.adminCmdUsernameAlreadyTakenError }
+        .placeholder("%USERNAME%", newUsername)
+        .send()
       return
     }
 
     proxyServer.getPlayer(user.username.value).ifPresent {
-      it.disconnect(
-        Component.text("Your account data has been migrated to '${newUsername}'.", TextColors.GREEN)
-      )
+      val disconnectReason =
+        multification.config.yourAccountDataHasBeenMigrated
+          .withPlaceholders()
+          .placeholder("USERNAME", newUsername)
+          .toComponent()
+      it.disconnect(disconnectReason)
     }
 
-    sender.sendMessage(
-      Component.text(
-        "Success! User '${user.username}' data has been migrated to '${newUsername}'.",
-        TextColors.GREEN,
-      )
-    )
+    multification
+      .create(sender) { it.multification.adminCmdUserDataMigratedSuccess }
+      .placeholder("%OLD_USERNAME%", user.username.value)
+      .placeholder("%NEW_USERNAME%", newUsername)
+      .send()
   }
 }

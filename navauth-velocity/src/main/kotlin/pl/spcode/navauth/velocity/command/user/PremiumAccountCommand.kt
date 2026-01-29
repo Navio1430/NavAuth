@@ -25,20 +25,23 @@ import dev.rollczi.litecommands.annotations.async.Async
 import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
-import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.exception.MissingPermissionException
-import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.velocity.command.Permissions
+import pl.spcode.navauth.velocity.multification.VelocityMultification
 
 // inverted permission
 @Command(name = "premium")
 class PremiumAccountCommand
 @Inject
-constructor(val userService: UserService, val mojangProfileService: MojangProfileService) {
+constructor(
+  val userService: UserService,
+  val mojangProfileService: MojangProfileService,
+  val multification: VelocityMultification,
+) {
 
   @Async
   @Execute
@@ -56,22 +59,20 @@ constructor(val userService: UserService, val mojangProfileService: MojangProfil
 
     val user = userService.findUserByExactUsername(sender.username)!!
     if (user.isPremium) {
-      sender.sendMessage(Component.text("Account is already set as a premium one.", TextColors.RED))
+      multification.send(sender) { it.multification.accountAlreadyPremiumError }
       return
     }
 
     val mojangProfile = mojangProfileService.fetchProfileInfo(Username(sender.username))
     if (mojangProfile == null) {
-      sender.sendMessage(
-        Component.text(
-          "Can't set this account as premium because there's no premium account with username '${sender.username}'.",
-          TextColors.RED,
-        )
-      )
+      multification
+        .create(sender) { it.multification.commandNoPremiumAccountWithUsername }
+        .placeholder("%USERNAME%", sender.username)
+        .send()
       return
     }
 
     userService.migrateToPremium(user, mojangProfile.uuid)
-    sender.sendMessage(Component.text("Account migrated successfully!", TextColors.GREEN))
+    multification.create(sender) { it.multification.accountMigrationSuccess }
   }
 }

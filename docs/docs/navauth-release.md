@@ -1,4 +1,3 @@
 # NavAuth Release
 
-First release of NavAuth is still under development.
-Please join our discord server to be notified about version 1.0
+NavAuth version 1.0 is still under development. As of now you can use versions **0.X** and give us your feedback on our **Discord** server.
