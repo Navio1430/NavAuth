@@ -1,12 +1,12 @@
 
-# ❗ NAVAUTH IS NOT FULLY RELEASED YET❗
+## NavAuth is available in alpha version ❗
 As of now, only an alpha version is available.
 We are working on additional configuration options and other improvements to prepare for the release of NavAuth 1.0.
-You can use the current version and give us a feedback about what needs to be changed etc. on our Discord.
+
 <div align="center">
 
   <h1>NavAuth 🔐 - autologin plugin</h1>
-  <p><b>NavAuth</b> is an upcoming next-generation Minecraft login plugin built for speed, security, and seamless player authentication. Designed with modern servers in mind, it combines performance, reliability, and integration flexibility.</p>
+  <p><b>NavAuth</b> is a next-generation Minecraft login plugin built for <b>speed</b>, <b>security</b>, and seamless player authentication. Designed with modern servers in mind, it combines <b>performance</b>, <b>reliability</b>, and <b>integration flexibility</b>.</p>
 
   [![Velocity](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/supported/velocity_vector.svg)](https://modrinth.com/plugin/navauth)
   [![Modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg)](https://modrinth.com/plugin/navauth)
@@ -29,10 +29,32 @@ You can use the current version and give us a feedback about what needs to be ch
 - be an auth/login plugin not an anti-vpn plugin
 - simple, fast & secure
 
+## 📊 Features
+
+### 🚀 Some of the NavAuth features
+- **Premium Auto-Login**
+- **[2FA](https://navio1430.github.io/NavAuth/docs/general/2fa.html)**
+- **[User sessions](https://navio1430.github.io/NavAuth/docs/general/user-lookup.html#lookup-user-sessions)**
+- **[Multification](https://navio1430.github.io/NavAuth/docs/configuration/multification.html)**
+- [Migration from other plugins](https://navio1430.github.io/NavAuth/docs/migration/migration.html)
+- [Database type migrations](https://navio1430.github.io/NavAuth/docs/migration/database-type-migration.html)
+
+### 🔒 In NavAuth password cracking takes more than TWELVE TRILLION (1.2 × 10^13) times longer than in the worst login plugins.
+Cracking the whole database of a bad plugin takes less than a **FEW MINUTES**.
+
+### What is not included?
+
+- **Anti-Bot** - use [Sonar](https://github.com/jonesdevelopment/sonar/) for that
+- **Anti-VPN**
+- block multiple accounts per IP - currently not supported.
+We've implemented user sessions which can be later used for an advanced mutli-account blocking solution.
+You can also use other plugins (like Anti-VPN's) for that.
+
 ## 👥 Contributors
 
-urhatedjack - logo design
-[KotreQ](https://github.com/KotreQ) - help with the QR code generation
+Thanks to **NavAuth contributors**:
+- urhatedjack - logo design  
+- [KotreQ](https://github.com/KotreQ) - help with the QR code generation
 
 Thanks to **Discord support team**:
 - [Blavez](https://github.com/Blavezz)
@@ -50,16 +72,20 @@ Thanks to people that kept **LibreLoginProd alive** until NavAuth release and ke
 
 ## 📘 Basic info
 
-| Platform | Supported |
-|-----------|:---------:|
-| Velocity | ✅ |
-
 ### 🧩 Requirements
 
 * Java 21
 * Limbo server e.g., NanoLimbo, PicoLimbo
 * Velocity forwarding set to MODERN
 * All backend servers must be 1.13+
+
+### FAQ
+Q: Why have I switched from maintaining LibreLoginProd?  
+A: Please check [offer page](https://navio1430.github.io/NavAuth/docs/offer.html) for more info.
+
+Q: Why is NavAuth almost 40MB in size?  
+A: We bundle all the dependencies into one file.
+> Downloading dependencies at runtime - where an application fetches required libraries upon startup or during execution rather than bundling them beforehand is generally considered bad practice in production environments due to reliability risks, performance overhead, and security concerns
 
 ### 📜 License
 
