@@ -32,6 +32,7 @@ You can use the current version and give us a feedback about what needs to be ch
 ## 👥 Contributors
 
 urhatedjack - logo design
+[KotreQ](https://github.com/KotreQ) - help with the QR code generation
 
 Thanks to **Discord support team**:
 - [Blavez](https://github.com/Blavezz)
