@@ -37,6 +37,9 @@ class VelocityPlayerAdapter(val velocityPlayer: Player) : PlayerAdapter {
   }
 
   override fun disconnect(reason: DisconnectReason) {
+    if (!isOnline()) {
+      return
+    }
     when (reason) {
       DisconnectReason.AUTH_SESSION_CLOSED ->
         velocityPlayer.disconnect(
@@ -46,8 +49,12 @@ class VelocityPlayerAdapter(val velocityPlayer: Player) : PlayerAdapter {
           )
         )
       DisconnectReason.TOO_MANY_LOGIN_ATTEMPTS ->
+        // this is handled by VelocityLoginAuthSession itself
         velocityPlayer.disconnect(
-          Component.text("Too many login attempts. Please try again later.", TextColors.RED)
+          Component.text(
+            "NavAuth: Too many login attempts. Please try again later.",
+            TextColors.RED,
+          )
         )
     }
   }

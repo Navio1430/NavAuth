@@ -26,20 +26,23 @@ import dev.rollczi.litecommands.annotations.async.Async
 import dev.rollczi.litecommands.annotations.command.RootCommand
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
-import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.exception.MissingPermissionException
-import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.velocity.command.Permissions
+import pl.spcode.navauth.velocity.multification.VelocityMultification
 
 // we use inverted permission in this command
 @RootCommand
 class TwoFactorDisableCommand
 @Inject
-constructor(val userService: UserService, val userCredentialsService: UserCredentialsService) {
+constructor(
+  val userService: UserService,
+  val userCredentialsService: UserCredentialsService,
+  val multification: VelocityMultification,
+) {
 
   @Async
   @Execute(name = "disable2fa")
@@ -53,17 +56,17 @@ constructor(val userService: UserService, val userCredentialsService: UserCreden
     val user = userService.findUserByUuid(UserUuid(sender.uniqueId))!!
     val credentials = userCredentialsService.findCredentials(user)
     if (credentials == null || !credentials.isTwoFactorEnabled) {
-      sender.sendMessage(Component.text("Your account has 2FA disabled already.", TextColors.RED))
+      multification.send(sender) { it.multification.twoFactorAlreadyDisabledError }
       return
     }
 
     if (!userCredentialsService.verifyCode(credentials, code)) {
-      sender.sendMessage(Component.text("Wrong code!", TextColors.RED))
+      multification.send(sender) { it.multification.twoFactorWrongCodeError }
       return
     }
 
     userService.disableTwoFactorAuth(user)
-    sender.sendMessage(Component.text("2FA disabled!", TextColors.GREEN))
+    multification.send(sender) { it.multification.twoFactorDisabledSuccess }
     return
   }
 }

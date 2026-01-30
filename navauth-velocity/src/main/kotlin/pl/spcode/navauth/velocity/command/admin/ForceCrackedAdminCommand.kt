@@ -29,16 +29,15 @@ import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
 import java.util.Optional
 import me.uniodex.velocityrcon.commandsource.IRconCommandSource
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.minimessage.MiniMessage
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.user.UserArgumentResolver
 import pl.spcode.navauth.common.command.user.UsernameOrUuidRaw
-import pl.spcode.navauth.common.component.TextColors
+import pl.spcode.navauth.common.extension.StringExtensions.Companion.applyPlaceholders
 import pl.spcode.navauth.common.shared.utils.StringUtils.Companion.generateRandomString
 import pl.spcode.navauth.velocity.command.Permissions
+import pl.spcode.navauth.velocity.multification.VelocityMultification
 
 @Command(name = "forcecracked")
 @Permission(Permissions.ADMIN_FORCE_CRACKED)
@@ -48,6 +47,7 @@ constructor(
   val userService: UserService,
   val userArgumentResolver: UserArgumentResolver,
   val userCredentialsService: UserCredentialsService,
+  val multification: VelocityMultification,
 ) {
 
   @Async
@@ -64,9 +64,10 @@ constructor(
     val user = userArgumentResolver.resolve(usernameOrUuidRaw)
 
     if (!user.isPremium) {
-      sender.sendMessage(
-        Component.text("User '${user.username}' is already non-premium account.", TextColors.RED)
-      )
+      multification
+        .create(sender) { it.multification.adminCmdAccountIsAlreadyNonPremiumError }
+        .placeholder("%USERNAME%", user.username.value)
+        .send()
       return
     }
 
@@ -79,13 +80,14 @@ constructor(
       if (sender is ConsoleCommandSource || sender is IRconCommandSource) {
         "$newPassword"
       } else {
-        "<aqua><bold><click:copy_to_clipboard:${newPassword}>CLICK HERE TO COPY</click>"
+        val placeholders = mapOf(Pair("PASSWORD", newPassword))
+        multification.config.adminCopyPasswordText.applyPlaceholders(placeholders)
       }
-    sender.sendMessage(
-      MiniMessage.miniMessage()
-        .deserialize(
-          "<${TextColors.GREEN.asHexString()}>User '${user.username}' has been successfully migrated to non-premium mode. Their new password is: $passwordText"
-        )
-    )
+
+    multification
+      .create(sender) { it.multification.adminCmdAccountMigratedToNonPremiumSuccess }
+      .placeholder("%USERNAME%", user.username.value)
+      .placeholder("%PASSWORD_TEXT%", passwordText)
+      .send()
   }
 }

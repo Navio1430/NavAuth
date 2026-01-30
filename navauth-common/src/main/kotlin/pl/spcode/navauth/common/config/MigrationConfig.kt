@@ -27,7 +27,7 @@ import pl.spcode.navauth.common.migrate.MigrationOriginPluginType
 @Header(
   "Database migration config",
   "This file contains database migration settings.",
-  "Check https://navio1430.github.io/NavAuth/migration/migration.html for more information",
+  "Check https://navio1430.github.io/NavAuth/docs/migration/migration.html for more information",
 )
 class MigrationConfig : OkaeriConfig() {
 
