@@ -6,8 +6,8 @@ dependencies {
   api(project(":navauth-api"))
 
   // EternalCode Multification
-  api("com.eternalcode:multification-core:1.2.2")
-  api("com.eternalcode:multification-okaeri:1.2.2")
+  api("com.eternalcode:multification-core:1.2.3")
+  api("com.eternalcode:multification-okaeri:1.2.3")
 
   implementation("com.google.inject:guice:7.0.0")
   api("com.google.code.gson:gson:2.13.2")
@@ -17,7 +17,7 @@ dependencies {
   api("com.j256.ormlite:ormlite-jdbc:6.1")
 
   // config
-  api("eu.okaeri:okaeri-configs-yaml-snakeyaml:6.0.0-beta.3")
+  api("eu.okaeri:okaeri-configs-yaml-snakeyaml:6.0.0-beta.27")
 
   // crypto
   implementation("at.favre.lib:bcrypt:0.10.2")
