@@ -34,13 +34,18 @@ import org.slf4j.Logger;
         "Minecraft login plugin built for speed, security, and seamless player authentication.",
     authors = {"Navio1430"})
 public class Bootstrap {
-  @Inject private Logger logger;
-  @Inject private Injector injector;
+
+  private static NavAuthVelocity instance;
+
+  @Inject
+  private Bootstrap(Logger logger, Injector injector) {
+    logger.info("Bootstrapping velocity plugin...");
+    instance = injector.getInstance(NavAuthVelocity.class);
+    instance.init();
+  }
 
   @Subscribe
-  void onProxyInitialization(final ProxyInitializeEvent event) {
-    logger.info("Bootstrapping velocity plugin...");
-    NavAuthVelocity instance = injector.getInstance(NavAuthVelocity.class);
-    instance.init(event, this);
+  private void onProxyInitializeEvent(ProxyInitializeEvent event) {
+    instance.onProxyInitializeEvent(this);
   }
 }

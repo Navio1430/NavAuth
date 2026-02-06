@@ -1,6 +1,6 @@
 /*
  * NavAuth
- * Copyright © 2025 Oliwier Fijas (Navio1430)
+ * Copyright © 2026 Oliwier Fijas (Navio1430)
  *
  * NavAuth is free software; You can redistribute it and/or modify it under the terms of:
  * the GNU Affero General Public License version 3 as published by the Free Software Foundation.
@@ -16,17 +16,8 @@
  *
  */
 
-package pl.spcode.navauth.velocity.module
+package pl.spcode.navauth.velocity
 
-import com.google.inject.AbstractModule
-import com.velocitypowered.api.scheduler.Scheduler
-import pl.spcode.navauth.velocity.VelocityPluginProvider
-import pl.spcode.navauth.velocity.scheduler.NavAuthScheduler
-
-class SchedulerModule(val pluginProvider: VelocityPluginProvider, val scheduler: Scheduler) :
-  AbstractModule() {
-
-  override fun configure() {
-    bind(NavAuthScheduler::class.java).toInstance(NavAuthScheduler(pluginProvider, scheduler))
-  }
+interface VelocityPluginProvider {
+  fun provideInstance(): Bootstrap
 }

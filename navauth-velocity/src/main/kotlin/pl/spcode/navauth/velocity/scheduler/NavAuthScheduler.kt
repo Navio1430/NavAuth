@@ -21,15 +21,18 @@ package pl.spcode.navauth.velocity.scheduler
 import com.velocitypowered.api.scheduler.ScheduledTask
 import com.velocitypowered.api.scheduler.Scheduler
 import java.util.function.Consumer
-import pl.spcode.navauth.velocity.Bootstrap
+import pl.spcode.navauth.velocity.VelocityPluginProvider
 
-class NavAuthScheduler(private val plugin: Bootstrap, private val scheduler: Scheduler) {
+class NavAuthScheduler(
+  private val pluginProvider: VelocityPluginProvider,
+  private val scheduler: Scheduler,
+) {
 
   fun buildTask(runnable: Runnable): Scheduler.TaskBuilder {
-    return scheduler.buildTask(plugin, runnable)
+    return scheduler.buildTask(pluginProvider.provideInstance(), runnable)
   }
 
   fun buildTask(consumer: Consumer<ScheduledTask>): Scheduler.TaskBuilder {
-    return scheduler.buildTask(plugin, consumer)
+    return scheduler.buildTask(pluginProvider.provideInstance(), consumer)
   }
 }
