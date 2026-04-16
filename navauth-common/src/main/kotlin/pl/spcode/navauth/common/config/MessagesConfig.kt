@@ -191,6 +191,11 @@ open class MessagesConfig : OkaeriConfig() {
       )
     var adminCmdUserPremiumMigrationSuccess: Notice =
       Notice.chat("<green>User '%USERNAME%' successfully migrated to premium mode.")
+
+    var adminCmdReloadingConfig: Notice = Notice.chat("<green>Reloading configuration...")
+    var adminCmdConfigReloadSuccess: Notice = Notice.chat("<green>Config %NAME% has been reloaded.")
+    var adminCmdConfigReloadError: Notice =
+      Notice.chat("<red>Failed to reload %NAME% configuration! Error: %CAUSE%")
   }
 
   @Variable("CONFIG_VERSION")

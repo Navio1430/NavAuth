@@ -24,6 +24,7 @@ import pl.spcode.navauth.velocity.command.admin.ForceCrackedAdminCommand
 import pl.spcode.navauth.velocity.command.admin.ForcePremiumAdminCommand
 import pl.spcode.navauth.velocity.command.admin.MigrateUserDataAdminCommand
 import pl.spcode.navauth.velocity.command.admin.PlayerLookupAdminCommand
+import pl.spcode.navauth.velocity.command.admin.ReloadConfigAdminCommand
 import pl.spcode.navauth.velocity.command.root.MigrationRootCommand
 import pl.spcode.navauth.velocity.command.user.ChangePasswordCommand
 import pl.spcode.navauth.velocity.command.user.LoginCommand
@@ -50,6 +51,7 @@ class CommandsRegistry {
         ForcePremiumAdminCommand::class,
         MigrateUserDataAdminCommand::class,
         PlayerLookupAdminCommand::class,
+        ReloadConfigAdminCommand::class,
         // root (console only)
         MigrationRootCommand::class,
       )
