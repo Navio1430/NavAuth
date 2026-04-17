@@ -18,12 +18,12 @@
 
 package pl.spcode.navauth.common.infra;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class MethodInvocation implements Invocation, Comparable<MethodInvocation> {
 
