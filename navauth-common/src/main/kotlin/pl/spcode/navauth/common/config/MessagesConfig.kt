@@ -70,6 +70,14 @@ open class MessagesConfig : OkaeriConfig() {
   var yourAccountDataHasBeenMigrated =
     TextComponent("<green>Your account data has been migrated to '%USERNAME%'.")
 
+  val possibleInvalidSessionReconnectError =
+    TextComponent(
+      "<red>You've tried to log in to a premium account '%USERNAME%' one or more times. " +
+        "<br>This might be an invalid session error, caused by one of the following:" +
+        "<br> 1. An outdated session. If you own the account, restart your client." +
+        "<br> 2. You don't own the premium account. In that case, use a non-premium username."
+    )
+
   @Comment(
     "Notifications which use multification library.",
     "Here you can use chat messages, action bars, sounds etc. combined.",

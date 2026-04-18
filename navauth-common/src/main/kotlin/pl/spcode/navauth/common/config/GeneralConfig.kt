@@ -61,6 +61,22 @@ open class GeneralConfig : OkaeriConfig() {
 
   @Comment("Passwords config") var passwordsConfig: PasswordsConfig = PasswordsConfig()
 
+  @Comment(
+    "When a non-premium user tries to join with a premium nickname,",
+    "an 'invalid session' error occurs. This is default Minecraft behavior.",
+    "Should we cache premium connections and send a more descriptive message",
+    "when they try to join again after getting disconnected right after the preLogin event?",
+    "",
+    "We cache player uuid, IP and protocol version.",
+  )
+  var descriptiveInvalidSessionEnabled = true
+
+  @Comment(
+    "Max time (milliseconds) to consider a reconnect as an invalid session connection.",
+    "(You can set this a little higher than the reconnect throttle from other plugins.)",
+  )
+  var descriptiveInvalidSessionCacheTimeMs = 8000
+
   @Variable("CONFIG_VERSION")
   @Comment("Config version. DO NOT CHANGE this property!")
   var configVersion: Int = 0
