@@ -77,6 +77,8 @@ open class GeneralConfig : OkaeriConfig() {
   )
   var descriptiveInvalidSessionCacheTimeMs = 8000
 
+  var sessionsConfig = SessionsConfig()
+
   @Variable("CONFIG_VERSION")
   @Comment("Config version. DO NOT CHANGE this property!")
   var configVersion: Int = 0
