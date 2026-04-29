@@ -42,7 +42,7 @@ Cracking the whole database of a bad plugin takes less than a **FEW MINUTES**.
 | Floodgate                                                       | ❌ (planned)                            | ✅                                     |
 
 ## 🚀 Planned Features
-- support Paper platform
+- ~~support Paper platform~~ based on experience with LibreLoginProd, I've decided not to continue with the idea of paper support
 - auto resolution of conflicts
 - option to translate uuid4 to uuid7
 - multi-proxy with redis support
