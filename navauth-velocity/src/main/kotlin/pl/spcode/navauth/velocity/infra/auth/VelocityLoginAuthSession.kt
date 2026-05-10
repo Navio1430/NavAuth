@@ -81,7 +81,7 @@ class VelocityLoginAuthSession(
           Runnable { multification.create().notice(notification).player(player.uniqueId).send() }
         )
         .delay(Duration.ofSeconds(1))
-        .repeat(Duration.ofSeconds(3))
+        .repeat(generalConfig.intervalBetweenLoginMultification)
         .schedule()
   }
 

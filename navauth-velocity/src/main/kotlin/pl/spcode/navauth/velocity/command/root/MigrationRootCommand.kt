@@ -20,14 +20,13 @@ package pl.spcode.navauth.velocity.command.root
 
 import com.google.inject.Inject
 import com.velocitypowered.api.command.CommandSource
-import com.velocitypowered.api.proxy.ConsoleCommandSource
 import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
-import me.uniodex.velocityrcon.commandsource.IRconCommandSource
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.migrate.MigrationManager
+import pl.spcode.navauth.velocity.util.CommandSourceUtils
 
 @Command(name = "migration")
 @Permission("navauth.root")
@@ -41,7 +40,7 @@ class MigrationRootCommand @Inject constructor(private val migrationManager: Mig
   )
   fun startMigration(@Context sender: CommandSource) {
 
-    if (sender !is ConsoleCommandSource && sender !is IRconCommandSource) {
+    if (!CommandSourceUtils.isConsoleOrRcon(sender)) {
       sender.sendPlainMessage("This command can only be executed from console.")
       return
     }

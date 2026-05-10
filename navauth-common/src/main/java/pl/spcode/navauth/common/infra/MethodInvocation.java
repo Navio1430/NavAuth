@@ -22,8 +22,13 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class MethodInvocation implements Invocation, Comparable<MethodInvocation> {
+
+  private static final Logger logger = LoggerFactory.getLogger(MethodInvocation.class);
+
   private final MethodHandle methodHandle;
   private final WeakReference<Object> targetRef;
   private final int priority;
@@ -41,7 +46,7 @@ class MethodInvocation implements Invocation, Comparable<MethodInvocation> {
     try {
       methodHandle.invoke(target, event);
     } catch (Throwable t) {
-      t.printStackTrace(); // Production: Use logger/SLF4J
+      logger.error("Error occurred while trying to invoke MethodInvocation", t);
     }
   }
 
@@ -52,6 +57,6 @@ class MethodInvocation implements Invocation, Comparable<MethodInvocation> {
 
   @Override
   public int compareTo(MethodInvocation o) {
-    return Integer.compare(o.priority, priority); // Desc: higher first
+    return Integer.compare(o.priority, priority);
   }
 }

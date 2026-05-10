@@ -67,7 +67,7 @@ class VelocityRegisterAuthSession(
           }
         )
         .delay(Duration.ofSeconds(1))
-        .repeat(Duration.ofSeconds(3))
+        .repeat(generalConfig.intervalBetweenRegisterMultification)
         .schedule()
   }
 

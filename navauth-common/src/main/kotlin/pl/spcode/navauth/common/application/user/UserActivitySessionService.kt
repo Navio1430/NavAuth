@@ -25,6 +25,7 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import pl.spcode.navauth.common.config.SessionsConfig
 import pl.spcode.navauth.common.domain.common.IPAddress
 import pl.spcode.navauth.common.domain.player.PlayerAdapter
 import pl.spcode.navauth.common.domain.user.User
@@ -36,7 +37,10 @@ import pl.spcode.navauth.common.infra.persistence.Paginator
 @Singleton
 class UserActivitySessionService
 @Inject
-constructor(private val userActivitySessionRepository: UserActivitySessionRepository) {
+constructor(
+  private val userActivitySessionRepository: UserActivitySessionRepository,
+  private val sessionsConfig: SessionsConfig,
+) {
 
   private val logger: Logger = LoggerFactory.getLogger(UserActivitySessionService::class.java)
   private val playerJoinedAtMap = ConcurrentHashMap<UUID, PlayerSessionData>()
@@ -45,17 +49,30 @@ constructor(private val userActivitySessionRepository: UserActivitySessionReposi
   private data class PlayerSessionData(val joinedAt: Date, val ip: IPAddress)
 
   fun registerPlayerJoin(playerAdapter: PlayerAdapter) {
+    if (!sessionsConfig.userActivitySessionsEnabled) {
+      return
+    }
     playerJoinedAtMap[playerAdapter.getUuid().value] =
       PlayerSessionData(Date(), playerAdapter.getIPAddress())
   }
 
   fun storePlayerSessionOnLeave(playerAdapter: PlayerAdapter) {
-    val data = playerJoinedAtMap.get(playerAdapter.getUuid().value)
+    val data = playerJoinedAtMap[playerAdapter.getUuid().value]
     if (data == null) {
-      logger.debug("player with UUID {} session was not registered", playerAdapter.getUuid())
+      if (sessionsConfig.userActivitySessionsEnabled) {
+        logger.debug("player with UUID {} session was not registered", playerAdapter.getUuid())
+      }
       return
     }
     val leftAt = Date()
+
+    if ((leftAt.time - data.joinedAt.time) < sessionsConfig.sessionMinimumTimeMs) {
+      logger.debug(
+        "player with UUID {} session was not registered, session minimum time not fulfilled",
+        playerAdapter.getUuid(),
+      )
+      return
+    }
 
     val session =
       UserActivitySession.create(

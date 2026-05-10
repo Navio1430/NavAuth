@@ -36,6 +36,8 @@ import pl.spcode.navauth.common.application.auth.username.UsernameResolutionServ
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.application.validator.UsernameValidator
 import pl.spcode.navauth.common.component.TextColors
+import pl.spcode.navauth.common.component.TextComponent
+import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeSession
 import pl.spcode.navauth.common.domain.auth.handshake.EncryptionType
@@ -44,6 +46,7 @@ import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.domain.user.Username
+import pl.spcode.navauth.velocity.application.auth.InvalidSessionCacheService
 import pl.spcode.navauth.velocity.application.auth.session.VelocityAuthSessionFactory
 import pl.spcode.navauth.velocity.extension.PlayerDisconnectExtension.Companion.disconnectIfActive
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
@@ -55,8 +58,10 @@ constructor(
   val usernameValidator: UsernameValidator,
   val authHandshakeSessionService: AuthHandshakeSessionService,
   val usernameResolutionService: UsernameResolutionService,
+  val invalidSessionCacheService: InvalidSessionCacheService,
   val authSessionFactory: VelocityAuthSessionFactory,
   val messagesConfig: MessagesConfig,
+  val generalConfig: GeneralConfig,
 ) {
 
   val logger: Logger = LoggerFactory.getLogger(LoginListeners::class.java)
@@ -81,11 +86,21 @@ constructor(
       is UsernameResResult.Success -> {
         when (res.requestedEncryption) {
           EncryptionType.ENFORCE_PREMIUM -> {
+            if (generalConfig.descriptiveInvalidSessionEnabled) {
+              if (
+                invalidSessionCacheService.isInvalidSessionReconnect(
+                  event.username,
+                  event.connection,
+                )
+              ) {
+                invalidSessionCacheService.invalidate(event.username)
+                event.result = invalidSessionReconnectDeniedResult(event.username)
+                return
+              }
+              invalidSessionCacheService.cachePremiumConnection(event.username, event.connection)
+            }
             // We force velocity to handle the initiation of the "minecraft encryption protocol".
             // User won't go any further than this event if not authenticated by velocity.
-            // todo set session cookie token ->
-            //  if the same player disconnects twice at the same handshake stage
-            //  then display "You're trying to login into a premium account..."
             event.result = PreLoginEvent.PreLoginComponentResult.forceOnlineMode()
           }
           EncryptionType.NONE ->
@@ -143,6 +158,10 @@ constructor(
         Component.text("NavAuth: Auth session expired, please try again", TextColors.RED)
       )
       return
+    }
+
+    if (generalConfig.descriptiveInvalidSessionEnabled && player.isOnlineMode) {
+      invalidSessionCacheService.markAsEncryptedPremiumConnection(player.username)
     }
 
     createAuthSession(player, handshakeSession, username)
@@ -216,6 +235,7 @@ constructor(
     player.disconnectIfActive(Component.text("NavAuth: Bad auth state", TextColors.RED))
   }
 
+  // todo move this out of here
   private fun createAndStorePremiumUser(player: Player) {
     val premiumUser =
       User.premium(UserUuid(player.uniqueId), Username(player.username), MojangId(player.uniqueId))
@@ -272,6 +292,19 @@ constructor(
     val comp =
       withSupportFooter(
         componentWithUsernamePlaceholder(messagesConfig.usernameAlreadyTakenConflictError, username)
+      )
+    return PreLoginEvent.PreLoginComponentResult.denied(comp)
+  }
+
+  private fun invalidSessionReconnectDeniedResult(
+    username: String
+  ): PreLoginEvent.PreLoginComponentResult {
+    val comp =
+      withSupportFooter(
+        componentWithUsernamePlaceholder(
+          messagesConfig.possibleInvalidSessionReconnectError,
+          username,
+        )
       )
     return PreLoginEvent.PreLoginComponentResult.denied(comp)
   }
