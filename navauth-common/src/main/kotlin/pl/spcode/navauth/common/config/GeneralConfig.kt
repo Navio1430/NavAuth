@@ -52,7 +52,13 @@ open class GeneralConfig : OkaeriConfig() {
   @Comment("Maximum time of registration.")
   var maxRegistrationDuration: Duration = Duration.ofSeconds(30)
 
+  @Comment("Interval between each register instruction multification.")
+  var intervalBetweenRegisterMultification: Duration = Duration.ofSeconds(3)
+
   @Comment("Maximum time of login.") var maxLoginDuration: Duration = Duration.ofSeconds(20)
+
+  @Comment("Interval between each login instruction multification.")
+  var intervalBetweenLoginMultification: Duration = Duration.ofSeconds(3)
 
   @Comment("Usernames config") var usernamesConfig: UsernamesConfig = UsernamesConfig()
 
