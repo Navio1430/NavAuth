@@ -20,7 +20,6 @@ package pl.spcode.navauth.velocity.command.admin
 
 import com.google.inject.Inject
 import com.velocitypowered.api.command.CommandSource
-import com.velocitypowered.api.proxy.ConsoleCommandSource
 import dev.rollczi.litecommands.annotations.argument.Arg
 import dev.rollczi.litecommands.annotations.async.Async
 import dev.rollczi.litecommands.annotations.command.Command
@@ -28,7 +27,6 @@ import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
 import java.util.Optional
-import me.uniodex.velocityrcon.commandsource.IRconCommandSource
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.user.UserService
@@ -38,6 +36,7 @@ import pl.spcode.navauth.common.extension.StringExtensions.Companion.applyPlaceh
 import pl.spcode.navauth.common.shared.utils.StringUtils.Companion.generateRandomString
 import pl.spcode.navauth.velocity.command.Permissions
 import pl.spcode.navauth.velocity.multification.VelocityMultification
+import pl.spcode.navauth.velocity.util.CommandSourceUtils
 
 @Command(name = "forcecracked")
 @Permission(Permissions.ADMIN_FORCE_CRACKED)
@@ -77,7 +76,7 @@ constructor(
     userService.migrateToNonPremium(user, hashedPassword)
 
     val passwordText =
-      if (sender is ConsoleCommandSource || sender is IRconCommandSource) {
+      if (CommandSourceUtils.isConsoleOrRcon(sender)) {
         "$newPassword"
       } else {
         val placeholders = mapOf(Pair("PASSWORD", newPassword))
