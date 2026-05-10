@@ -60,6 +60,9 @@ open class GeneralConfig : OkaeriConfig() {
   @Comment("Interval between each login instruction multification.")
   var intervalBetweenLoginMultification: Duration = Duration.ofSeconds(3)
 
+  @Comment("Delay before sending multification on a successful premium authentication.")
+  var premiumAuthMultificationDelay: Duration = Duration.ofSeconds(1)
+
   @Comment("Usernames config") var usernamesConfig: UsernamesConfig = UsernamesConfig()
 
   @Comment("Two-factor (2FA) TOTP authentication config")

@@ -99,7 +99,14 @@ constructor(
     uniqueSessionId: VelocityUniqueSessionId,
   ): VelocityAutoLoginAuthSession {
     val session =
-      VelocityAutoLoginAuthSession(player, scheduler, multification, messagesConfig, eventBus)
+      VelocityAutoLoginAuthSession(
+        player,
+        scheduler,
+        multification,
+        messagesConfig,
+        generalConfig,
+        eventBus,
+      )
     return authSessionService.registerSession(uniqueSessionId, session)
   }
 }
