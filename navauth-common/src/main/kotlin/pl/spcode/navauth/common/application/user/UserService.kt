@@ -82,13 +82,7 @@ constructor(
     userRepository.save(user)
   }
 
-  fun deleteUserCredentials(user: User): User {
-    return txService.inTransaction {
-      return@inTransaction deleteUserCredentialsNoTx(user)
-    }
-  }
-
-  private fun deleteUserCredentialsNoTx(user: User): User {
+  private fun deleteUserCredentialsUpdateUserNoTx(user: User): User {
     val user = user.withCredentialsRequired(false)
     userRepository.save(user)
     userCredentialsService.deleteUserCredentials(user)
@@ -111,12 +105,15 @@ constructor(
         val requireCredentials = credentials.isTwoFactorEnabled
         val premiumUser = User.premium(user.uuid, user.username, mojangId, requireCredentials)
 
-        userRepository.save(premiumUser)
+        val status = userRepository.save(premiumUser)
+        status.isCreated
+        status.isUpdated
+        status.numLinesChanged
         if (requireCredentials) {
           val newCredentials = credentials.withoutPassword()
           userCredentialsService.storeUserCredentials(premiumUser, newCredentials)
         } else {
-          deleteUserCredentialsNoTx(user)
+          userCredentialsService.deleteUserCredentials(premiumUser)
         }
 
         return@inTransaction premiumUser
@@ -257,7 +254,7 @@ constructor(
         val newCredentials = credentials.withoutTotpSecret()
         userCredentialsService.storeUserCredentials(user, newCredentials)
       } else {
-        deleteUserCredentialsNoTx(user)
+        deleteUserCredentialsUpdateUserNoTx(user)
       }
     }
   }

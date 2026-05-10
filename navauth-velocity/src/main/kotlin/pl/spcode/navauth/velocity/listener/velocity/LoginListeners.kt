@@ -235,6 +235,7 @@ constructor(
     player.disconnectIfActive(Component.text("NavAuth: Bad auth state", TextColors.RED))
   }
 
+  // todo move this out of here
   private fun createAndStorePremiumUser(player: Player) {
     val premiumUser =
       User.premium(UserUuid(player.uniqueId), Username(player.username), MojangId(player.uniqueId))
