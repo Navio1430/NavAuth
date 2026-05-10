@@ -5,6 +5,23 @@ Multification library was created by [**EternalCode**](https://github.com/Eterna
 
 > Multification makes it simple to create customizable notifications and messages within large plugins that require handling a high volume of messages
 
+## With Multification, you have granular control over the notifications and messages sent to players.
+Here's a quick example of how easy it is:
+![multification-login-example.png](/multification/multification-login-example.png)
+Here's the edited property from example above (messages.yml):  
+```yml
+loginPasswordOnlyInstruction:
+    chat: <#2784F5>ᴇᴋɪᴘᴀ.ɢɢ</#2784F5> <gray>×</gray> <white>Zaloguj się za pomocą
+      /login <hasło>
+    title: <#2784F5>ᴇᴋɪᴘᴀ.ɢɢ</#2784F5>
+    subtitle: <white>Zaloguj się
+    bossbar:
+      message: <#2784F5>ᴇᴋɪᴘᴀ.ɢɢ</#2784F5> <gray>×</gray> <white>Oczekiwanie na logowanie...
+      duration: 3s
+      color: BLUE
+      progress: '1.0'
+```
+
 ### 📝 Example usage (copy of original lib docs)
 
 ::: tip
