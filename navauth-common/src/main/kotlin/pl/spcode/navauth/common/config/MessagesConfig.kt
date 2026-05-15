@@ -70,7 +70,7 @@ open class MessagesConfig : OkaeriConfig() {
   var yourAccountDataHasBeenMigrated =
     TextComponent("<green>Your account data has been migrated to '%USERNAME%'.")
 
-  val possibleInvalidSessionReconnectError =
+  var possibleInvalidSessionReconnectError =
     TextComponent(
       "<red>You've tried to log in to a premium account '%USERNAME%' one or more times. " +
         "<br>This might be an invalid session error, caused by one of the following:" +
