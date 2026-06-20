@@ -24,6 +24,7 @@ import org.bouncycastle.crypto.digests.SHA256Digest
 import org.bouncycastle.crypto.digests.SHA512Digest
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator
 import org.bouncycastle.crypto.params.KeyParameter
+import pl.spcode.navauth.common.application.credentials.CredentialsHasher
 import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 import pl.spcode.navauth.common.infra.crypto.CryptoUtils
 import pl.spcode.navauth.common.infra.crypto.HashedPassword

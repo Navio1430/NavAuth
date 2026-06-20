@@ -19,6 +19,7 @@
 package pl.spcode.navauth.common.infra.crypto.hasher
 
 import at.favre.lib.crypto.bcrypt.BCrypt
+import pl.spcode.navauth.common.application.credentials.CredentialsHasher
 import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
 import pl.spcode.navauth.common.infra.crypto.PasswordHash

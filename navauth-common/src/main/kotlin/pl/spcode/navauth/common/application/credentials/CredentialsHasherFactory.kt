@@ -23,7 +23,6 @@ import pl.spcode.navauth.common.config.PasswordsConfig
 import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 import pl.spcode.navauth.common.infra.crypto.hasher.Argon2CredentialsHasher
 import pl.spcode.navauth.common.infra.crypto.hasher.BCryptCredentialsHasher
-import pl.spcode.navauth.common.infra.crypto.hasher.CredentialsHasher
 import pl.spcode.navauth.common.infra.crypto.hasher.LibreLoginSHACredentialsHasher
 import pl.spcode.navauth.common.infra.crypto.hasher.SHACredentialsHasher
 
@@ -33,7 +32,10 @@ class CredentialsHasherFactory @Inject constructor(val passwordsConfig: Password
     return when (passwordsConfig.hashingAlgorithm) {
       HashingAlgorithm.BCRYPT -> BCryptCredentialsHasher()
       HashingAlgorithm.ARGON2 -> Argon2CredentialsHasher()
-      else -> throw IllegalArgumentException()
+      else ->
+        throw IllegalArgumentException(
+          "Hashing algorithm not supported: ${passwordsConfig.hashingAlgorithm}! Supported hashing algorithms: ${HashingAlgorithm.entries.joinToString(", ")}"
+        )
     }
   }
 

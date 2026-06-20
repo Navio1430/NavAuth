@@ -23,6 +23,7 @@ import java.security.MessageDigest
 import java.security.SecureRandom
 import org.bouncycastle.crypto.generators.Argon2BytesGenerator
 import org.bouncycastle.crypto.params.Argon2Parameters
+import pl.spcode.navauth.common.application.credentials.CredentialsHasher
 import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 import pl.spcode.navauth.common.infra.crypto.CryptoUtils
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
