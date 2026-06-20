@@ -91,6 +91,9 @@ open class GeneralConfig : OkaeriConfig() {
   )
   var descriptiveInvalidSessionCacheTimeMs = 8000
 
+  @Comment("Mojang API and profile resolution config")
+  var mojangAPIConfig: MojangAPIConfig = MojangAPIConfig()
+
   var sessionsConfig = SessionsConfig()
 
   @Variable("CONFIG_VERSION")

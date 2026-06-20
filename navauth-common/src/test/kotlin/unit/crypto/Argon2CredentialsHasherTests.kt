@@ -19,11 +19,11 @@
 package unit.crypto
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import pl.spcode.navauth.common.infra.crypto.PasswordHash
 import pl.spcode.navauth.common.infra.crypto.hasher.Argon2CredentialsHasher
-import kotlin.test.assertEquals
 
 class Argon2CredentialsHasherTests {
 
@@ -40,7 +40,8 @@ class Argon2CredentialsHasherTests {
 
   @Test
   fun `custom hasher produces PHC with matching properties`() {
-    val hasher = Argon2CredentialsHasher(hashLength = 32, memoryKb = 128, iterations = 5, parallelism = 2)
+    val hasher =
+      Argon2CredentialsHasher(hashLength = 32, memoryKb = 128, iterations = 5, parallelism = 2)
     val phc = hasher.hash("TestPassword123!").passwordHash.value
 
     val parts = phc.split("$")
@@ -62,7 +63,8 @@ class Argon2CredentialsHasherTests {
 
   @Test
   fun `hash and verify round-trip with custom hasher`() {
-    val hasher = Argon2CredentialsHasher(hashLength = 32, memoryKb = 128, iterations = 5, parallelism = 2)
+    val hasher =
+      Argon2CredentialsHasher(hashLength = 32, memoryKb = 128, iterations = 5, parallelism = 2)
     val password = "TestPassword123!"
 
     val hashed = hasher.hash(password)

@@ -28,7 +28,7 @@ import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
 import pl.spcode.navauth.common.annotation.Description
-import pl.spcode.navauth.common.application.mojang.MojangProfileService
+import pl.spcode.navauth.common.application.mojang.ProfileService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.application.user.UsernameAlreadyTakenException
 import pl.spcode.navauth.common.application.validator.UsernameValidator
@@ -45,7 +45,7 @@ class MigrateUserDataAdminCommand
 constructor(
   val proxyServer: ProxyServer,
   val userService: UserService,
-  val profileService: MojangProfileService,
+  val profileService: ProfileService,
   val userArgumentResolver: UserArgumentResolver,
   val usernameValidator: UsernameValidator,
   val multification: VelocityMultification,

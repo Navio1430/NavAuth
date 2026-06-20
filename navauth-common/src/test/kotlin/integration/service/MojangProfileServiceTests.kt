@@ -28,15 +28,15 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import org.junit.jupiter.api.extension.ExtendWith
-import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.Username
+import pl.spcode.navauth.common.infra.mojang.MojangProfileServiceImpl
 import utils.generateRandomString
 
 @ExtendWith(ApplicationTestExtension::class)
 class MojangProfileServiceTests {
 
-  @Inject lateinit var mojangProfileService: MojangProfileService
+  @Inject lateinit var mojangProfileService: MojangProfileServiceImpl
 
   @Test
   fun `test mojang profile fetch`() {

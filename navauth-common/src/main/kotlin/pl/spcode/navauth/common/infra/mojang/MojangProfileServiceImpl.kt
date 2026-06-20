@@ -1,6 +1,6 @@
 /*
  * NavAuth
- * Copyright © 2025 Oliwier Fijas (Navio1430)
+ * Copyright © 2026 Oliwier Fijas (Navio1430)
  *
  * NavAuth is free software; You can redistribute it and/or modify it under the terms of:
  * the GNU Affero General Public License version 3 as published by the Free Software Foundation.
@@ -16,7 +16,7 @@
  *
  */
 
-package pl.spcode.navauth.common.application.mojang
+package pl.spcode.navauth.common.infra.mojang
 
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
@@ -26,6 +26,8 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import pl.spcode.navauth.common.application.mojang.ProfileService
+import pl.spcode.navauth.common.config.MojangAPIConfig
 import pl.spcode.navauth.common.domain.mojang.MojangProfile
 import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.Username
@@ -33,9 +35,10 @@ import pl.spcode.navauth.common.shared.http.HttpStatusCodes
 import pl.spcode.navauth.common.shared.utils.UuidUtils
 
 @Singleton
-class MojangProfileService @Inject constructor(val httpClient: HttpClient) {
-
-  val gson: Gson = Gson()
+class MojangProfileServiceImpl
+@Inject
+constructor(val httpClient: HttpClient, val gson: Gson, val config: MojangAPIConfig) :
+  ProfileService {
 
   data class MojangProfileDto(
     @SerializedName(value = "id") val uuidWithoutDashes: String,
@@ -47,12 +50,12 @@ class MojangProfileService @Inject constructor(val httpClient: HttpClient) {
     }
   }
 
-  fun fetchProfileInfo(usernameCaseIgnored: Username): MojangProfile? {
+  override fun fetchProfileInfo(usernameCaseIgnored: Username): MojangProfile? {
     val requestUri =
       URI.create(
         "https://api.minecraftservices.com/minecraft/profile/lookup/name/${usernameCaseIgnored.value}"
       )
-    val request = HttpRequest.newBuilder(requestUri).GET().build()
+    val request = HttpRequest.newBuilder(requestUri).timeout(config.apiTimeout).GET().build()
 
     val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
 

@@ -1,6 +1,6 @@
 /*
  * NavAuth
- * Copyright © 2025 Oliwier Fijas (Navio1430)
+ * Copyright © 2026 Oliwier Fijas (Navio1430)
  *
  * NavAuth is free software; You can redistribute it and/or modify it under the terms of:
  * the GNU Affero General Public License version 3 as published by the Free Software Foundation.
@@ -16,14 +16,16 @@
  *
  */
 
-package pl.spcode.navauth.common.domain.mojang
+package pl.spcode.navauth.common.module
 
-import pl.spcode.navauth.common.domain.user.MojangId
-import pl.spcode.navauth.common.domain.user.Username
+import com.google.gson.Gson
+import com.google.inject.AbstractModule
+import com.google.inject.Provides
 
-data class MojangProfile(val uuid: MojangId, val name: Username)
+class GsonModule : AbstractModule() {
 
-enum class MojangProfileApi {
-  MINETOOLS,
-  MOJANG,
+  @Provides
+  fun provideGson(): Gson {
+    return Gson()
+  }
 }

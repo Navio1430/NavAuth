@@ -25,7 +25,7 @@ import pl.spcode.navauth.api.event.user.UserNonPremiumMigrationEvent
 import pl.spcode.navauth.api.event.user.UserPremiumMigrationEvent
 import pl.spcode.navauth.api.event.user.UserUsernameMigrationEvent
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
-import pl.spcode.navauth.common.application.mojang.MojangProfileService
+import pl.spcode.navauth.common.application.mojang.ProfileService
 import pl.spcode.navauth.common.domain.common.TransactionService
 import pl.spcode.navauth.common.domain.credentials.TOTPSecret
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
@@ -43,7 +43,7 @@ class UserService
 constructor(
   val userRepository: UserRepository,
   val userCredentialsService: UserCredentialsService,
-  val profileService: MojangProfileService,
+  val profileService: ProfileService,
   val txService: TransactionService,
   val eventBus: NavAuthEventBus,
 ) {

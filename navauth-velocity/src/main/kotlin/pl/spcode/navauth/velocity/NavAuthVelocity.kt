@@ -106,6 +106,7 @@ constructor(
           VelocityMultificationsModule(velocityViewerProvider),
           VelocityCommandsModule(),
           SchedulerModule(this, proxyServer.scheduler),
+          GsonModule(),
           HttpClientModule(),
           DataPersistenceModule(),
           ServicesModule(),
