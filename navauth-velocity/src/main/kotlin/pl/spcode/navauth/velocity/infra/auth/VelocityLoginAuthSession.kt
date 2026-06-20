@@ -38,10 +38,10 @@ class VelocityLoginAuthSession(
   userCredentials: UserCredentials,
   userCredentialsService: UserCredentialsService,
   scheduler: NavAuthScheduler,
-  val velocityEventDispatcher: VelocityEventDispatcher,
-  val multification: VelocityMultification,
+  private val velocityEventDispatcher: VelocityEventDispatcher,
+  private val multification: VelocityMultification,
   generalConfig: GeneralConfig,
-  val messagesConfig: MessagesConfig,
+  private val messagesConfig: MessagesConfig,
   eventBus: NavAuthEventBus,
 ) :
   LoginAuthSession<VelocityPlayerAdapter>(

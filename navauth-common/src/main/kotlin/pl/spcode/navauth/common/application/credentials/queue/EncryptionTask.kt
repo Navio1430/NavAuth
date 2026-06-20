@@ -1,6 +1,6 @@
 /*
  * NavAuth
- * Copyright © 2025 Oliwier Fijas (Navio1430)
+ * Copyright © 2026 Oliwier Fijas (Navio1430)
  *
  * NavAuth is free software; You can redistribute it and/or modify it under the terms of:
  * the GNU Affero General Public License version 3 as published by the Free Software Foundation.
@@ -16,14 +16,17 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.crypto.hasher
+package pl.spcode.navauth.common.application.credentials.queue
 
-import pl.spcode.navauth.common.infra.crypto.HashedPassword
-import pl.spcode.navauth.common.infra.crypto.PasswordHash
+import java.util.UUID
 
-interface CredentialsHasher {
+class EncryptionTask(val playerId: UUID?, private val operation: () -> Unit) : Runnable {
 
-  fun hash(password: String): HashedPassword
+  @Volatile var cancelled = false
 
-  fun verify(password: String, passwordHash: PasswordHash): Boolean
+  override fun run() {
+    if (cancelled) return
+
+    operation()
+  }
 }

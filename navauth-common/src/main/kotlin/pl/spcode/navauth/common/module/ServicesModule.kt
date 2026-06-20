@@ -23,15 +23,19 @@ import pl.spcode.navauth.common.application.auth.handshake.AuthHandshakeSessionS
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.auth.username.UsernameResolutionService
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
+import pl.spcode.navauth.common.application.credentials.queue.EncryptionQueueService
 import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserActivitySessionService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.domain.common.TransactionService
+import pl.spcode.navauth.common.infra.crypto.queue.EncryptionQueueServiceImpl
 import pl.spcode.navauth.common.infra.persistence.ormlite.TransactionServiceImpl
 
 class ServicesModule : AbstractModule() {
 
   override fun configure() {
+    bind(EncryptionQueueService::class.java).to(EncryptionQueueServiceImpl::class.java)
+
     bind(TransactionService::class.java).to(TransactionServiceImpl::class.java)
 
     bind(UsernameResolutionService::class.java)

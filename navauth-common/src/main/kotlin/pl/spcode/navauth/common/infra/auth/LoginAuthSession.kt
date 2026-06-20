@@ -18,9 +18,11 @@
 
 package pl.spcode.navauth.common.infra.auth
 
+import java.util.concurrent.CompletableFuture
 import pl.spcode.navauth.api.domain.auth.AuthSessionType
 import pl.spcode.navauth.api.event.NavAuthEventBus
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
+import pl.spcode.navauth.common.application.credentials.queue.EncryptionTaskAlreadyQueuedException
 import pl.spcode.navauth.common.domain.auth.session.AuthSession
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.player.DisconnectReason
@@ -29,7 +31,7 @@ import pl.spcode.navauth.common.domain.player.PlayerAdapter
 open class LoginAuthSession<T : PlayerAdapter>(
   playerAdapter: T,
   val userCredentials: UserCredentials,
-  val userCredentialsService: UserCredentialsService,
+  private val userCredentialsService: UserCredentialsService,
   maxLoginAttempts: Int,
   eventBus: NavAuthEventBus,
 ) : AuthSession<T>(playerAdapter, eventBus) {
@@ -53,37 +55,78 @@ open class LoginAuthSession<T : PlayerAdapter>(
    * @param password the raw (not hashed) password to authenticate the user, can be null if not
    *   required
    * @param twoFactorCode the two-factor authentication code, can be null if 2FA is not enabled
-   * @return true if the authentication is successful, otherwise false
+   * @return CompletableFuture with AuthTaskResult
    * @throws IllegalArgumentException if `password` or `twoFactorCode` is required by the user
    *   credentials but not provided
    */
-  fun auth(password: String?, twoFactorCode: String?): Boolean {
-    val result = tryAuth(password, twoFactorCode)
-    if (!result) {
-      attemptsLeft -= 1
-      if (attemptsLeft <= 0) {
-        onTooManyLoginAttempts()
+  fun enqueueAuthTask(
+    password: String?,
+    twoFactorCode: String?,
+  ): CompletableFuture<AuthTaskResult> {
+    return tryAuth(password, twoFactorCode).thenApply { result ->
+      when (result) {
+        AuthTaskResult.WrongCredentials -> {
+          attemptsLeft -= 1
+          if (attemptsLeft <= 0) {
+            onTooManyLoginAttempts()
+            return@thenApply AuthTaskResult.FailedTooManyAttempts
+          }
+        }
+        AuthTaskResult.Success -> {
+          authenticate()
+        }
+        else -> {}
       }
+      return@thenApply result
     }
-    return result
   }
 
-  private fun tryAuth(password: String?, twoFactorCode: String?): Boolean {
+  private fun tryAuth(
+    password: String?,
+    twoFactorCode: String?,
+  ): CompletableFuture<AuthTaskResult> {
     if (userCredentials.isTwoFactorEnabled) {
       require(twoFactorCode != null) { "twoFactorCode parameter is required by user credentials" }
       if (!userCredentialsService.verifyCode(userCredentials, twoFactorCode)) {
-        return false
+        return CompletableFuture.completedFuture(AuthTaskResult.WrongCredentials)
       }
     }
 
     if (userCredentials.isPasswordRequired) {
+      val future = CompletableFuture<AuthTaskResult>()
       require(password != null) { "password parameter is required by user credentials" }
-      if (!userCredentialsService.verifyPassword(userCredentials, password)) {
-        return false
+      try {
+        userCredentialsService
+          .enqueueVerifyPassword(userCredentials, password, playerAdapter.identifier)
+          .whenComplete { isCorrect, throwable ->
+            if (throwable != null) {
+              future.completeExceptionally(throwable)
+              return@whenComplete
+            }
+            if (isCorrect) {
+              future.complete(AuthTaskResult.Success)
+            } else {
+              future.complete(AuthTaskResult.WrongCredentials)
+            }
+          }
+      } catch (ex: EncryptionTaskAlreadyQueuedException) {
+        future.complete(AuthTaskResult.AlreadyQueued)
       }
+
+      return future
     }
 
-    authenticate()
-    return true
+    // 2fa was the only one required and it passed successfully
+    return CompletableFuture.completedFuture(AuthTaskResult.Success)
+  }
+
+  sealed class AuthTaskResult {
+    object AlreadyQueued : AuthTaskResult()
+
+    object WrongCredentials : AuthTaskResult()
+
+    object Success : AuthTaskResult()
+
+    object FailedTooManyAttempts : AuthTaskResult()
   }
 }

@@ -16,14 +16,16 @@
  *
  */
 
-package pl.spcode.navauth.common.application.credentials
+package pl.spcode.navauth.common.application.credentials.queue
 
-import pl.spcode.navauth.common.infra.crypto.HashedPassword
-import pl.spcode.navauth.common.infra.crypto.PasswordHash
+import java.util.UUID
 
-interface CredentialsHasher {
+interface EncryptionQueueService {
 
-  fun hash(password: String): HashedPassword
+  /** @throws EncryptionTaskAlreadyQueuedException if player has existing task queued */
+  fun submitTask(playerId: UUID, operation: () -> Unit)
 
-  fun verify(password: String, passwordHash: PasswordHash): Boolean
+  fun dequeueTask(playerId: UUID): Boolean
+
+  fun isTaskQueued(playerId: UUID): Boolean
 }

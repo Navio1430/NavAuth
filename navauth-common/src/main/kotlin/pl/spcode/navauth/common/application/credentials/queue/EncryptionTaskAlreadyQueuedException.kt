@@ -16,14 +16,6 @@
  *
  */
 
-package pl.spcode.navauth.common.application.credentials
+package pl.spcode.navauth.common.application.credentials.queue
 
-import pl.spcode.navauth.common.infra.crypto.HashedPassword
-import pl.spcode.navauth.common.infra.crypto.PasswordHash
-
-interface CredentialsHasher {
-
-  fun hash(password: String): HashedPassword
-
-  fun verify(password: String, passwordHash: PasswordHash): Boolean
-}
+class EncryptionTaskAlreadyQueuedException : Exception()

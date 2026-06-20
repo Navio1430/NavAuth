@@ -87,6 +87,10 @@ open class MessagesConfig : OkaeriConfig() {
 
   class NoticesConfig : OkaeriConfig() {
 
+    val unexpectedErrorOccurred: Notice = Notice.chat("<red>An unexpected error occurred.")
+    var processAlreadyInProgressError: Notice =
+      Notice.chat("<red>Process is already in progress. Please wait...")
+
     var passwordRequiredError: Notice = Notice.chat("<red>Please provide your current password.")
     var twoFactorAlreadyEnabledError: Notice =
       Notice.chat("<red>Your account has 2FA enabled already!")
@@ -106,6 +110,11 @@ open class MessagesConfig : OkaeriConfig() {
       )
     var accountAlreadyPremiumError: Notice =
       Notice.chat("<red>Account is already set as a premium one.")
+
+    var alreadyTryingToLoginError: Notice =
+      Notice.chat(
+        "<red>You're already trying to login, please wait for login result before next retry."
+      )
 
     var registerPasswordInvalidError: Notice =
       Notice.chat(
