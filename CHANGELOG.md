@@ -5,6 +5,8 @@
 ```diff
 + Encryption queue (backpressure especially for Argon2 and BCrypt hashing methods which can lead to OOM killer)
 + Argon2 configuration settings
++ Mojang profile API order (API fallback)
++ MineTools profile API support (preferred one by default)
 ```
 
 ### Fixes
@@ -14,6 +16,8 @@
 **General** config:
 ```diff
 + encryptionQueueConfig
++ mojangAPIConfig
++ Argon2 settings
 ```
 
 **Messages** config:
