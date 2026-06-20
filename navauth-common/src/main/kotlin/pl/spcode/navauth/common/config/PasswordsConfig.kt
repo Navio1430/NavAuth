@@ -31,6 +31,25 @@ class PasswordsConfig : OkaeriConfig() {
   )
   var hashingAlgorithm: HashingAlgorithm = HashingAlgorithm.BCRYPT
 
+  @Comment(
+    "Argon2 settings — used only when hashingAlgorithm is set to ARGON2.",
+    "Leave these unchanged unless you know what you're doing.",
+    "Changing any of these properties can significantly increase CPU usage or reduce security.",
+    "Default Argon version: Argon2ID",
+    "Default salt bytes: 16",
+  )
+  var argon2: Argon2Config = Argon2Config()
+
+  class Argon2Config : OkaeriConfig() {
+    @Comment("Hash length in bytes", "default: 16") var hashLength: Int = 16
+
+    @Comment("Memory cost in KB", "default: 65536 = 64 MiB") var memoryKb: Int = 65536
+
+    @Comment("Time cost (iterations)", "default: 3") var iterations: Int = 3
+
+    @Comment("Parallelism (threads)", "default: 4") var parallelism: Int = 4
+  }
+
   @Comment("Minimum length") var minLength: Int = 5
 
   @Comment("Require uppercase letters?") var requireUppercase: Boolean = false

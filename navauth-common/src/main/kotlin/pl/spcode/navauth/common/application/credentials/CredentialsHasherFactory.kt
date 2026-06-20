@@ -31,7 +31,7 @@ class CredentialsHasherFactory @Inject constructor(val passwordsConfig: Password
   fun createDefaultHasher(): CredentialsHasher {
     return when (passwordsConfig.hashingAlgorithm) {
       HashingAlgorithm.BCRYPT -> BCryptCredentialsHasher()
-      HashingAlgorithm.ARGON2 -> Argon2CredentialsHasher()
+      HashingAlgorithm.ARGON2 -> argon2Hasher()
       else ->
         throw IllegalArgumentException(
           "Hashing algorithm not supported: ${passwordsConfig.hashingAlgorithm}! Supported hashing algorithms: ${HashingAlgorithm.entries.joinToString(", ")}"
@@ -42,11 +42,19 @@ class CredentialsHasherFactory @Inject constructor(val passwordsConfig: Password
   fun createHasher(algo: HashingAlgorithm): CredentialsHasher {
     return when (algo) {
       HashingAlgorithm.BCRYPT -> BCryptCredentialsHasher()
-      HashingAlgorithm.ARGON2 -> Argon2CredentialsHasher()
+      HashingAlgorithm.ARGON2 -> argon2Hasher()
       HashingAlgorithm.SHA256,
       HashingAlgorithm.SHA512 -> SHACredentialsHasher()
       HashingAlgorithm.LIBRELOGIN_SHA256,
       HashingAlgorithm.LIBRELOGIN_SHA512 -> LibreLoginSHACredentialsHasher()
     }
   }
+
+  private fun argon2Hasher() =
+    Argon2CredentialsHasher(
+      hashLength = passwordsConfig.argon2.hashLength,
+      memoryKb = passwordsConfig.argon2.memoryKb,
+      iterations = passwordsConfig.argon2.iterations,
+      parallelism = passwordsConfig.argon2.parallelism,
+    )
 }
