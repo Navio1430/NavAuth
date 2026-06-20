@@ -105,10 +105,7 @@ constructor(
         val requireCredentials = credentials.isTwoFactorEnabled
         val premiumUser = User.premium(user.uuid, user.username, mojangId, requireCredentials)
 
-        val status = userRepository.save(premiumUser)
-        status.isCreated
-        status.isUpdated
-        status.numLinesChanged
+        userRepository.save(premiumUser)
         if (requireCredentials) {
           val newCredentials = credentials.withoutPassword()
           userCredentialsService.storeUserCredentials(premiumUser, newCredentials)
