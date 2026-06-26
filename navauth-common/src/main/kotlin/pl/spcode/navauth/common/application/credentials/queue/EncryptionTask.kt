@@ -20,12 +20,19 @@ package pl.spcode.navauth.common.application.credentials.queue
 
 import java.util.UUID
 
-class EncryptionTask(val playerId: UUID?, private val operation: () -> Unit) : Runnable {
+class EncryptionTask(
+  val playerId: UUID?,
+  private val operation: () -> Unit,
+  val onCancelled: () -> Unit,
+) : Runnable {
 
   @Volatile var cancelled = false
 
   override fun run() {
-    if (cancelled) return
+    if (cancelled) {
+      onCancelled.invoke()
+      return
+    }
 
     operation()
   }

@@ -22,8 +22,11 @@ import java.util.UUID
 
 interface EncryptionQueueService {
 
-  /** @throws EncryptionTaskAlreadyQueuedException if player has existing task queued */
-  fun submitTask(playerId: UUID, operation: () -> Unit)
+  /**
+   * @param onCancelled called when the task is dequeued before execution
+   * @throws EncryptionTaskAlreadyQueuedException if player has existing task queued
+   */
+  fun submitTask(playerId: UUID, operation: () -> Unit, onCancelled: () -> Unit)
 
   fun dequeueTask(playerId: UUID): Boolean
 

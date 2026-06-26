@@ -29,6 +29,7 @@ import dev.rollczi.litecommands.annotations.permission.Permission
 import java.util.Optional
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
+import pl.spcode.navauth.common.application.credentials.queue.EncryptionTaskAlreadyQueuedException
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.user.UserArgumentResolver
 import pl.spcode.navauth.common.command.user.UsernameOrUuidRaw
@@ -72,21 +73,27 @@ constructor(
 
     val newPassword = newPasswordOpt.orElseGet { generateRandomString(8) }
 
-    val hashedPassword = userCredentialsService.hashPassword(newPassword)
-    userService.migrateToNonPremium(user, hashedPassword)
+    try {
+      userCredentialsService.enqueueHashPassword(newPassword, user.uuid.value).thenAccept {
+        hashedPassword ->
+        userService.migrateToNonPremium(user, hashedPassword)
 
-    val passwordText =
-      if (CommandSourceUtils.isConsoleOrRcon(sender)) {
-        "$newPassword"
-      } else {
-        val placeholders = mapOf(Pair("PASSWORD", newPassword))
-        multification.config.adminCopyPasswordText.applyPlaceholders(placeholders)
+        val passwordText =
+          if (CommandSourceUtils.isConsoleOrRcon(sender)) {
+            "$newPassword"
+          } else {
+            val placeholders = mapOf(Pair("PASSWORD", newPassword))
+            multification.config.adminCopyPasswordText.applyPlaceholders(placeholders)
+          }
+
+        multification
+          .create(sender) { it.multification.adminCmdAccountMigratedToNonPremiumSuccess }
+          .placeholder("%USERNAME%", user.username.value)
+          .placeholder("%PASSWORD_TEXT%", passwordText)
+          .send()
       }
-
-    multification
-      .create(sender) { it.multification.adminCmdAccountMigratedToNonPremiumSuccess }
-      .placeholder("%USERNAME%", user.username.value)
-      .placeholder("%PASSWORD_TEXT%", passwordText)
-      .send()
+    } catch (_: EncryptionTaskAlreadyQueuedException) {
+      multification.create(sender) { it.multification.processAlreadyInProgressError }.send()
+    }
   }
 }

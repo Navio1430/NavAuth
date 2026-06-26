@@ -131,6 +131,7 @@ open class MessagesConfig : OkaeriConfig() {
 
     var registerInstruction: Notice =
       Notice.chat("<green>Please register using /register command.</green>")
+    var registeringInfo: Notice = Notice.chat("<yellow>Registering, please wait...</yellow>")
 
     var loginSuccess: Notice =
       Notice.chat("<green>You have been authenticated successfully.</green>")

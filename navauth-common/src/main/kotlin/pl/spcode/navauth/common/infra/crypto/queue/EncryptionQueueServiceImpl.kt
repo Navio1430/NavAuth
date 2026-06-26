@@ -51,12 +51,12 @@ class EncryptionQueueServiceImpl @Inject constructor(private val config: Encrypt
       TimeUnit.SECONDS,
       workQueue,
       Executors.defaultThreadFactory(),
-    ) { task, _ ->
-      task as EncryptionTask
+    ) { runnable, _ ->
+      val runner = runnable as EncryptionTaskRunner
       try {
-        workQueue.put(task)
+        workQueue.put(runner)
       } catch (e: InterruptedException) {
-        activeTasks.remove(task.playerId)
+        activeTasks.remove(runner.task.playerId)
         Thread.currentThread().interrupt()
         throw RejectedExecutionException("Interrupted while waiting for queue slot", e)
       }
@@ -67,21 +67,15 @@ class EncryptionQueueServiceImpl @Inject constructor(private val config: Encrypt
   }
 
   /** @throws EncryptionTaskAlreadyQueuedException if task is already queued */
-  override fun submitTask(playerId: UUID, operation: () -> Unit) {
-    val task = EncryptionTask(playerId, operation)
+  override fun submitTask(playerId: UUID, operation: () -> Unit, onCancelled: () -> Unit) {
+    val task = EncryptionTask(playerId, operation, onCancelled)
 
     if (activeTasks.containsKey(playerId)) {
       throw EncryptionTaskAlreadyQueuedException()
     }
     activeTasks[playerId] = task
 
-    executor.execute {
-      val result = runCatching { task.run() }
-      if (result.isFailure) {
-        logger.warn("Player id='${playerId}' EncryptionTask failed", result.exceptionOrNull())
-      }
-      activeTasks.remove(playerId)
-    }
+    executor.execute(EncryptionTaskRunner(playerId, task, activeTasks, logger))
   }
 
   override fun isTaskQueued(playerId: UUID): Boolean {
@@ -89,14 +83,33 @@ class EncryptionQueueServiceImpl @Inject constructor(private val config: Encrypt
   }
 
   override fun dequeueTask(playerId: UUID): Boolean {
-    workQueue.removeIf { it is EncryptionTask && it.playerId == playerId }
+    val cancelledFromQueue =
+      workQueue.removeIf { it is EncryptionTaskRunner && it.playerId == playerId }
 
     val task = activeTasks.remove(playerId)
     if (task != null) {
       task.cancelled = true
+      if (cancelledFromQueue) {
+        task.onCancelled.invoke()
+      }
       return true
     }
 
     return false
+  }
+
+  private class EncryptionTaskRunner(
+    val playerId: UUID,
+    val task: EncryptionTask,
+    private val activeTasks: ConcurrentHashMap<UUID, EncryptionTask>,
+    private val logger: Logger,
+  ) : Runnable {
+    override fun run() {
+      val result = runCatching { task.run() }
+      if (result.isFailure) {
+        logger.warn("Player id='${playerId}' EncryptionTask failed", result.exceptionOrNull())
+      }
+      activeTasks.remove(playerId)
+    }
   }
 }

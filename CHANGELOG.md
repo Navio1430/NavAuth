@@ -25,4 +25,5 @@
 + unexpectedErrorOccurred
 + processAlreadyInProgressError
 + alreadyTryingToLoginError
++ registeringInfo
 ```

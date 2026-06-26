@@ -21,6 +21,7 @@ package pl.spcode.navauth.common.application.credentials
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import java.util.UUID
+import java.util.concurrent.CancellationException
 import java.util.concurrent.CompletableFuture
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -97,23 +98,58 @@ constructor(
     val hasher = credentialsHasherFactory.createHasher(credentials.hashedPassword.algo)
 
     val future = CompletableFuture<Boolean>()
-    encryptionQueueService.submitTask(playerId) {
-      try {
-        val result = hasher.verify(password, passwordHash)
-        future.complete(result)
-      } catch (ex: Exception) {
-        logger.error(
-          "Unexpected error occurred while trying to verify user id='${playerId}' password",
-          ex,
+    encryptionQueueService.submitTask(
+      playerId = playerId,
+      operation = {
+        try {
+          val result = hasher.verify(password, passwordHash)
+          future.complete(result)
+        } catch (ex: Exception) {
+          logger.error(
+            "Unexpected error occurred while trying to verify user id='${playerId}' password",
+            ex,
+          )
+          future.completeExceptionally(ex)
+        }
+      },
+      onCancelled = {
+        future.completeExceptionally(
+          CancellationException("Password verification task was cancelled")
         )
-        future.completeExceptionally(ex)
-      }
-    }
+      },
+    )
     return future
   }
 
-  fun hashPassword(password: String): HashedPassword {
-    return credentialsHasherFactory.createDefaultHasher().hash(password)
+  /**
+   * @param password the raw (not hashed) password
+   * @param playerId the id of the player for queue tracking
+   * @throws
+   *   pl.spcode.navauth.common.application.credentials.queue.EncryptionTaskAlreadyQueuedException
+   *   if task is already queued
+   */
+  fun enqueueHashPassword(password: String, playerId: UUID): CompletableFuture<HashedPassword> {
+    val hasher = credentialsHasherFactory.createDefaultHasher()
+    val future = CompletableFuture<HashedPassword>()
+    encryptionQueueService.submitTask(
+      playerId = playerId,
+      operation = {
+        try {
+          val result = hasher.hash(password)
+          future.complete(result)
+        } catch (ex: Exception) {
+          logger.error(
+            "Unexpected error occurred while trying to hash password for player id='${playerId}'",
+            ex,
+          )
+          future.completeExceptionally(ex)
+        }
+      },
+      onCancelled = {
+        future.completeExceptionally(CancellationException("Password hash task was cancelled"))
+      },
+    )
+    return future
   }
 
   fun verifyCode(credentials: UserCredentials, code: String): Boolean {
@@ -129,12 +165,12 @@ constructor(
    * @param newPassword the new raw password to be hashed and stored
    */
   fun updatePassword(user: User, newPassword: String) {
+    val hashedPassword = enqueueHashPassword(newPassword, user.uuid.value).join()
+
     transactionService.inTransaction {
       val credentials = findCredentials(user)
       require(credentials != null) { "user does not have credentials" }
 
-      val hasher = credentialsHasherFactory.createDefaultHasher()
-      val hashedPassword = hasher.hash(newPassword)
       val newCredentials = credentials.withNewPassword(hashedPassword)
       storeUserCredentials(user, newCredentials)
     }
