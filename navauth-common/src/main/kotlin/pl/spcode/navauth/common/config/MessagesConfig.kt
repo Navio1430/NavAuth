@@ -111,7 +111,6 @@ open class MessagesConfig : OkaeriConfig() {
     var accountAlreadyPremiumError: Notice =
       Notice.chat("<red>Account is already set as a premium one.")
 
-    var loggingInInfo: Notice = Notice.chat("<yellow>Logging in, please wait...</yellow>")
     var alreadyTryingToLoginError: Notice =
       Notice.chat(
         "<red>You're already trying to login, please wait for login result before next retry."
@@ -129,6 +128,7 @@ open class MessagesConfig : OkaeriConfig() {
       Notice.chat("<green>Please login using \"/2fa <code>\" command.</green>")
     var loginPasswordAndTwoFactorInstruction: Notice =
       Notice.chat("<green>Please login using \"/login <password> <2fa_code>\" command.</green>")
+    var loggingInInfo: Notice = Notice.chat("<yellow>Logging in, please wait...</yellow>")
 
     var registerInstruction: Notice =
       Notice.chat("<green>Please register using /register command.</green>")
