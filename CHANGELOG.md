@@ -26,4 +26,5 @@
 + processAlreadyInProgressError
 + alreadyTryingToLoginError
 + registeringInfo
++ loggingInInfo
 ```
