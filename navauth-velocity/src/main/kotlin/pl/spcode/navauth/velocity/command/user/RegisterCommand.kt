@@ -88,8 +88,6 @@ constructor(
       return
     }
 
-    multification.send(sender) { it.multification.registeringInfo }
-
     try {
       userCredentialsService.enqueueHashPassword(password, sender.uniqueId).thenAccept {
         hashedPassword ->
@@ -100,6 +98,7 @@ constructor(
         // register session will send success message
         session.authenticate()
       }
+      multification.send(sender) { it.multification.registeringInfo }
     } catch (_: EncryptionTaskAlreadyQueuedException) {
       multification.send(sender) { it.multification.processAlreadyInProgressError }
     }
