@@ -7,10 +7,17 @@
 + Argon2 configuration settings
 + Mojang profile API order (API fallback)
 + MineTools profile API support (preferred one by default)
++ NavAuthAPI.isAuthenticated(UUID) method for checking player auth state
++ AjQueue integration plugin
 ```
 
 ### Fixes
 - fix register command always using BCrypt instead of the selected algo
+
+### API
+```diff
++ NavAuthAPI#isAuthenticated(UUID)
+```
 
 ### Config
 **General** config:
@@ -28,3 +35,7 @@
 + registeringInfo
 + loggingInInfo
 ```
+
+### New integration for AjQueue (as a separate plugin)
+- Automatically adds authenticated players to a configurable AjQueue queue
+- Optionally cancel AjQueue `PreQueueEvent` for unauthenticated players
