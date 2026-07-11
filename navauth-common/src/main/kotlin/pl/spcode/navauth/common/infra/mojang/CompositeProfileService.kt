@@ -31,7 +31,7 @@ class CompositeProfileService
 @Inject
 constructor(
   private val config: MojangAPIConfig,
-  private val mojangProfileService: ProfileService,
+  private val mojangProfileService: MojangProfileServiceImpl,
   private val mineToolsProfileService: MineToolsProfileService,
   private val profileCache: ProfileCache,
 ) : ProfileService {
