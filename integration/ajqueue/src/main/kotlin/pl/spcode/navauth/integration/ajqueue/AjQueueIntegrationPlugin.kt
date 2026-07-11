@@ -30,6 +30,7 @@ import org.slf4j.Logger
 import pl.spcode.navauth.api.NavAuthAPI
 import pl.spcode.navauth.common.module.YamlConfigModule
 import pl.spcode.navauth.integration.ajqueue.config.GeneralConfig
+import pl.spcode.navauth.integration.ajqueue.listener.AjQueueListeners
 import pl.spcode.navauth.integration.ajqueue.listener.NavAuthListeners
 
 @Plugin(
@@ -59,6 +60,9 @@ constructor(
 
       val eventBus = NavAuthAPI.getInstance().eventBus
       eventBus.register(childInjector.getInstance(NavAuthListeners::class.java))
+
+      val ajQueueListeners = childInjector.getInstance(AjQueueListeners::class.java)
+      ajQueueListeners.registerAll()
 
       logger.info("NavAuth AJQueue integration initialized successfully")
     } catch (ex: Exception) {

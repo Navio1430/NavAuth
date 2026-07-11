@@ -32,4 +32,7 @@ class GeneralConfig : OkaeriConfig() {
 
   @Comment("Whether to kick the player if adding them to the queue fails")
   var kickOnQueueAddFail: Boolean = false
+
+  @Comment("Whether to cancel the AjQueue PreQueueEvent if the player is not authenticated yet")
+  var cancelQueueJoinEventIfNotAuth: Boolean = false
 }
