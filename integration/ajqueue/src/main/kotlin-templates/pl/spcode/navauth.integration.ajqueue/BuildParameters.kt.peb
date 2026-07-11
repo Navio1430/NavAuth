@@ -1,0 +1,7 @@
+package pl.spcode.navauth.integration.ajqueue
+
+class BuildParameters {
+  companion object {
+    const val VERSION = "{{ version }}"
+  }
+}
