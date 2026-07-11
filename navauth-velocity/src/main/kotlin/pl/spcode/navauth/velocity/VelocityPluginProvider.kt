@@ -19,5 +19,5 @@
 package pl.spcode.navauth.velocity
 
 interface VelocityPluginProvider {
-  fun provideInstance(): Bootstrap
+  fun provideInstance(): NavAuthVelocity
 }

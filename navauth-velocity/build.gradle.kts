@@ -1,6 +1,7 @@
 plugins {
   alias(libs.plugins.blossom)
   id("buildsrc.navauth-shadow")
+  kotlin("kapt")
 }
 
 val projectName = "navauth"
@@ -29,9 +30,14 @@ tasks.shadowJar {
   }
 }
 
-blossom {
-  replaceTokenIn("pl/spcode/$projectName/velocity/Bootstrap.java")
-  replaceToken("@version@", rootProject.version.toString())
+sourceSets {
+  main {
+    blossom {
+      kotlinSources {
+        property("version", rootProject.version.toString())
+      }
+    }
+  }
 }
 
 repositories {
@@ -45,17 +51,13 @@ dependencies {
   implementation(libs.litecommands.velocity)
 
   compileOnly(libs.velocitypowered.velocity.api)
-  annotationProcessor(libs.velocitypowered.velocity.api)
+  kapt(libs.velocitypowered.velocity.api)
 
   // bstats
   implementation("org.bstats:bstats-velocity:3.1.0")
 
   // Tribufu-Rcon used in itzg containers
   compileOnly("com.tribufu:Tribufu-VelocityRcon:1.2.0")
-}
-
-tasks.compileJava {
-  options.compilerArgs.add("-parameters")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
