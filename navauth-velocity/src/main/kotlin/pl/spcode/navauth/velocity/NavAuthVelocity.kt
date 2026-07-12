@@ -172,9 +172,6 @@ constructor(
   }
 
   fun registerListeners(injector: Injector) {
-    // register self as listener because of the shutdown event
-    proxyServer.eventManager.register(this, this)
-
     val listeners = VelocityListenersRegistry.getWithInjection(injector)
     listeners.forEach { proxyServer.eventManager.register(this, it) }
   }
