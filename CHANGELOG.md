@@ -13,6 +13,7 @@
 
 ### Fixes
 - fix register command always using BCrypt instead of the selected algo
+- fix same letter case username migration
 
 ### API
 ```diff

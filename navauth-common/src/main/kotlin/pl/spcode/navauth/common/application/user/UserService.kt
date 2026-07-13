@@ -217,7 +217,8 @@ constructor(
     if (user.username == newUsername) throw IllegalArgumentException("username cannot be the same")
 
     val conflictingUser = userRepository.findByUsernameIgnoreCase(newUsername.value)
-    if (conflictingUser != null) throw UsernameAlreadyTakenException("username already taken")
+    if (conflictingUser != null && conflictingUser.uuid != user.uuid)
+      throw UsernameAlreadyTakenException("username already taken")
 
     val newUser = user.withNewUsername(newUsername)
     userRepository.save(newUser)
