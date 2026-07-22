@@ -38,6 +38,11 @@ We are working on additional configuration options and other improvements to pre
 - **[Multification](https://navio1430.github.io/NavAuth/docs/configuration/multification.html)**
 - [Migration from other plugins](https://navio1430.github.io/NavAuth/docs/migration/migration.html)
 - [Database type migrations](https://navio1430.github.io/NavAuth/docs/migration/database-type-migration.html)
+- Configurable encryption queue
+- Configurable external Mojang profile API usage
+
+### 🧩 Integrations
+- AjQueue integration 
 
 ### 🔒 In NavAuth password cracking takes more than TWELVE TRILLION (1.2 × 10^13) times longer than in the worst login plugins.
 Cracking the whole database of a bad plugin takes less than a **FEW MINUTES**.
