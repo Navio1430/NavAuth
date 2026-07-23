@@ -10,11 +10,14 @@ val projectName = "navauth-ajqueue-integration"
 group = "pl.spcode.navauth"
 version = "1.0.0-SNAPSHOT"
 
+val requiredMinNavAuthVersion = "0.2.0" // always X.Y.Z format
+
 sourceSets {
   main {
     blossom {
       kotlinSources {
         property("version", project.version.toString())
+        property("requiredMinNavAuthVersion", requiredMinNavAuthVersion)
       }
     }
   }

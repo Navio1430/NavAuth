@@ -18,8 +18,9 @@
 
 package utils
 
-fun generateRandomString(length: Int): String {
-  val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+fun generateRandomString(length: Int, withNumbers: Boolean = true): String {
+  val allowedChars =
+    if (withNumbers) ('A'..'Z') + ('a'..'z') + ('0'..'9') else ('A'..'Z') + ('a'..'z')
   return (1..length).map { allowedChars.random() }.joinToString("")
 }
 
