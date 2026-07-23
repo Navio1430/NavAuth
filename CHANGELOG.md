@@ -40,3 +40,6 @@
 ### New integration for AjQueue (as a separate plugin)
 - Automatically adds authenticated players to a configurable AjQueue queue
 - Optionally cancel AjQueue `PreQueueEvent` for unauthenticated players
+
+### Docs
+- AjQueue integration info
