@@ -29,13 +29,14 @@ import dev.rollczi.litecommands.annotations.execute.Execute
 import pl.spcode.navauth.api.domain.auth.AuthSessionType
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
+import pl.spcode.navauth.common.application.credentials.UserCredentialsService
+import pl.spcode.navauth.common.application.credentials.queue.EncryptionTaskAlreadyQueuedException
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.application.validator.PasswordValidator
 import pl.spcode.navauth.common.command.exception.MissingPermissionException
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.domain.user.Username
-import pl.spcode.navauth.common.infra.crypto.hasher.BCryptCredentialsHasher
 import pl.spcode.navauth.velocity.command.Permissions
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
@@ -48,6 +49,7 @@ class RegisterCommand
 constructor(
   val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
   val userService: UserService,
+  val userCredentialsService: UserCredentialsService,
   val passwordValidator: PasswordValidator,
   val multification: VelocityMultification,
 ) {
@@ -86,11 +88,19 @@ constructor(
       return
     }
 
-    userService.createAndStoreUserWithNewCredentials(
-      User.nonPremium(UserUuid(sender.uniqueId), Username(sender.username)),
-      BCryptCredentialsHasher().hash(password),
-    )
-    // register session will send success message
-    session.authenticate()
+    try {
+      userCredentialsService.enqueueHashPassword(password, sender.uniqueId).thenAccept {
+        hashedPassword ->
+        userService.createAndStoreUserWithNewCredentials(
+          User.nonPremium(UserUuid(sender.uniqueId), Username(sender.username)),
+          hashedPassword,
+        )
+        // register session will send success message
+        session.authenticate()
+      }
+      multification.send(sender) { it.multification.registeringInfo }
+    } catch (_: EncryptionTaskAlreadyQueuedException) {
+      multification.send(sender) { it.multification.processAlreadyInProgressError }
+    }
   }
 }

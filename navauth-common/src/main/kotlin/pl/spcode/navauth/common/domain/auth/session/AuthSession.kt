@@ -40,6 +40,7 @@ abstract class AuthSession<T : PlayerAdapter>(val playerAdapter: T, val eventBus
     private set
 
   fun authenticate() {
+    if (!playerAdapter.isOnline()) return
     isAuthenticated = true
     state = AuthSessionState.AUTHENTICATED
     eventBus as NavAuthEventBusInternal

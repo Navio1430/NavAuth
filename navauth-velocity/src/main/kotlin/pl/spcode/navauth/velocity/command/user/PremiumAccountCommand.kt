@@ -26,7 +26,7 @@ import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import pl.spcode.navauth.common.annotation.Description
-import pl.spcode.navauth.common.application.mojang.MojangProfileService
+import pl.spcode.navauth.common.application.mojang.ProfileService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.exception.MissingPermissionException
 import pl.spcode.navauth.common.domain.user.Username
@@ -39,7 +39,7 @@ class PremiumAccountCommand
 @Inject
 constructor(
   val userService: UserService,
-  val mojangProfileService: MojangProfileService,
+  val mojangProfileService: ProfileService,
   val multification: VelocityMultification,
 ) {
 

@@ -18,6 +18,7 @@
 
 package pl.spcode.navauth.api;
 
+import java.util.UUID;
 import pl.spcode.navauth.api.event.NavAuthEventBus;
 
 public abstract class NavAuthAPI {
@@ -29,6 +30,8 @@ public abstract class NavAuthAPI {
   public NavAuthEventBus getEventBus() {
     return provideEventBus();
   }
+
+  public abstract boolean isAuthenticated(UUID playerUuid);
 
   public static NavAuthAPI getInstance() {
     return instance;

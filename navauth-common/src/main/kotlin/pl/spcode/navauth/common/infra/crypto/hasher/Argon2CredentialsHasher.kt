@@ -20,23 +20,23 @@ package pl.spcode.navauth.common.infra.crypto.hasher
 
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
-import java.security.SecureRandom
 import org.bouncycastle.crypto.generators.Argon2BytesGenerator
 import org.bouncycastle.crypto.params.Argon2Parameters
+import pl.spcode.navauth.common.application.credentials.CredentialsHasher
 import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 import pl.spcode.navauth.common.infra.crypto.CryptoUtils
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
 import pl.spcode.navauth.common.infra.crypto.PasswordHash
 
-class Argon2CredentialsHasher : CredentialsHasher {
+class Argon2CredentialsHasher(
+  private val hashLength: Int = 16,
+  private val memoryKb: Int = 65536,
+  private val iterations: Int = 3,
+  private val parallelism: Int = 4,
+) : CredentialsHasher {
 
   companion object {
-    private val random = SecureRandom()
-    private const val SALT_LENGTH = 16
-    private const val HASH_LENGTH = 16
-    private const val MEMORY_KB = 65536 // 64MiB
-    private const val ITERATIONS = 3
-    private const val PARALLELISM = 4
+    private const val SALT_LENGTH: Int = 16
   }
 
   override fun hash(password: String): HashedPassword {
@@ -44,16 +44,18 @@ class Argon2CredentialsHasher : CredentialsHasher {
     val params =
       Argon2Parameters.Builder(Argon2Parameters.ARGON2_id)
         .withSalt(salt)
-        .withIterations(ITERATIONS)
-        .withMemoryAsKB(MEMORY_KB)
-        .withParallelism(PARALLELISM)
+        .withIterations(iterations)
+        .withMemoryAsKB(memoryKb)
+        .withParallelism(parallelism)
         .build()
+
+    val version = params.version
 
     val generator = Argon2BytesGenerator()
     generator.init(params)
 
     val passwordBytes = password.toByteArray(StandardCharsets.UTF_8)
-    val hash = ByteArray(HASH_LENGTH)
+    val hash = ByteArray(hashLength)
     generator.generateBytes(passwordBytes, hash)
 
     val saltB64 = CryptoUtils.base64EncodeToString(salt)
@@ -62,10 +64,10 @@ class Argon2CredentialsHasher : CredentialsHasher {
     // PHC-style: $argon2id$v=19$m=65536,t=3,p=4$<salt_b64>$<hash_b64>
     val encoded = buildString {
       append($$"$argon2id")
-      append($$"$v=19")
-      append($$"$m=").append(MEMORY_KB)
-      append(",t=").append(ITERATIONS)
-      append(",p=").append(PARALLELISM)
+      append($$"$v=").append(version)
+      append($$"$m=").append(memoryKb)
+      append(",t=").append(iterations)
+      append(",p=").append(parallelism)
       append("$").append(saltB64)
       append("$").append(hashB64)
     }

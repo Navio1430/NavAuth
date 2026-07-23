@@ -1,0 +1,8 @@
+package pl.spcode.navauth.integration.ajqueue
+
+class BuildParameters {
+  companion object {
+    const val VERSION = "{{ version }}"
+    const val REQUIRED_MIN_NAVAUTH_VERSION = "{{ requiredMinNavAuthVersion }}"
+  }
+}

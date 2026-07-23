@@ -22,6 +22,7 @@ import java.math.BigInteger
 import java.security.MessageDigest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import pl.spcode.navauth.common.application.credentials.CredentialsHasher
 import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
 import pl.spcode.navauth.common.infra.crypto.PasswordHash

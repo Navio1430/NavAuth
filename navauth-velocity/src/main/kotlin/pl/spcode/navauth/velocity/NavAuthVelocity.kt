@@ -24,7 +24,9 @@ import com.google.inject.Key
 import com.google.inject.Singleton
 import com.velocitypowered.api.command.CommandSource
 import com.velocitypowered.api.event.Subscribe
+import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
+import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.plugin.annotation.DataDirectory
 import com.velocitypowered.api.proxy.ProxyServer
 import dev.rollczi.litecommands.LiteCommands
@@ -59,6 +61,15 @@ import pl.spcode.navauth.velocity.module.VelocityMultificationsModule
 import pl.spcode.navauth.velocity.module.VelocityServicesModule
 import pl.spcode.navauth.velocity.multification.VelocityViewerProvider
 
+@Plugin(
+  id = "navauth",
+  name = "NavAuth",
+  version = BuildParameters.VERSION,
+  url = "https://spcode.pl/navauth",
+  description =
+    "Minecraft login plugin built for speed, security, and seamless player authentication.",
+  authors = ["Navio1430"],
+)
 @Singleton
 class NavAuthVelocity
 @Inject
@@ -71,13 +82,12 @@ constructor(
 
   private val logger: Logger = LoggerFactory.getLogger(NavAuthVelocity::class.java)
 
-  // chicken or egg problem, unfortunately
-  var pluginInstance: Bootstrap? = null
   lateinit var injector: Injector
 
   lateinit var liteCommands: LiteCommands<CommandSource>
 
-  fun init() {
+  @Subscribe
+  fun onProxyInitializeEvent(event: ProxyInitializeEvent) {
     try {
       logger.info("Initializing NavAuth plugin...")
 
@@ -106,6 +116,7 @@ constructor(
           VelocityMultificationsModule(velocityViewerProvider),
           VelocityCommandsModule(),
           SchedulerModule(this, proxyServer.scheduler),
+          GsonModule(),
           HttpClientModule(),
           DataPersistenceModule(),
           ServicesModule(),
@@ -120,19 +131,10 @@ constructor(
 
       val apiImpl = injector.getInstance(NavAuthApiImpl::class.java)
       NavAuthAPI.setAPIInstance(apiImpl)
-    } catch (ex: Exception) {
-      logger.error("Could not initialize NavAuth plugin, shutting down the server...", ex)
-      proxyServer.shutdown(Component.text("NavAuth initialization failure"))
-    }
-  }
-
-  fun onProxyInitializeEvent(pluginInstance: Bootstrap) {
-    try {
-      this.pluginInstance = pluginInstance
 
       // initialize bstats
       val pluginId = 28777
-      metricsFactory.make(pluginInstance, pluginId)
+      metricsFactory.make(this, pluginId)
 
       registerListeners(injector)
       registerCommands(injector)
@@ -170,11 +172,8 @@ constructor(
   }
 
   fun registerListeners(injector: Injector) {
-    // register self as listener because of the shutdown event
-    proxyServer.eventManager.register(pluginInstance, this)
-
     val listeners = VelocityListenersRegistry.getWithInjection(injector)
-    listeners.forEach { proxyServer.eventManager.register(pluginInstance, it) }
+    listeners.forEach { proxyServer.eventManager.register(this, it) }
   }
 
   @Suppress("UNNECESSARY_SAFE_CALL")
@@ -186,8 +185,7 @@ constructor(
     logger.info("Goodbye!")
   }
 
-  override fun provideInstance(): Bootstrap {
-    require(pluginInstance != null) { "plugin was not initialized yet" }
-    return pluginInstance!!
+  override fun provideInstance(): NavAuthVelocity {
+    return this
   }
 }

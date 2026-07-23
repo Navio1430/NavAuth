@@ -31,7 +31,9 @@ import kotlin.jvm.optionals.getOrNull
 import pl.spcode.navauth.api.domain.auth.AuthSessionType
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
+import pl.spcode.navauth.common.application.credentials.queue.EncryptionTaskAlreadyQueuedException
 import pl.spcode.navauth.common.command.exception.MissingPermissionException
+import pl.spcode.navauth.common.infra.auth.LoginAuthSession
 import pl.spcode.navauth.velocity.command.Permissions
 import pl.spcode.navauth.velocity.infra.auth.VelocityLoginAuthSession
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
@@ -121,10 +123,27 @@ constructor(
     password: String?,
     code: String?,
   ) {
-    if (session.auth(password, code)) {
-      return
+    try {
+      session.enqueueAuthTask(password, code).whenComplete { result, throwable ->
+        if (throwable != null) {
+          multification.send(sender) { it.multification.unexpectedErrorOccurred }
+          return@whenComplete
+        }
+        when (result) {
+          LoginAuthSession.AuthTaskResult.WrongCredentials -> {
+            multification.send(sender) { it.multification.wrongCredentialsError }
+          }
+          LoginAuthSession.AuthTaskResult.FailedTooManyAttempts -> {
+            // handled by VelocityLoginAuthSession.onTooManyLoginAttempts
+          }
+          LoginAuthSession.AuthTaskResult.Success -> {
+            // handled by VelocityLoginAuthSession.onAuthenticated
+          }
+        }
+      }
+      multification.send(sender) { it.multification.loggingInInfo }
+    } catch (_: EncryptionTaskAlreadyQueuedException) {
+      multification.send(sender) { it.multification.alreadyTryingToLoginError }
     }
-
-    multification.send(sender) { it.multification.wrongCredentialsError }
   }
 }

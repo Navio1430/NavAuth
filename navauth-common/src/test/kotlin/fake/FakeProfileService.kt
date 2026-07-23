@@ -16,14 +16,24 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.crypto.hasher
+package fake
 
-import pl.spcode.navauth.common.infra.crypto.HashedPassword
-import pl.spcode.navauth.common.infra.crypto.PasswordHash
+import pl.spcode.navauth.common.application.mojang.ProfileService
+import pl.spcode.navauth.common.domain.mojang.MojangProfile
+import pl.spcode.navauth.common.domain.user.Username
 
-interface CredentialsHasher {
+class FakeProfileService : ProfileService {
+  private val profiles = mutableMapOf<Username, MojangProfile>()
 
-  fun hash(password: String): HashedPassword
+  fun addProfile(username: Username, profile: MojangProfile) {
+    profiles[username] = profile
+  }
 
-  fun verify(password: String, passwordHash: PasswordHash): Boolean
+  override fun fetchProfileInfo(usernameCaseIgnored: Username): MojangProfile? {
+    return profiles[usernameCaseIgnored]
+  }
+
+  fun reset() {
+    profiles.clear()
+  }
 }

@@ -19,7 +19,7 @@
 package pl.spcode.navauth.common.application.auth.username
 
 import com.google.inject.Inject
-import pl.spcode.navauth.common.application.mojang.MojangProfileService
+import pl.spcode.navauth.common.application.mojang.ProfileService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.application.user.UsernameAlreadyTakenException
 import pl.spcode.navauth.common.domain.auth.handshake.EncryptionType
@@ -28,10 +28,7 @@ import pl.spcode.navauth.common.domain.user.Username
 
 class UsernameResolutionService
 @Inject
-constructor(
-  private val userService: UserService,
-  private val profileService: MojangProfileService,
-) {
+constructor(private val userService: UserService, private val profileService: ProfileService) {
 
   fun resolveUsernameConflicts(
     connUsername: Username,

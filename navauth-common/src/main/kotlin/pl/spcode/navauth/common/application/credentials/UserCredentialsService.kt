@@ -20,6 +20,12 @@ package pl.spcode.navauth.common.application.credentials
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import java.util.UUID
+import java.util.concurrent.CancellationException
+import java.util.concurrent.CompletableFuture
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import pl.spcode.navauth.common.application.credentials.queue.EncryptionQueueService
 import pl.spcode.navauth.common.domain.common.TransactionService
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
@@ -34,7 +40,10 @@ constructor(
   val credentialsRepository: UserCredentialsRepository,
   val transactionService: TransactionService,
   val credentialsHasherFactory: CredentialsHasherFactory,
+  val encryptionQueueService: EncryptionQueueService,
 ) {
+
+  private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
   fun findCredentials(user: User): UserCredentials? {
     return credentialsRepository.findByUser(user)
@@ -72,18 +81,75 @@ constructor(
     credentialsRepository.deleteByUser(user)
   }
 
-  /** @param password the raw (not hashed) password */
-  fun verifyPassword(credentials: UserCredentials, password: String): Boolean {
-    require(credentials.hashedPassword != null) { "credentials do not have a password hash" }
+  /**
+   * @param password the raw (not hashed) password
+   * @throws
+   *   pl.spcode.navauth.common.application.credentials.queue.EncryptionTaskAlreadyQueuedException
+   *   if task is already queued
+   */
+  fun enqueueVerifyPassword(
+    credentials: UserCredentials,
+    password: String,
+    playerId: UUID,
+  ): CompletableFuture<Boolean> {
+    require(credentials.hashedPassword != null) { "credentials must have password hash" }
 
     val passwordHash = credentials.hashedPassword.passwordHash
     val hasher = credentialsHasherFactory.createHasher(credentials.hashedPassword.algo)
 
-    return hasher.verify(password, passwordHash)
+    val future = CompletableFuture<Boolean>()
+    encryptionQueueService.submitTask(
+      playerId = playerId,
+      operation = {
+        try {
+          val result = hasher.verify(password, passwordHash)
+          future.complete(result)
+        } catch (ex: Exception) {
+          logger.error(
+            "Unexpected error occurred while trying to verify user id='${playerId}' password",
+            ex,
+          )
+          future.completeExceptionally(ex)
+        }
+      },
+      onCancelled = {
+        future.completeExceptionally(
+          CancellationException("Password verification task was cancelled")
+        )
+      },
+    )
+    return future
   }
 
-  fun hashPassword(password: String): HashedPassword {
-    return credentialsHasherFactory.createDefaultHasher().hash(password)
+  /**
+   * @param password the raw (not hashed) password
+   * @param playerId the id of the player for queue tracking
+   * @throws
+   *   pl.spcode.navauth.common.application.credentials.queue.EncryptionTaskAlreadyQueuedException
+   *   if task is already queued
+   */
+  fun enqueueHashPassword(password: String, playerId: UUID): CompletableFuture<HashedPassword> {
+    val hasher = credentialsHasherFactory.createDefaultHasher()
+    val future = CompletableFuture<HashedPassword>()
+    encryptionQueueService.submitTask(
+      playerId = playerId,
+      operation = {
+        try {
+          val result = hasher.hash(password)
+          future.complete(result)
+        } catch (ex: Exception) {
+          logger.error(
+            "Unexpected error occurred while trying to hash password for player id='${playerId}'",
+            ex,
+          )
+          future.completeExceptionally(ex)
+        }
+      },
+      onCancelled = {
+        future.completeExceptionally(CancellationException("Password hash task was cancelled"))
+      },
+    )
+    return future
   }
 
   fun verifyCode(credentials: UserCredentials, code: String): Boolean {
@@ -99,12 +165,12 @@ constructor(
    * @param newPassword the new raw password to be hashed and stored
    */
   fun updatePassword(user: User, newPassword: String) {
+    val hashedPassword = enqueueHashPassword(newPassword, user.uuid.value).join()
+
     transactionService.inTransaction {
       val credentials = findCredentials(user)
       require(credentials != null) { "user does not have credentials" }
 
-      val hasher = credentialsHasherFactory.createDefaultHasher()
-      val hashedPassword = hasher.hash(newPassword)
       val newCredentials = credentials.withNewPassword(hashedPassword)
       storeUserCredentials(user, newCredentials)
     }

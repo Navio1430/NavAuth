@@ -25,7 +25,7 @@ import pl.spcode.navauth.api.event.user.UserNonPremiumMigrationEvent
 import pl.spcode.navauth.api.event.user.UserPremiumMigrationEvent
 import pl.spcode.navauth.api.event.user.UserUsernameMigrationEvent
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
-import pl.spcode.navauth.common.application.mojang.MojangProfileService
+import pl.spcode.navauth.common.application.mojang.ProfileService
 import pl.spcode.navauth.common.domain.common.TransactionService
 import pl.spcode.navauth.common.domain.credentials.TOTPSecret
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
@@ -43,7 +43,7 @@ class UserService
 constructor(
   val userRepository: UserRepository,
   val userCredentialsService: UserCredentialsService,
-  val profileService: MojangProfileService,
+  val profileService: ProfileService,
   val txService: TransactionService,
   val eventBus: NavAuthEventBus,
 ) {
@@ -105,10 +105,7 @@ constructor(
         val requireCredentials = credentials.isTwoFactorEnabled
         val premiumUser = User.premium(user.uuid, user.username, mojangId, requireCredentials)
 
-        val status = userRepository.save(premiumUser)
-        status.isCreated
-        status.isUpdated
-        status.numLinesChanged
+        userRepository.save(premiumUser)
         if (requireCredentials) {
           val newCredentials = credentials.withoutPassword()
           userCredentialsService.storeUserCredentials(premiumUser, newCredentials)
@@ -220,7 +217,8 @@ constructor(
     if (user.username == newUsername) throw IllegalArgumentException("username cannot be the same")
 
     val conflictingUser = userRepository.findByUsernameIgnoreCase(newUsername.value)
-    if (conflictingUser != null) throw UsernameAlreadyTakenException("username already taken")
+    if (conflictingUser != null && conflictingUser.uuid != user.uuid)
+      throw UsernameAlreadyTakenException("username already taken")
 
     val newUser = user.withNewUsername(newUsername)
     userRepository.save(newUser)

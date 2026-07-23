@@ -30,13 +30,13 @@ import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.application.auth.handshake.AuthHandshakeSessionService
+import pl.spcode.navauth.common.application.auth.username.PostUsernameResolutionState
 import pl.spcode.navauth.common.application.auth.username.UsernameResFailureReason
 import pl.spcode.navauth.common.application.auth.username.UsernameResResult
 import pl.spcode.navauth.common.application.auth.username.UsernameResolutionService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.application.validator.UsernameValidator
 import pl.spcode.navauth.common.component.TextColors
-import pl.spcode.navauth.common.component.TextComponent
 import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeSession
@@ -131,9 +131,20 @@ constructor(
       return
     }
 
+    val sessionUser =
+      if (
+        res is UsernameResResult.Success &&
+          res.postResolutionState != PostUsernameResolutionState.NO_CHANGE
+      ) {
+        // re-fetch if any change occurred
+        userService.findUserByUsernameIgnoreCase(connUsername)
+      } else {
+        existingUser
+      }
+
     authHandshakeSessionService.createSession(
       VelocityUniqueSessionId(connUsername, event.connection.remoteAddress),
-      existingUser,
+      sessionUser,
       connUsername,
       res,
     )

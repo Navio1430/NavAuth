@@ -71,6 +71,11 @@ open class GeneralConfig : OkaeriConfig() {
   @Comment("Passwords config") var passwordsConfig: PasswordsConfig = PasswordsConfig()
 
   @Comment(
+    "Encryption queue config - limits concurrent encryption operations (especially bcrypt/argon2) to prevent OOM"
+  )
+  var encryptionQueueConfig: EncryptionQueueConfig = EncryptionQueueConfig()
+
+  @Comment(
     "When a non-premium user tries to join with a premium nickname,",
     "an 'invalid session' error occurs. This is default Minecraft behavior.",
     "Should we cache premium connections and send a more descriptive message",
@@ -85,6 +90,9 @@ open class GeneralConfig : OkaeriConfig() {
     "(You can set this a little higher than the reconnect throttle from other plugins.)",
   )
   var descriptiveInvalidSessionCacheTimeMs = 8000
+
+  @Comment("Mojang API and profile resolution config")
+  var mojangAPIConfig: MojangAPIConfig = MojangAPIConfig()
 
   var sessionsConfig = SessionsConfig()
 

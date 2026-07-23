@@ -28,7 +28,6 @@ import pl.spcode.navauth.common.application.auth.username.PostUsernameResolution
 import pl.spcode.navauth.common.application.auth.username.UsernameResFailureReason
 import pl.spcode.navauth.common.application.auth.username.UsernameResResult
 import pl.spcode.navauth.common.application.auth.username.UsernameResolutionService
-import pl.spcode.navauth.common.application.mojang.MojangProfileService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.domain.auth.handshake.EncryptionType
 import pl.spcode.navauth.common.domain.mojang.MojangProfile
@@ -36,13 +35,14 @@ import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.domain.user.Username
+import pl.spcode.navauth.common.infra.mojang.MojangProfileServiceImpl
 import utils.generateRandomString
 import utils.invertCase
 
 class UsernameResolutionServiceTests :
   FunSpec({
     lateinit var mockUserService: UserService
-    lateinit var mockProfileService: MojangProfileService
+    lateinit var mockProfileService: MojangProfileServiceImpl
     lateinit var service: UsernameResolutionService
 
     beforeTest {

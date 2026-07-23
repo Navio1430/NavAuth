@@ -29,6 +29,7 @@ import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
+import pl.spcode.navauth.common.application.credentials.queue.EncryptionQueueService
 import pl.spcode.navauth.common.application.user.UserActivitySessionService
 import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.config.GeneralConfig
@@ -43,6 +44,7 @@ class ConnectionListeners
 @Inject
 constructor(
   val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
+  val encryptionQueueService: EncryptionQueueService,
   val serverSelectionService: VelocityServerSelectionService,
   val userActivitySessionService: UserActivitySessionService,
   val generalConfig: GeneralConfig,
@@ -53,6 +55,7 @@ constructor(
   @Subscribe
   fun onDisconnect(event: DisconnectEvent) {
     authSessionService.closeSession(VelocityUniqueSessionId(event.player))
+    encryptionQueueService.dequeueTask(event.player.uniqueId)
     userActivitySessionService.storePlayerSessionOnLeave(VelocityPlayerAdapter(event.player))
   }
 

@@ -87,6 +87,10 @@ open class MessagesConfig : OkaeriConfig() {
 
   class NoticesConfig : OkaeriConfig() {
 
+    val unexpectedErrorOccurred: Notice = Notice.chat("<red>An unexpected error occurred.")
+    var processAlreadyInProgressError: Notice =
+      Notice.chat("<red>Process is already in progress. Please wait...")
+
     var passwordRequiredError: Notice = Notice.chat("<red>Please provide your current password.")
     var twoFactorAlreadyEnabledError: Notice =
       Notice.chat("<red>Your account has 2FA enabled already!")
@@ -107,6 +111,11 @@ open class MessagesConfig : OkaeriConfig() {
     var accountAlreadyPremiumError: Notice =
       Notice.chat("<red>Account is already set as a premium one.")
 
+    var alreadyTryingToLoginError: Notice =
+      Notice.chat(
+        "<red>You're already trying to login, please wait for login result before next retry."
+      )
+
     var registerPasswordInvalidError: Notice =
       Notice.chat(
         "<red>The password is invalid. It must be at least 5 characters long and contain at least one uppercase letter and one digit."
@@ -119,9 +128,11 @@ open class MessagesConfig : OkaeriConfig() {
       Notice.chat("<green>Please login using \"/2fa <code>\" command.</green>")
     var loginPasswordAndTwoFactorInstruction: Notice =
       Notice.chat("<green>Please login using \"/login <password> <2fa_code>\" command.</green>")
+    var loggingInInfo: Notice = Notice.chat("<yellow>Logging in, please wait...</yellow>")
 
     var registerInstruction: Notice =
       Notice.chat("<green>Please register using /register command.</green>")
+    var registeringInfo: Notice = Notice.chat("<yellow>Registering, please wait...</yellow>")
 
     var loginSuccess: Notice =
       Notice.chat("<green>You have been authenticated successfully.</green>")

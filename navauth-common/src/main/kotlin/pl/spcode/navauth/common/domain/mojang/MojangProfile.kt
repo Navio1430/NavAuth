@@ -22,3 +22,8 @@ import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.Username
 
 data class MojangProfile(val uuid: MojangId, val name: Username)
+
+enum class MojangProfileApi {
+  MINETOOLS,
+  MOJANG,
+}
