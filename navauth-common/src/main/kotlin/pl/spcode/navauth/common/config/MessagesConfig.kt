@@ -87,7 +87,7 @@ open class MessagesConfig : OkaeriConfig() {
 
   class NoticesConfig : OkaeriConfig() {
 
-    val unexpectedErrorOccurred: Notice = Notice.chat("<red>An unexpected error occurred.")
+    var unexpectedErrorOccurred: Notice = Notice.chat("<red>An unexpected error occurred.")
     var processAlreadyInProgressError: Notice =
       Notice.chat("<red>Process is already in progress. Please wait...")
 
