@@ -1,3 +1,10 @@
+## 0.2.1
+
+### Changes
+```diff
++ Send players to original initialServer instead of keeping them in limbo when initialServers is empty
+```
+
 
 ## 0.2.0
 

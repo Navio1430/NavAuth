@@ -19,6 +19,7 @@
 package pl.spcode.navauth.velocity.infra.player
 
 import com.velocitypowered.api.proxy.Player
+import com.velocitypowered.api.proxy.server.RegisteredServer
 import net.kyori.adventure.text.Component
 import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.domain.common.IPAddress
@@ -27,6 +28,8 @@ import pl.spcode.navauth.common.domain.player.PlayerAdapter
 import pl.spcode.navauth.common.domain.user.UserUuid
 
 class VelocityPlayerAdapter(val velocityPlayer: Player) : PlayerAdapter {
+
+  var originalInitialServer: RegisteredServer? = null
 
   override fun getIPAddress(): IPAddress {
     return IPAddress.fromInetAddress(velocityPlayer.remoteAddress.address)

@@ -25,6 +25,7 @@ import com.velocitypowered.api.event.connection.DisconnectEvent
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent
 import com.velocitypowered.api.event.player.ServerPreConnectEvent
 import com.velocitypowered.api.proxy.Player
+import kotlin.jvm.optionals.getOrNull
 import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -136,7 +137,7 @@ constructor(
       }
 
       if (authSession.isAuthenticated) {
-        setInitialServerAuthenticated(event)
+        setInitialServerAuthenticated(event, authSession)
       } else {
         setInitialLimboUnauthenticated(event, authSession)
       }
@@ -147,9 +148,14 @@ constructor(
    * If server found then sets it as the initial server, if there's no initial server defined, then
    * nothing happens.
    */
-  private fun setInitialServerAuthenticated(event: PlayerChooseInitialServerEvent) {
+  private fun setInitialServerAuthenticated(
+    event: PlayerChooseInitialServerEvent,
+    authSession: AuthSession<VelocityPlayerAdapter>,
+  ) {
     val player = event.player
-    val initialServer = serverSelectionService.getInitialServer(player)
+    val initialServer =
+      serverSelectionService.getInitialServer(player)
+        ?: authSession.playerAdapter.originalInitialServer
     if (initialServer == null) {
       logger.debug(
         "PlayerChooseInitialServer: initial server not found for an authenticated user '${player.username}'"
@@ -197,6 +203,8 @@ constructor(
       )
       return
     }
+
+    authSession.playerAdapter.originalInitialServer = event.initialServer.getOrNull()
 
     event.setInitialServer(limbo)
     logger.debug(
