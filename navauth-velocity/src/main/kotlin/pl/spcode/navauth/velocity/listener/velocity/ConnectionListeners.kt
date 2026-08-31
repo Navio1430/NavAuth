@@ -19,7 +19,6 @@
 package pl.spcode.navauth.velocity.listener.velocity
 
 import com.google.inject.Inject
-import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.connection.DisconnectEvent
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent
@@ -59,8 +58,9 @@ constructor(
     userActivitySessionService.storePlayerSessionOnLeave(VelocityPlayerAdapter(event.player))
   }
 
-  @Subscribe(order = PostOrder.FIRST)
-  fun onServerConnect(event: ServerPreConnectEvent) {
+  /** Priority is Short.MIN_VALUE to always have the final say */
+  @Subscribe(priority = Short.MIN_VALUE)
+  fun onServerPreConnect(event: ServerPreConnectEvent) {
     val player = event.player
     disconnectOnUnexpectedError(player) {
       val uniqueSessionId = VelocityUniqueSessionId(player)
@@ -109,7 +109,8 @@ constructor(
     }
   }
 
-  @Subscribe(order = PostOrder.FIRST)
+  /** Priority is Short.MIN_VALUE to always have the final say */
+  @Subscribe(priority = Short.MIN_VALUE)
   fun onPlayerChooseInitialServer(event: PlayerChooseInitialServerEvent) {
     val player = event.player
     disconnectOnUnexpectedError(player) {

@@ -28,7 +28,7 @@ import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.domain.user.User
-import pl.spcode.navauth.velocity.application.event.VelocityEventDispatcher
+import pl.spcode.navauth.velocity.application.server.VelocityServerConnectService
 import pl.spcode.navauth.velocity.infra.auth.VelocityAutoLoginAuthSession
 import pl.spcode.navauth.velocity.infra.auth.VelocityLoginAuthSession
 import pl.spcode.navauth.velocity.infra.auth.VelocityRegisterAuthSession
@@ -44,7 +44,7 @@ constructor(
   val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
   val userCredentialsService: UserCredentialsService,
   val scheduler: NavAuthScheduler,
-  val velocityEventDispatcher: VelocityEventDispatcher,
+  val serverConnectService: VelocityServerConnectService,
   val multification: VelocityMultification,
   val generalConfig: GeneralConfig,
   val messagesConfig: MessagesConfig,
@@ -68,7 +68,7 @@ constructor(
         credentials,
         userCredentialsService,
         scheduler,
-        velocityEventDispatcher,
+        serverConnectService,
         multification,
         generalConfig,
         messagesConfig,
@@ -85,7 +85,7 @@ constructor(
       VelocityRegisterAuthSession(
         player,
         scheduler,
-        velocityEventDispatcher,
+        serverConnectService,
         multification,
         messagesConfig,
         generalConfig,
