@@ -1,16 +1,34 @@
 
-## 0.2.1
+## 0.3.0
 
 ### Changes
 ```diff
-- After successful login/register, the player is now sent directly to the initial
++ Mojang profile lookup now also caches non-premium (not found) usernames, so repeated login
+  attempts against nicknames that have no Mojang account no longer hit the profile API every time
++ Only username resolution during login/register reads this not-found cache (avoids rate limits /
+  latency on login spam and brute-force attempts)
++ Authoritative lookups (e.g. /premium, admin commands, username migration) keep using the live
+  API and ignore the not-found cache, so they always reflect the current Mojang state
++ After successful login/register, the player is now sent directly to the initial
   server via VelocityServerConnectService instead of firing a faked PlayerChooseInitialServerEvent
-- Priority of PlayerChooseInitialServerEvent and ServerPreConnectEvent listeners set to always
++ Priority of PlayerChooseInitialServerEvent and ServerPreConnectEvent listeners set to always
   have the final say (MIN)
+- No more fake PlayerChooseInitialServerEvent dispatch
 ```
+
+### Tradeoffs
+- A not-found cache entry is stored for the configured `profileCacheTTL`.
+  If a player becomes premium (buys the game / renames to that nickname) within that window,
+  username resolution may briefly still treat the name as non-premium until the cache expires.
 
 ### Fixes
 - fix unexpectedErrorOccurred message: changed val to var (this was causing warning messages and no changes after /reload)
+
+### Config
+***Messages*** config:
+```diff
++ profileApiFailureKickMessage
+```
 
 
 ## 0.2.0
