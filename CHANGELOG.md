@@ -1,4 +1,14 @@
 
+## 0.2.1
+
+### Changes
+```diff
+- After successful login/register, the player is now sent directly to the initial
+  server via VelocityServerConnectService instead of firing a faked PlayerChooseInitialServerEvent
+- Priority of PlayerChooseInitialServerEvent and ServerPreConnectEvent listeners set to always
+  have the final say (MIN)
+```
+
 ## 0.2.0
 
 ### Changes
