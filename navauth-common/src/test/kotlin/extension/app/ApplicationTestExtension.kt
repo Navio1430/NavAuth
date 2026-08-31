@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.TestInstancePostProcessor
 import pl.spcode.navauth.common.module.DataPersistenceModule
 import pl.spcode.navauth.common.module.EventsModule
+import pl.spcode.navauth.common.module.ExecutorsModule
 import pl.spcode.navauth.common.module.HttpClientModule
 import pl.spcode.navauth.common.module.ServicesModule
 import utils.GuiceUtils
@@ -37,6 +38,7 @@ class ApplicationTestExtension : TestInstancePostProcessor {
       TestsConfigModule(),
       HttpClientModule(),
       DataPersistenceModule(),
+      ExecutorsModule(),
       ServicesModule(),
     )
 

@@ -20,6 +20,7 @@ package pl.spcode.navauth.common.infra.mojang
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import pl.spcode.navauth.common.application.mojang.ProfileApiFetchException
 import pl.spcode.navauth.common.application.mojang.ProfileService
 import pl.spcode.navauth.common.config.MojangAPIConfig
 import pl.spcode.navauth.common.domain.mojang.MojangProfile
@@ -36,13 +37,21 @@ constructor(
   private val profileCache: ProfileCache,
 ) : ProfileService {
 
-  override fun fetchProfileInfo(usernameCaseIgnored: Username): MojangProfile? {
-    profileCache.get(usernameCaseIgnored)?.let {
-      return it
+  override fun fetchProfileInfo(
+    usernameCaseIgnored: Username,
+    useNotFoundCache: Boolean,
+  ): MojangProfile? {
+    val username = Username(usernameCaseIgnored.value.lowercase())
+    when (val cached = profileCache.get(username)) {
+      is CachedProfile.Found -> return cached.profile
+      is CachedProfile.NotFound ->
+        if (useNotFoundCache) {
+          return null
+        }
+      null -> {}
     }
 
-    var lastError: Exception? = null
-
+    val exceptions: MutableList<Exception> = mutableListOf()
     for (api in config.apiOrder) {
       try {
         val profile =
@@ -52,15 +61,20 @@ constructor(
             MojangProfileApi.MOJANG -> mojangProfileService.fetchProfileInfo(usernameCaseIgnored)
           }
         if (profile != null) {
-          profileCache.put(usernameCaseIgnored, profile)
+          profileCache.putFound(username, profile)
           return profile
         }
-      } catch (e: Exception) {
-        lastError = e
+      } catch (ex: Exception) {
+        exceptions.add(ex)
       }
     }
 
-    if (lastError != null) throw lastError
+    if (exceptions.isNotEmpty()) {
+      throw ProfileApiFetchException(usernameCaseIgnored, exceptions)
+    }
+    if (useNotFoundCache) {
+      profileCache.putNotFound(username)
+    }
     return null
   }
 }

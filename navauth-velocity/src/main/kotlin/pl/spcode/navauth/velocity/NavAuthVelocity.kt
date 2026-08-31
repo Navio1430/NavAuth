@@ -112,6 +112,7 @@ constructor(
           generalConfigModule,
           messagesConfigModule,
           migrationConfigModule,
+          ExecutorsModule(),
           EventsModule(),
           VelocityMultificationsModule(velocityViewerProvider),
           VelocityCommandsModule(),

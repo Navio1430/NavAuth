@@ -55,6 +55,12 @@ open class MessagesConfig : OkaeriConfig() {
       "<red>Username '%USERNAME%' is already taken! Administrator needs to resolve the conflict.</red>"
     )
 
+  @Comment("Usually caused by API rate limit.")
+  var profileApiFailureKickMessage =
+    TextComponent(
+      "<red>We couldn't verify your profile with Mojang APIs. Please try again later.</red>"
+    )
+
   var loginTimeExceededError =
     TextComponent("<red>You've exceeded login time, please try again</red>")
 
@@ -198,6 +204,8 @@ open class MessagesConfig : OkaeriConfig() {
         "<red>Can't find '%USERNAME%' user in Mojang database. This player can't be migrated to premium mode."
       )
 
+    var adminCmdPasswordSetUpdating: Notice =
+      Notice.chat("<yellow>Updating password, please wait...")
     var adminCmdPasswordSetSuccess: Notice =
       Notice.chat("<green>Success! User '%USERNAME%' password was set.")
     var adminCmdAccountMigratedToNonPremiumSuccess: Notice =

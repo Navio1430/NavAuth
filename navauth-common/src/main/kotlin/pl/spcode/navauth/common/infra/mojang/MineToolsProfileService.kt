@@ -40,7 +40,10 @@ constructor(val httpClient: HttpClient, val gson: Gson, val config: MojangAPICon
 
   private data class MineToolsProfileDto(val id: String?, val name: String?, val status: String?)
 
-  override fun fetchProfileInfo(usernameCaseIgnored: Username): MojangProfile? {
+  override fun fetchProfileInfo(
+    usernameCaseIgnored: Username,
+    useNotFoundCache: Boolean,
+  ): MojangProfile? {
     val requestUri = URI.create("https://api.minetools.eu/uuid/${usernameCaseIgnored.value}")
     val request = HttpRequest.newBuilder(requestUri).timeout(config.apiTimeout).GET().build()
     val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())

@@ -123,6 +123,9 @@ constructor(
             is UsernameResFailureReason.UsernameMigrationFailedUsernameAlreadyTaken -> {
               usernameMigrationFailedUsernameAlreadyTakenConflictResult(failureReason.username)
             }
+            is UsernameResFailureReason.ProfileAPIFailure -> {
+              profileApiFailureKickResult()
+            }
           }
       }
     }
@@ -304,6 +307,11 @@ constructor(
       withSupportFooter(
         componentWithUsernamePlaceholder(messagesConfig.usernameAlreadyTakenConflictError, username)
       )
+    return PreLoginEvent.PreLoginComponentResult.denied(comp)
+  }
+
+  private fun profileApiFailureKickResult(): PreLoginEvent.PreLoginComponentResult {
+    val comp = withSupportFooter(messagesConfig.profileApiFailureKickMessage.toComponent())
     return PreLoginEvent.PreLoginComponentResult.denied(comp)
   }
 

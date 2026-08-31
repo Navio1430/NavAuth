@@ -26,8 +26,11 @@ import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
+import pl.spcode.navauth.common.application.credentials.queue.EncryptionTaskAlreadyQueuedException
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.user.UserArgumentResolver
 import pl.spcode.navauth.common.command.user.UsernameOrUuidRaw
@@ -44,6 +47,8 @@ constructor(
   val userArgumentResolver: UserArgumentResolver,
   val multification: VelocityMultification,
 ) {
+
+  private val logger: Logger = LoggerFactory.getLogger(ForceChangePasswordAdminCommand::class.java)
 
   @Async
   @Execute
@@ -65,10 +70,22 @@ constructor(
       return
     }
 
-    userCredentialsService.updatePassword(user, password)
-    multification
-      .create(sender) { it.multification.adminCmdPasswordSetSuccess }
-      .placeholder("%USERNAME%", user.username.value)
-      .send()
+    multification.create(sender) { it.multification.adminCmdPasswordSetUpdating }.send()
+
+    try {
+      userCredentialsService.updatePassword(user, password).whenComplete { _, throwable ->
+        if (throwable != null) {
+          logger.error("Failed to update password for user '${user.username.value}'", throwable)
+          multification.send(sender) { it.multification.unexpectedErrorOccurred }
+        } else {
+          multification
+            .create(sender) { it.multification.adminCmdPasswordSetSuccess }
+            .placeholder("%USERNAME%", user.username.value)
+            .send()
+        }
+      }
+    } catch (_: EncryptionTaskAlreadyQueuedException) {
+      multification.send(sender) { it.multification.processAlreadyInProgressError }
+    }
   }
 }

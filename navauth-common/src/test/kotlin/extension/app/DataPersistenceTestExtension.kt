@@ -25,10 +25,12 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.TestInstancePostProcessor
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.module.DataPersistenceModule
+import pl.spcode.navauth.common.module.ExecutorsModule
 import utils.GuiceUtils
 
 class DataPersistenceTestExtension : TestInstancePostProcessor {
-  var injector: Injector = Guice.createInjector(TestsConfigModule(), DataPersistenceModule())
+  var injector: Injector =
+    Guice.createInjector(TestsConfigModule(), DataPersistenceModule(), ExecutorsModule())
 
   init {
     injector.getInstance(DatabaseManager::class.java).connectAndInit()

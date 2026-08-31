@@ -26,6 +26,7 @@ import pl.spcode.navauth.common.config.MojangAPIConfig
 import pl.spcode.navauth.common.domain.mojang.MojangProfile
 import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.Username
+import pl.spcode.navauth.common.infra.mojang.CachedProfile
 import pl.spcode.navauth.common.infra.mojang.ProfileCache
 
 class ProfileCacheTest :
@@ -38,20 +39,43 @@ class ProfileCacheTest :
 
     test("get returns null for uncached username") { cache.get(username).shouldBeNull() }
 
-    test("get returns profile after put") {
-      cache.put(username, profile)
-      cache.get(username) shouldBe profile
+    test("get returns Found after putFound") {
+      cache.putFound(username, profile)
+      cache.get(username) shouldBe CachedProfile.Found(profile)
     }
 
-    test("put overwrites existing entry") {
+    test("get returns NotFound after putNotFound") {
+      cache.putNotFound(username)
+      cache.get(username) shouldBe CachedProfile.NotFound
+    }
+
+    test("putFound overwrites existing entry") {
       val newProfile = MojangProfile(MojangId(UUID.randomUUID()), username)
-      cache.put(username, profile)
-      cache.put(username, newProfile)
-      cache.get(username) shouldBe newProfile
+      cache.putFound(username, profile)
+      cache.putFound(username, newProfile)
+      cache.get(username) shouldBe CachedProfile.Found(newProfile)
+    }
+
+    test("putFound overwrites NotFound entry") {
+      cache.putNotFound(username)
+      cache.putFound(username, profile)
+      cache.get(username) shouldBe CachedProfile.Found(profile)
+    }
+
+    test("putNotFound overwrites Found entry") {
+      cache.putFound(username, profile)
+      cache.putNotFound(username)
+      cache.get(username) shouldBe CachedProfile.NotFound
     }
 
     test("invalidate removes entry") {
-      cache.put(username, profile)
+      cache.putFound(username, profile)
+      cache.invalidate(username)
+      cache.get(username).shouldBeNull()
+    }
+
+    test("invalidate removes NotFound entry") {
+      cache.putNotFound(username)
       cache.invalidate(username)
       cache.get(username).shouldBeNull()
     }
@@ -60,7 +84,7 @@ class ProfileCacheTest :
 
     test("get returns null for different usernames") {
       val other = Username("other")
-      cache.put(username, profile)
+      cache.putFound(username, profile)
       cache.get(other).shouldBeNull()
     }
 
@@ -69,7 +93,7 @@ class ProfileCacheTest :
       config.profileCacheTTL = java.time.Duration.ofHours(1)
       val longTtlCache = ProfileCache(config)
 
-      longTtlCache.put(username, profile)
-      longTtlCache.get(username) shouldBe profile
+      longTtlCache.putFound(username, profile)
+      longTtlCache.get(username) shouldBe CachedProfile.Found(profile)
     }
   })

@@ -1,6 +1,6 @@
 /*
  * NavAuth
- * Copyright © 2025 Oliwier Fijas (Navio1430)
+ * Copyright © 2026 Oliwier Fijas (Navio1430)
  *
  * NavAuth is free software; You can redistribute it and/or modify it under the terms of:
  * the GNU Affero General Public License version 3 as published by the Free Software Foundation.
@@ -16,19 +16,21 @@
  *
  */
 
-package pl.spcode.navauth.common.application.auth.username
+package pl.spcode.navauth.common.application.mojang
 
-sealed class UsernameResFailureReason {
-  data class PremiumUsernameNotIdentical(val requiredUsername: String) : UsernameResFailureReason()
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import pl.spcode.navauth.common.domain.user.Username
 
-  data class UsernameMigrationFailedUsernameAlreadyTaken(val username: String) :
-    UsernameResFailureReason()
+class ProfileApiFetchException(username: Username, val causes: List<Exception>) :
+  RuntimeException("All APIs failed to fetch profile for $username") {
 
-  data class NonPremiumWithPremiumConflict(val premiumUsername: String) :
-    UsernameResFailureReason()
-
-  data class NonPremiumUsernameNotIdentical(val requiredUsername: String) :
-    UsernameResFailureReason()
-
-  data object ProfileAPIFailure : UsernameResFailureReason()
+  init {
+    val logger: Logger = LoggerFactory.getLogger(ProfileApiFetchException::class.java)
+    logger.error(
+      "All APIs failed to fetch profile for {}. Following errors occurred:",
+      username.value,
+    )
+    causes.forEach { logger.error("  - {}", it.message, it) }
+  }
 }

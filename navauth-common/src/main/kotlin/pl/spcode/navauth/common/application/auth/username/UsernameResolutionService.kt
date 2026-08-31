@@ -19,6 +19,7 @@
 package pl.spcode.navauth.common.application.auth.username
 
 import com.google.inject.Inject
+import pl.spcode.navauth.common.application.mojang.ProfileApiFetchException
 import pl.spcode.navauth.common.application.mojang.ProfileService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.application.user.UsernameAlreadyTakenException
@@ -34,7 +35,12 @@ constructor(private val userService: UserService, private val profileService: Pr
     connUsername: Username,
     existingUserIgnoreCase: User?,
   ): UsernameResResult {
-    val correspondingPremiumProfile = profileService.fetchProfileInfo(connUsername)
+    val correspondingPremiumProfile =
+      try {
+        profileService.fetchProfileInfo(connUsername, useNotFoundCache = true)
+      } catch (e: ProfileApiFetchException) {
+        return failure(UsernameResFailureReason.ProfileAPIFailure)
+      }
     val isPremiumNickname = correspondingPremiumProfile != null
 
     // check if the user changed their nickname (does not check letter cases)
