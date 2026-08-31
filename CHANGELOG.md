@@ -9,6 +9,10 @@
   have the final say (MIN)
 ```
 
+### Fixes
+- fix unexpectedErrorOccurred message: changed val to var (this was causing warning messages and no changes after /reload)
+
+
 ## 0.2.0
 
 ### Changes
