@@ -1,16 +1,57 @@
 [versions]
 # libs
-velocity-api = "3.4.0-SNAPSHOT"
+velocity-api = "4.1.0-SNAPSHOT"
+bstats = "3.1.0"
+tribufu-rcon = "1.2.0"
+multification = "1.2.3"
+guice = "7.0.0"
+gson = "2.13.2"
+hikaricp = "7.0.2"
+ormlite = "6.1"
+okaeri-configs = "6.0.0-beta.27"
+bcrypt = "0.10.2"
+bouncycastle = "1.83"
+adventure-minimessage = "4.25.0"
+h2 = "2.4.240"
+mysql = "9.5.0"
+postgresql = "42.7.8"
+sqlite = "3.51.1.0"
+zxing = "3.5.4"
+kotest = "5.8.0"
+mockk = "1.13.8"
+ajqueue-api = "2.9.1"
 # plugins
 shadow = "9.2.0"
 blossom = "2.2.0"
 spotless = "8.0.0"
-litecommands = "3.10.6"
+litecommands = "3.11.0"
 
 [libraries]
 velocitypowered-velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "velocity-api" }
 litecommands-core = { module = "dev.rollczi:litecommands-core", version.ref = "litecommands" }
 litecommands-velocity = { module = "dev.rollczi:litecommands-velocity", version.ref = "litecommands" }
+bstats-velocity = { module = "org.bstats:bstats-velocity", version.ref = "bstats" }
+tribufu-velocity-rcon = { module = "com.tribufu:Tribufu-VelocityRcon", version.ref = "tribufu-rcon" }
+multification-core = { module = "com.eternalcode:multification-core", version.ref = "multification" }
+multification-okaeri = { module = "com.eternalcode:multification-okaeri", version.ref = "multification" }
+guice = { module = "com.google.inject:guice", version.ref = "guice" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikaricp" }
+ormlite-jdbc = { module = "com.j256.ormlite:ormlite-jdbc", version.ref = "ormlite" }
+okaeri-configs-yaml-snakeyaml = { module = "eu.okaeri:okaeri-configs-yaml-snakeyaml", version.ref = "okaeri-configs" }
+bcrypt = { module = "at.favre.lib:bcrypt", version.ref = "bcrypt" }
+bouncycastle-prov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
+bouncycastle-util = { module = "org.bouncycastle:bcutil-jdk18on", version.ref = "bouncycastle" }
+adventure-text-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure-minimessage" }
+h2 = { module = "com.h2database:h2", version.ref = "h2" }
+mysql = { module = "com.mysql:mysql-connector-j", version.ref = "mysql" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite" }
+zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
+kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
+kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+ajqueue-api = { module = "us.ajg0702.queue.api:api", version.ref = "ajqueue-api" }
 
 [plugins]
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
