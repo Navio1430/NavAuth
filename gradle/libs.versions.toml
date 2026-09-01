@@ -1,6 +1,6 @@
 [versions]
 # libs
-velocity-api = "4.1.0-SNAPSHOT"
+velocity-api = "4.1.1-SNAPSHOT"
 bstats = "3.1.0"
 tribufu-rcon = "1.2.0"
 multification = "1.2.3"
