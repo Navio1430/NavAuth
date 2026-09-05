@@ -176,7 +176,7 @@ open class MessagesConfig : OkaeriConfig() {
         <white><bold>YOUR SECRET:</bold>
         <bold><red>⚠ NEVER share this - even with admins!</red></bold>
         <yellow>%SECRET%</yellow>
-        
+
         <click:run_command:'/generate2faqr'><aqua><b>CLICK HERE TO GENERATE QR CODE</b></click>
 
         <gray><i>⏱ Time left: %REMAINING_SECONDS%s<gray></i>

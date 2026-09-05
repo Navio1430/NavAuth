@@ -98,23 +98,22 @@ constructor(
    * @return The updated user with premium account status.
    */
   fun migrateToPremium(user: User, mojangId: MojangId): User {
-    val user =
-      txService.inTransaction {
-        val credentials = userCredentialsService.findCredentials(user)!!
-        // require credentials only if there's 2FA enabled
-        val requireCredentials = credentials.isTwoFactorEnabled
-        val premiumUser = User.premium(user.uuid, user.username, mojangId, requireCredentials)
+    val user = txService.inTransaction {
+      val credentials = userCredentialsService.findCredentials(user)!!
+      // require credentials only if there's 2FA enabled
+      val requireCredentials = credentials.isTwoFactorEnabled
+      val premiumUser = User.premium(user.uuid, user.username, mojangId, requireCredentials)
 
-        userRepository.save(premiumUser)
-        if (requireCredentials) {
-          val newCredentials = credentials.withoutPassword()
-          userCredentialsService.storeUserCredentials(premiumUser, newCredentials)
-        } else {
-          userCredentialsService.deleteUserCredentials(premiumUser)
-        }
-
-        return@inTransaction premiumUser
+      userRepository.save(premiumUser)
+      if (requireCredentials) {
+        val newCredentials = credentials.withoutPassword()
+        userCredentialsService.storeUserCredentials(premiumUser, newCredentials)
+      } else {
+        userCredentialsService.deleteUserCredentials(premiumUser)
       }
+
+      return@inTransaction premiumUser
+    }
 
     eventBus as NavAuthEventBusInternal
     eventBus.post(UserPremiumMigrationEvent(user.toAuthUser()))
@@ -135,19 +134,18 @@ constructor(
   fun migrateToNonPremium(user: User, newPassword: HashedPassword): User {
     require(user.isPremium) { "cannot migrate non-premium user to non-premium" }
 
-    val user =
-      txService.inTransaction {
-        // make sure the user has credentials required
-        val nonPremiumUser = user.toNonPremium()
-        userRepository.save(nonPremiumUser)
+    val user = txService.inTransaction {
+      // make sure the user has credentials required
+      val nonPremiumUser = user.toNonPremium()
+      userRepository.save(nonPremiumUser)
 
-        val newCredentials =
-          userCredentialsService.findCredentials(nonPremiumUser)?.withNewPassword(newPassword)
-            ?: UserCredentials.create(nonPremiumUser, newPassword, null)
-        userCredentialsService.storeUserCredentials(nonPremiumUser, newCredentials)
+      val newCredentials =
+        userCredentialsService.findCredentials(nonPremiumUser)?.withNewPassword(newPassword)
+          ?: UserCredentials.create(nonPremiumUser, newPassword, null)
+      userCredentialsService.storeUserCredentials(nonPremiumUser, newCredentials)
 
-        return@inTransaction nonPremiumUser
-      }
+      return@inTransaction nonPremiumUser
+    }
 
     eventBus as NavAuthEventBusInternal
     eventBus.post(UserNonPremiumMigrationEvent(user.toAuthUser()))
@@ -167,10 +165,9 @@ constructor(
    */
   fun migrateUsername(user: User, newUsername: Username): User {
     val oldUsername = user.username
-    val user =
-      txService.inTransaction {
-        return@inTransaction migrateUsernameNoTx(user, newUsername)
-      }
+    val user = txService.inTransaction {
+      return@inTransaction migrateUsernameNoTx(user, newUsername)
+    }
 
     eventBus as NavAuthEventBusInternal
     eventBus.post(UserUsernameMigrationEvent(user.toAuthUser(), oldUsername.value))

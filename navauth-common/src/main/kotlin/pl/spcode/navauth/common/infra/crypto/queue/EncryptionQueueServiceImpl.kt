@@ -83,8 +83,9 @@ class EncryptionQueueServiceImpl @Inject constructor(private val config: Encrypt
   }
 
   override fun dequeueTask(playerId: UUID): Boolean {
-    val cancelledFromQueue =
-      workQueue.removeIf { it is EncryptionTaskRunner && it.playerId == playerId }
+    val cancelledFromQueue = workQueue.removeIf {
+      it is EncryptionTaskRunner && it.playerId == playerId
+    }
 
     val task = activeTasks.remove(playerId)
     if (task != null) {

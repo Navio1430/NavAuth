@@ -18,5 +18,4 @@
 
 package pl.spcode.navauth.common.migrate.error
 
-open class MigrationException(message: String, error: Throwable? = null) :
-  Exception(message, error)
+open class MigrationException(message: String, error: Throwable? = null) : Exception(message, error)

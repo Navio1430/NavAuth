@@ -73,7 +73,8 @@ constructor(
           """
           |NavAuth version {} is too old. Required minimum version is {}.
           |Please update NavAuth to at least version {}.
-          |Download the latest version from: https://github.com/Navio1430/NavAuth"""
+          |Download the latest version from: https://github.com/Navio1430/NavAuth
+          """
             .trimMargin(),
           navAuthVersion,
           requiredVersion,
