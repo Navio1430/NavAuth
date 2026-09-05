@@ -4,7 +4,7 @@
 ### Changes
 ```diff
 + Update to Java 25
-+ Update to Velocity 4.1.1
++ Update to Velocity 4.1.2
 + Mojang profile lookup now also caches non-premium (not found) usernames, so repeated login
   attempts against nicknames that have no Mojang account no longer hit the profile API every time
 + Only username resolution during login/register reads this not-found cache (avoids rate limits /
