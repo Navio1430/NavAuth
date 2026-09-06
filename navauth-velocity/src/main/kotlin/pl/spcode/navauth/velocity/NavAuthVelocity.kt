@@ -49,6 +49,7 @@ import pl.spcode.navauth.common.config.MigrationConfig
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.module.*
 import pl.spcode.navauth.velocity.command.CommandsRegistry
+import pl.spcode.navauth.velocity.command.configurer.CommandConfigurer
 import pl.spcode.navauth.velocity.infra.command.VelocityInvalidUsageHandler
 import pl.spcode.navauth.velocity.infra.command.VelocityMissingPermissionExceptionHandler
 import pl.spcode.navauth.velocity.infra.command.VelocityMissingPermissionHandler
@@ -163,6 +164,7 @@ constructor(
           UserResolveException::class.java,
           UserResolveExceptionHandler(VelocityAudienceProvider(proxyServer)),
         )
+          .editorGlobal(injector.getInstance(CommandConfigurer::class.java))
         .exception(
           MissingPermissionException::class.java,
           injector.getInstance(VelocityMissingPermissionExceptionHandler::class.java),
