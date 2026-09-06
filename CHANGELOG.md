@@ -30,12 +30,12 @@
 - fix unexpectedErrorOccurred message: changed val to var (this was causing warning messages and no changes after /reload)
 
 ### Config
-***Messages*** config:
+**Messages** config:
 ```diff
 + profileApiFailureKickMessage
 ```
 
-***General** config:
+**General** config:
 ```diff
 + commandsConfig
 ```
