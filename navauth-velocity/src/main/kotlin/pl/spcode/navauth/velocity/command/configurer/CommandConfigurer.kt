@@ -26,7 +26,6 @@ import dev.rollczi.litecommands.meta.Meta
 import dev.rollczi.litecommands.permission.PermissionSet
 import pl.spcode.navauth.common.config.CommandConfig
 import java.util.function.UnaryOperator
-import javax.security.auth.login.Configuration
 
 class CommandConfigurer @Inject constructor(
     private val commandConfiguration: CommandConfig
@@ -37,7 +36,7 @@ class CommandConfigurer @Inject constructor(
     val command = commandConfiguration.commands[context.name()] ?: return context
 
     var currentContext = context
-    for ((childName, subCommand) in command.subCommands) {
+    for ((childName, subCommand) in command.subcommands) {
       currentContext = currentContext.editChild(childName) { editor ->
         editor.name(subCommand.name)
             .aliases(subCommand.aliases)

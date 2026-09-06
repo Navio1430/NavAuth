@@ -19,7 +19,6 @@
 package pl.spcode.navauth.common.command.configurer
 
 import eu.okaeri.configs.OkaeriConfig
-import java.io.Serializable
 import java.util.Collections.emptyList
 
 

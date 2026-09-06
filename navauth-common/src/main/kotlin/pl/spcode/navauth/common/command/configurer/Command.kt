@@ -16,54 +16,17 @@
  *
  */
 
-package pl.spcode.navauth.velocity.command.configurer
+package pl.spcode.navauth.common.command.configurer
 
-import java.io.Serializable
+import eu.okaeri.configs.OkaeriConfig
+import java.util.Collections.emptyList
 
 
-class Command : Serializable {
-
-  var name: String? = null
-  var enabled: Boolean = false
-  var aliases: MutableList<String?>? = ArrayList<String?>()
-  var permissions: MutableList<String?>? = ArrayList<String?>()
-  var subCommands: MutableMap<String?, SubCommand?>? = HashMap<String?, SubCommand?>()
-
-  fun Command() {}
-
-  fun Command(name: String?, aliases: MutableList<String?>?, permissions: MutableList<String?>?, enabled: Boolean) {
-    this.name = name
-    this.enabled = enabled
-    this.aliases = aliases
-    this.permissions = permissions
-  }
-
-  fun Command(name: String?, aliases: MutableList<String?>?, permissions: MutableList<String?>?, subCommands: MutableMap<String?, SubCommand?>?, enabled: Boolean) {
-    this.name = name
-    this.aliases = aliases
-    this.permissions = permissions
-    this.subCommands = subCommands
-    this.enabled = enabled
-  }
-
-  fun name(): String? {
-    return this.name
-  }
-
-  fun aliases(): MutableList<String?>? {
-    return this.aliases
-  }
-
-  fun permissions(): MutableList<String?>? {
-    return this.permissions
-  }
-
-  fun subCommands(): MutableMap<String?, SubCommand?>? {
-    return this.subCommands
-  }
-
-  fun isEnabled(): Boolean {
-    return this.enabled
-  }
-
+class Command(
+    var name: String = "",
+    var enabled: Boolean = true,
+    var aliases: MutableList<String> = emptyList(),
+    var permissions: MutableList<String> = emptyList(),
+    var subcommands: MutableMap<String, SubCommand> = mutableMapOf()
+) : OkaeriConfig() {
 }
