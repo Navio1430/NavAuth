@@ -36,6 +36,7 @@ class CommandsConfig : OkaeriConfig() {
     mutableMapOf(
       "navauth" to CommandConfig(name = "navauth", aliases = mutableListOf("na"), enabled = true),
       "login" to CommandConfig(name = "login", aliases = mutableListOf("l"), enabled = true),
-      "register" to CommandConfig(name = "register", aliases = mutableListOf("reg"), enabled = true),
+      "register" to
+        CommandConfig(name = "register", aliases = mutableListOf("reg"), enabled = true),
     )
 }
