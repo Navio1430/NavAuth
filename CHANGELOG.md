@@ -40,6 +40,9 @@
 + commandsConfig
 ```
 
+### New contributors
+WejsoneKK - implemented command aliases - Thanks!
+
 
 ## 0.2.0
 
