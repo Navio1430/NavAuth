@@ -59,6 +59,12 @@ constructor(
     @Arg(value = "new_password") newPassword: String,
   ) {
     val user = userService.findUserByExactUsername(sender.username)!!
+
+    if (user.isPremium) {
+      multification.send(sender) { it.multification.accountNotNonPremiumError }
+      return
+    }
+
     val credentials = userCredentialsService.findCredentials(user)!!
 
     if (!credentials.isPasswordRequired) {

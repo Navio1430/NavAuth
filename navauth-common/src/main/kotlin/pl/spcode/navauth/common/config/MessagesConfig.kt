@@ -116,6 +116,8 @@ open class MessagesConfig : OkaeriConfig() {
       )
     var accountAlreadyPremiumError: Notice =
       Notice.chat("<red>Account is already set as a premium one.")
+    var accountNotNonPremiumError: Notice =
+      Notice.chat("<red>Can't execute this command right now: your account is not a non-premium one.")
 
     var alreadyTryingToLoginError: Notice =
       Notice.chat(
