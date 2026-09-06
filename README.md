@@ -60,6 +60,7 @@ You can also use other plugins (like Anti-VPN's) for that.
 Thanks to **NavAuth contributors**:
 - urhatedjack - logo design  
 - [KotreQ](https://github.com/KotreQ) - help with the QR code generation
+- [WejsoneKK](https://github.com/WejsoneKK) - commands configuration feature
 
 Thanks to **Discord support team**:
 - [Blavez](https://github.com/Blavezz)
@@ -80,7 +81,7 @@ Thanks to people that kept **LibreLoginProd alive** until NavAuth release and ke
 ### 🧩 Requirements
 
 * Java 25
-* Velocity 4.1.1+
+* Velocity 4.1.2+
 * Limbo server e.g., NanoLimbo, PicoLimbo
 * Velocity forwarding set to MODERN
 * All backend servers must be 1.13+ (because of modern forward)
@@ -100,12 +101,4 @@ NavAuth is licensed under the GNU AGPL v3. See the license file for more informa
 [![GNU AGPL Logo](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/agpl-3.0.en.html)
 
 ## 💡 TODO List
-More planned features are described in [Documentation](https://navio1430.github.io/NavAuth/docs/offer.html#%F0%9F%9A%80-planned-features)
-- readme:
-   - add banner
-- github/gh actions:
-   - modrinth CD
-   - issue template:
-      - bug report
-      - feature request
-- commands and messages localization
+Planned features are described in [Documentation](https://navio1430.github.io/NavAuth/docs/offer.html#%F0%9F%9A%80-planned-features)
