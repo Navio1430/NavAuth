@@ -28,11 +28,13 @@
 
 ### Fixes
 - fix unexpectedErrorOccurred message: changed val to var (this was causing warning messages and no changes after /reload)
+- /changepassword now notifies premium accounts that they can't change their password
 
 ### Config
 **Messages** config:
 ```diff
 + profileApiFailureKickMessage
++ accountNotNonPremiumError
 ```
 
 **General** config:
