@@ -96,8 +96,6 @@ open class GeneralConfig : OkaeriConfig() {
 
   var sessionsConfig = SessionsConfig()
 
-  var commandsConfig: CommandsConfig = CommandsConfig()
-
   @Variable("CONFIG_VERSION")
   @Comment("Config version. DO NOT CHANGE this property!")
   var configVersion: Int = 0

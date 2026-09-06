@@ -43,6 +43,7 @@ import pl.spcode.navauth.common.command.exception.UserResolveException
 import pl.spcode.navauth.common.command.handler.UserResolveExceptionHandler
 import pl.spcode.navauth.common.command.user.UsernameOrUuidParser
 import pl.spcode.navauth.common.command.user.UsernameOrUuidRaw
+import pl.spcode.navauth.common.config.CommandsConfig
 import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.config.MigrationConfig
@@ -106,6 +107,9 @@ constructor(
       val migrationConfigModule =
         YamlConfigModule(MigrationConfig::class, dataDirectory.resolve("migration.yml").toFile())
 
+      val commandsConfigModule =
+        YamlConfigModule(CommandsConfig::class, dataDirectory.resolve("commands.yml").toFile())
+
       injector =
         parentInjector.createChildInjector(
           PluginDirectoryModule(dataDirectory),
@@ -113,6 +117,7 @@ constructor(
           generalConfigModule,
           messagesConfigModule,
           migrationConfigModule,
+          commandsConfigModule,
           ExecutorsModule(),
           EventsModule(),
           VelocityMultificationsModule(velocityViewerProvider),
