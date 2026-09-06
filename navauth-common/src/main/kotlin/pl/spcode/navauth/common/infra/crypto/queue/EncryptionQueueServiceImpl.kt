@@ -106,11 +106,11 @@ class EncryptionQueueServiceImpl @Inject constructor(private val config: Encrypt
     private val logger: Logger,
   ) : Runnable {
     override fun run() {
+      activeTasks.remove(playerId)
       val result = runCatching { task.run() }
       if (result.isFailure) {
         logger.warn("Player id='${playerId}' EncryptionTask failed", result.exceptionOrNull())
       }
-      activeTasks.remove(playerId)
     }
   }
 }
