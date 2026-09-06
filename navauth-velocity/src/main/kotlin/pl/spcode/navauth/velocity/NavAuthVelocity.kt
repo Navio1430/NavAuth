@@ -164,7 +164,7 @@ constructor(
           UserResolveException::class.java,
           UserResolveExceptionHandler(VelocityAudienceProvider(proxyServer)),
         )
-          .editorGlobal(injector.getInstance(CommandConfigurer::class.java))
+        .editorGlobal(injector.getInstance(CommandConfigurer::class.java))
         .exception(
           MissingPermissionException::class.java,
           injector.getInstance(VelocityMissingPermissionExceptionHandler::class.java),

@@ -21,11 +21,9 @@ package pl.spcode.navauth.common.command.configurer
 import eu.okaeri.configs.OkaeriConfig
 import java.util.Collections.emptyList
 
-
 class SubCommand(
-    var name: String = "",
-    var enabled: Boolean = true,
-    var aliases: MutableList<String> = emptyList(),
-    var permissions: MutableList<String> = emptyList(),
-) : OkaeriConfig() {
-}
+  var name: String = "",
+  var enabled: Boolean = true,
+  var aliases: MutableList<String> = emptyList(),
+  var permissions: MutableList<String> = emptyList(),
+) : OkaeriConfig() {}

@@ -24,40 +24,37 @@ import dev.rollczi.litecommands.command.builder.CommandBuilder
 import dev.rollczi.litecommands.editor.Editor
 import dev.rollczi.litecommands.meta.Meta
 import dev.rollczi.litecommands.permission.PermissionSet
-import pl.spcode.navauth.common.config.CommandConfig
 import java.util.function.UnaryOperator
+import pl.spcode.navauth.common.config.CommandsConfig
 
-class CommandConfigurer @Inject constructor(
-    private val commandConfiguration: CommandConfig
-) : Editor<CommandSource> {
-
+class CommandConfigurer @Inject constructor(private val commandConfiguration: CommandsConfig) :
+  Editor<CommandSource> {
 
   override fun edit(context: CommandBuilder<CommandSource>): CommandBuilder<CommandSource> {
     val command = commandConfiguration.commands[context.name()] ?: return context
 
     var currentContext = context
     for ((childName, subCommand) in command.subcommands) {
-      currentContext = currentContext.editChild(childName) { editor ->
-        editor.name(subCommand.name)
+      currentContext =
+        currentContext.editChild(childName) { editor ->
+          editor
+            .name(subCommand.name)
             .aliases(subCommand.aliases)
             .applyMeta(editPermissions(subCommand.permissions))
             .enabled(subCommand.enabled)
-      }
+        }
     }
 
     return currentContext
-        .name(command.name)
-        .aliases(command.aliases)
-        .applyMeta(editPermissions(command.permissions))
-        .enabled(command.enabled)
+      .name(command.name)
+      .aliases(command.aliases)
+      .applyMeta(editPermissions(command.permissions))
+      .enabled(command.enabled)
   }
 
   private fun editPermissions(permissions: List<String>): UnaryOperator<Meta> {
     return UnaryOperator { meta ->
-      meta.listEditor(Meta.PERMISSIONS)
-          .clear()
-          .add(PermissionSet(permissions))
-          .apply()
+      meta.listEditor(Meta.PERMISSIONS).clear().add(PermissionSet(permissions)).apply()
     }
   }
 }
