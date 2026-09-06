@@ -67,7 +67,11 @@ class EncryptionQueueServiceImpl @Inject constructor(private val config: Encrypt
   }
 
   /** @throws EncryptionTaskAlreadyQueuedException if task is already queued */
-  override fun submitTask(playerId: UUID, operation: () -> Unit, onCancelled: () -> Unit) {
+  override fun submitTask(
+    playerId: UUID,
+    operation: (finishTask: () -> Unit) -> Unit,
+    onCancelled: () -> Unit,
+  ) {
     val task = EncryptionTask(playerId, operation, onCancelled)
 
     if (activeTasks.containsKey(playerId)) {
@@ -75,7 +79,12 @@ class EncryptionQueueServiceImpl @Inject constructor(private val config: Encrypt
     }
     activeTasks[playerId] = task
 
-    executor.execute(EncryptionTaskRunner(playerId, task, activeTasks, logger))
+    val finishTask = {
+      activeTasks.remove(playerId, task)
+      Unit
+    }
+
+    executor.execute(EncryptionTaskRunner(playerId, task, finishTask, logger))
   }
 
   override fun isTaskQueued(playerId: UUID): Boolean {
@@ -102,15 +111,15 @@ class EncryptionQueueServiceImpl @Inject constructor(private val config: Encrypt
   private class EncryptionTaskRunner(
     val playerId: UUID,
     val task: EncryptionTask,
-    private val activeTasks: ConcurrentHashMap<UUID, EncryptionTask>,
+    private val finishTask: () -> Unit,
     private val logger: Logger,
   ) : Runnable {
     override fun run() {
-      activeTasks.remove(playerId)
-      val result = runCatching { task.run() }
+      val result = runCatching { task.run(finishTask) }
       if (result.isFailure) {
         logger.warn("Player id='${playerId}' EncryptionTask failed", result.exceptionOrNull())
       }
+      finishTask()
     }
   }
 }

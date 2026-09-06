@@ -104,10 +104,11 @@ constructor(
     val future = CompletableFuture<Boolean>()
     encryptionQueueService.submitTask(
       playerId = playerId,
-      operation = {
+      operation = { finishTask ->
         try {
           val result = hasher.verify(password, passwordHash)
           future.complete(result)
+          finishTask()
         } catch (ex: Exception) {
           logger.error(
             "Unexpected error occurred while trying to verify user id='${playerId}' password",
@@ -136,9 +137,10 @@ constructor(
     val future = CompletableFuture<HashedPassword>()
     encryptionQueueService.submitTask(
       playerId = playerId,
-      operation = {
+      operation = { finishTask ->
         try {
           val result = hasher.hash(password)
+          finishTask()
           future.complete(result)
         } catch (ex: Exception) {
           logger.error(

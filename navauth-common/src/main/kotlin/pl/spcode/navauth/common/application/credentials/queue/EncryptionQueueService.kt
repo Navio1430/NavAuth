@@ -23,10 +23,29 @@ import java.util.UUID
 interface EncryptionQueueService {
 
   /**
+   * Submits an encryption task for the given player.
+   *
+   * The player's slot in the active-task registry is held from the moment this method returns until
+   * [operation] invokes the `finishTask` callback it is given (or, as a fallback, until the task
+   * finishes running). Calling `finishTask` early — e.g. right before completing a future with the
+   * result — frees the slot for a new [submitTask] call for the same [playerId] while this task's
+   * continuations are still unwinding. Calling `finishTask` more than once is safe and has no
+   * effect after the first call.
+   *
+   * @param playerId the player this task is associated with; only one task per player may be queued
+   *   or running at a time
+   * @param operation the work to perform, given a `finishTask` callback that must be invoked just
+   *   before committing the operation's result (e.g. right before completing a future), so the
+   *   player's slot is released before any reentrant work triggered by that commit (such as a
+   *   completion callback) runs
    * @param onCancelled called when the task is dequeued before execution
    * @throws EncryptionTaskAlreadyQueuedException if player has existing task queued
    */
-  fun submitTask(playerId: UUID, operation: () -> Unit, onCancelled: () -> Unit)
+  fun submitTask(
+    playerId: UUID,
+    operation: (finishTask: () -> Unit) -> Unit,
+    onCancelled: () -> Unit,
+  )
 
   fun dequeueTask(playerId: UUID): Boolean
 

@@ -22,18 +22,18 @@ import java.util.UUID
 
 class EncryptionTask(
   val playerId: UUID?,
-  private val operation: () -> Unit,
+  private val operation: (finishTask: () -> Unit) -> Unit,
   val onCancelled: () -> Unit,
-) : Runnable {
+) {
 
   @Volatile var cancelled = false
 
-  override fun run() {
+  fun run(finishTask: () -> Unit) {
     if (cancelled) {
       onCancelled.invoke()
       return
     }
 
-    operation()
+    operation(finishTask)
   }
 }
