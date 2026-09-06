@@ -65,6 +65,7 @@ subprojects {
 
     dependsOn("spotlessJavaApply")
     dependsOn("spotlessKotlinApply")
+    dependsOn("spotlessCheck")
   }
 
   spotless {
