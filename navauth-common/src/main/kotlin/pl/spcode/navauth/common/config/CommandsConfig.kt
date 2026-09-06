@@ -25,48 +25,17 @@ import pl.spcode.navauth.common.command.configurer.CommandConfig
 class CommandsConfig : OkaeriConfig() {
 
   @Comment(
-    "# This file allows you to configure commands.",
-    "# You can change command name, aliases and permissions.",
-    "# You can edit the commands as follows this template:",
-    "# commands:",
-    "#   <command_name>:",
-    "#     name: \"<new_command_name>\"",
-    "#     enabled: true/false",
-    "#     aliases:",
-    "#       - \"<new_command_aliases>\"",
-    "#     permissions:",
-    "#       - \"<new_command_permission>\"",
-    "#     subcommands:",
-    "#       <default_sub_command_name>:",
-    "#         name: \"<new_sub_command_name>\"",
-    "#         enabled: true/false",
-    "#         aliases:",
-    "#           - \"<new_sub_command_aliases>\"",
-    "#         permissions:",
-    "#           - \"<new_sub_command_permission>\"",
+    "This property allows you to configure commands definitions.",
+    "You can toggle the command and update its name or aliases.",
+    "",
+    "You can find command names in docs:",
+    "https://navio1430.github.io/NavAuth/docs/general/commands.html#available-commands",
+    "Remember to use command names without the leading slash '/'.",
   )
   var commands: MutableMap<String, CommandConfig> =
     mutableMapOf(
-      "navauth" to
-        CommandConfig(
-          name = "navauth",
-          aliases = mutableListOf("na"),
-          permissions = mutableListOf("navauth.command.navauth"),
-          enabled = true,
-        ),
-      "login" to
-        CommandConfig(
-          name = "login",
-          aliases = mutableListOf("l"),
-          permissions = mutableListOf("navauth.command.login"),
-          enabled = true,
-        ),
-      "register" to
-        CommandConfig(
-          name = "register",
-          aliases = mutableListOf("reg"),
-          permissions = mutableListOf("navauth.command.register"),
-          enabled = true,
-        ),
+      "navauth" to CommandConfig(name = "navauth", aliases = mutableListOf("na"), enabled = true),
+      "login" to CommandConfig(name = "login", aliases = mutableListOf("l"), enabled = true),
+      "register" to CommandConfig(name = "register", aliases = mutableListOf("reg"), enabled = true),
     )
 }

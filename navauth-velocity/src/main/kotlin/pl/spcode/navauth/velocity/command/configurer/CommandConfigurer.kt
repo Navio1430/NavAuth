@@ -30,6 +30,14 @@ class CommandConfigurer @Inject constructor(private val commandConfiguration: Co
   override fun edit(context: CommandBuilder<CommandSource>): CommandBuilder<CommandSource> {
     val command = commandConfiguration.commands[context.name()] ?: return context
 
-    return context.name(command.name).aliases(command.aliases).enabled(command.enabled)
+    var newContext = context
+
+    if (!command.name.isNullOrEmpty()) {
+      newContext = context.name(command.name)
+    }
+
+    val aliasesFiltered = command.aliases.filter { it.isNotEmpty() }
+
+    return newContext.aliases(aliasesFiltered).enabled(command.enabled)
   }
 }

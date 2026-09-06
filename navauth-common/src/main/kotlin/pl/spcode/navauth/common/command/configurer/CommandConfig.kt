@@ -22,7 +22,7 @@ import eu.okaeri.configs.OkaeriConfig
 import java.util.Collections.emptyList
 
 class CommandConfig(
-  var name: String = "",
+  var name: String? = null, // new command name
   var enabled: Boolean = true,
   var aliases: List<String> = emptyList(),
 ) : OkaeriConfig() {}
