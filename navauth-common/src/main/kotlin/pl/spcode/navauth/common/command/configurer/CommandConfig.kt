@@ -24,7 +24,5 @@ import java.util.Collections.emptyList
 class CommandConfig(
   var name: String = "",
   var enabled: Boolean = true,
-  var aliases: MutableList<String> = emptyList(),
-  var permissions: MutableList<String> = emptyList(),
-  var subcommands: MutableMap<String, SubCommand> = mutableMapOf(),
+  var aliases: List<String> = emptyList(),
 ) : OkaeriConfig() {}
