@@ -52,7 +52,7 @@ class UsernameResolutionServiceTests :
       service = UsernameResolutionService(mockUserService, mockProfileService)
     }
 
-    test("new premium user returns success, premium encryption type") {
+    test("new premium user returns success, none type") {
       val username = Username(generateRandomString(10))
       val premiumProfile = MojangProfile(MojangId(UUID.randomUUID()), username)
       every { mockProfileService.fetchProfileInfo(username, any()) } returns premiumProfile
@@ -62,7 +62,7 @@ class UsernameResolutionServiceTests :
 
       result shouldBe
         UsernameResResult.Success(
-          EncryptionType.ENFORCE_PREMIUM,
+          EncryptionType.NONE,
           PostUsernameResolutionState.NEW_ACCOUNT,
         )
     }
@@ -127,7 +127,7 @@ class UsernameResolutionServiceTests :
         UsernameResResult.Success(EncryptionType.NONE, PostUsernameResolutionState.NO_CHANGE)
     }
 
-    test("existing nonpremium user conflict with different case premium username returns failure") {
+    test("existing nonpremium user conflict with different case premium username returns success") {
       val username = Username(generateRandomString(10))
       // make sure the premium profile has a different username case
       val premiumUsername = Username(invertCase(username.value))
@@ -138,8 +138,9 @@ class UsernameResolutionServiceTests :
       val result = service.resolveUsernameConflicts(username, existingUser)
 
       result shouldBe
-        UsernameResResult.Failure(
-          UsernameResFailureReason.NonPremiumWithPremiumConflict(premiumUsername.value)
+        UsernameResResult.Success(
+          EncryptionType.NONE,
+          PostUsernameResolutionState.NONPREMIUM_WITH_SAME_PREMIUM_NICKNAME,
         )
     }
 
