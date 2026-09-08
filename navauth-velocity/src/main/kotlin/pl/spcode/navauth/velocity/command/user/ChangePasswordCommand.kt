@@ -67,11 +67,6 @@ constructor(
 
     val credentials = userCredentialsService.findCredentials(user)!!
 
-    if (!credentials.isPasswordRequired) {
-      multification.send(sender) { it.multification.commandPasswordNotSetForAccountError }
-      return
-    }
-
     try {
       userCredentialsService
         .enqueueVerifyPassword(credentials, currentPassword, sender.uniqueId)

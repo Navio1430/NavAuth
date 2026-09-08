@@ -41,32 +41,25 @@ data class User
 private constructor(
   val uuid: UserUuid,
   val username: Username,
-  val credentialsRequired: Boolean,
   val mojangUuid: MojangId? = null, // null = non-premium
 ) {
   val isPremium: Boolean
     get() = mojangUuid != null
 
   companion object Factory {
-    fun nonPremium(id: UserUuid, username: Username): User = User(id, username, true)
+    fun nonPremium(id: UserUuid, username: Username): User = User(id, username)
 
-    fun premium(
-      id: UserUuid,
-      username: Username,
-      mojangUuid: MojangId,
-      requiresCredentials: Boolean = false,
-    ): User = User(id, username, requiresCredentials, mojangUuid)
+    fun premium(id: UserUuid, username: Username, mojangUuid: MojangId): User =
+      User(id, username, mojangUuid)
   }
 
   fun withNewUsername(username: Username): User {
-    return User(this.uuid, username, this.credentialsRequired, this.mojangUuid)
+    return User(this.uuid, username, this.mojangUuid)
   }
 
   fun toNonPremium(): User {
-    return copy(mojangUuid = null, credentialsRequired = true)
+    return copy(mojangUuid = null)
   }
-
-  fun withCredentialsRequired(required: Boolean = true) = copy(credentialsRequired = required)
 
   fun toAuthUser(): AuthUser {
     return object : AuthUser {
@@ -85,6 +78,6 @@ private constructor(
   }
 
   override fun toString(): String {
-    return "User(id=$uuid, username=$username, mojangUuid=$mojangUuid, credentialsRequired=$credentialsRequired)"
+    return "User(id=$uuid, username=$username, mojangUuid=$mojangUuid)"
   }
 }

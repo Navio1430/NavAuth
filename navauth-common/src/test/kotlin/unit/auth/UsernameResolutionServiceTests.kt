@@ -105,7 +105,7 @@ class UsernameResolutionServiceTests :
       val premiumProfile = MojangProfile(MojangId(UUID.randomUUID()), username)
       every { mockProfileService.fetchProfileInfo(username, any()) } returns premiumProfile
       val existingUser =
-        User.premium(UserUuid(premiumProfile.uuid.value), username, premiumProfile.uuid, false)
+        User.premium(UserUuid(premiumProfile.uuid.value), username, premiumProfile.uuid)
 
       val result = service.resolveUsernameConflicts(username, existingUser)
 
@@ -179,8 +179,7 @@ class UsernameResolutionServiceTests :
       val premiumProfile = MojangProfile(MojangId(UUID.randomUUID()), username)
       every { mockProfileService.fetchProfileInfo(connUsername, any()) } returns premiumProfile
       every { mockUserService.findUserByMojangUuid(MojangId(any())) } returns null
-      val existingUser =
-        User.premium(UserUuid(UUID.randomUUID()), username, premiumProfile.uuid, false)
+      val existingUser = User.premium(UserUuid(UUID.randomUUID()), username, premiumProfile.uuid)
 
       val result = service.resolveUsernameConflicts(connUsername, existingUser)
 

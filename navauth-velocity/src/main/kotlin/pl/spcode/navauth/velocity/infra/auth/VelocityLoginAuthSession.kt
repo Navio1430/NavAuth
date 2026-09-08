@@ -67,12 +67,10 @@ class VelocityLoginAuthSession(
         .schedule()
 
     val notification =
-      if (userCredentials.isPasswordRequired && !userCredentials.isTwoFactorEnabled) {
-        messagesConfig.multification.loginPasswordOnlyInstruction
-      } else if (!userCredentials.isPasswordRequired && userCredentials.isTwoFactorEnabled) {
-        messagesConfig.multification.loginTwoFactorOnlyInstruction
-      } else {
+      if (userCredentials.isTwoFactorEnabled) {
         messagesConfig.multification.loginPasswordAndTwoFactorInstruction
+      } else {
+        messagesConfig.multification.loginPasswordOnlyInstruction
       }
 
     notifyMessageTask =

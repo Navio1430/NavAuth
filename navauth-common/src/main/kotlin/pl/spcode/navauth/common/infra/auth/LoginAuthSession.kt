@@ -52,12 +52,10 @@ open class LoginAuthSession<T : PlayerAdapter>(
    * Authenticates the session owner using a combination of password and two-factor authentication
    * code if required.
    *
-   * @param password the raw (not hashed) password to authenticate the user, can be null if not
-   *   required
+   * @param password the raw (not hashed) password to authenticate the user
    * @param twoFactorCode the two-factor authentication code, can be null if 2FA is not enabled
    * @return CompletableFuture with AuthTaskResult
-   * @throws IllegalArgumentException if `password` or `twoFactorCode` is required by the user
-   *   credentials but not provided
+   * @throws IllegalArgumentException if `password` is null (always required)
    * @throws EncryptionTaskAlreadyQueuedException if an encryption task is already queued
    */
   fun enqueueAuthTask(
@@ -83,12 +81,12 @@ open class LoginAuthSession<T : PlayerAdapter>(
   }
 
   /**
-   * Validates credentials and enqueues password verification if required.
+   * Validates credentials and enqueues password verification.
    *
-   * @param password the raw password, can be null if not required
-   * @param twoFactorCode the 2FA code, can be null if not required
+   * @param password the raw password (always required)
+   * @param twoFactorCode the 2FA code, can be null if not enabled
    * @return CompletableFuture with AuthTaskResult
-   * @throws IllegalArgumentException if `password` or `twoFactorCode` is required but not provided
+   * @throws IllegalArgumentException if `password` is null
    * @throws EncryptionTaskAlreadyQueuedException if an encryption task is already queued
    */
   private fun tryAuth(
@@ -102,28 +100,24 @@ open class LoginAuthSession<T : PlayerAdapter>(
       }
     }
 
-    if (userCredentials.isPasswordRequired) {
-      val future = CompletableFuture<AuthTaskResult>()
-      require(password != null) { "password parameter is required by user credentials" }
-      userCredentialsService
-        .enqueueVerifyPassword(userCredentials, password, playerAdapter.identifier)
-        .whenComplete { isCorrect, throwable ->
-          if (throwable != null) {
-            future.completeExceptionally(throwable)
-            return@whenComplete
-          }
-          if (isCorrect) {
-            future.complete(AuthTaskResult.Success)
-          } else {
-            future.complete(AuthTaskResult.WrongCredentials)
-          }
+    // Password is always required
+    val future = CompletableFuture<AuthTaskResult>()
+    require(password != null) { "password parameter is required" }
+    userCredentialsService
+      .enqueueVerifyPassword(userCredentials, password, playerAdapter.identifier)
+      .whenComplete { isCorrect, throwable ->
+        if (throwable != null) {
+          future.completeExceptionally(throwable)
+          return@whenComplete
         }
+        if (isCorrect) {
+          future.complete(AuthTaskResult.Success)
+        } else {
+          future.complete(AuthTaskResult.WrongCredentials)
+        }
+      }
 
-      return future
-    }
-
-    // 2fa was the only one required and it passed successfully
-    return CompletableFuture.completedFuture(AuthTaskResult.Success)
+    return future
   }
 
   sealed class AuthTaskResult {

@@ -39,11 +39,8 @@ private constructor(
 ) {
 
   init {
-    require(isValid()) { "Credentials must have either password or TOTP secret" }
+    require(isValid()) { "Credentials must have a password" }
   }
-
-  val isPasswordRequired: Boolean
-    get() = hashedPassword != null
 
   val isTwoFactorEnabled: Boolean
     get() = totpSecret != null
@@ -68,18 +65,11 @@ private constructor(
 
   fun withNewPassword(password: HashedPassword): UserCredentials = copy(hashedPassword = password)
 
-  fun withoutPassword(): UserCredentials {
-    require(totpSecret != null) {
-      "to create credentials without password, at least totpSecret must be set"
-    }
-    return copy(hashedPassword = null)
-  }
-
   fun withTotpSecret(totpSecret: TOTPSecret): UserCredentials = copy(totpSecret = totpSecret)
 
   fun withoutTotpSecret(): UserCredentials = copy(totpSecret = null)
 
   fun isValid(): Boolean {
-    return hashedPassword != null || totpSecret != null
+    return hashedPassword != null // Must have password, TOTP is optional
   }
 }

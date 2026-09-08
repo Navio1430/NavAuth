@@ -65,8 +65,6 @@ constructor(
   }
 
   fun createAndStoreUserWithNewCredentials(user: User, password: HashedPassword) {
-    require(user.credentialsRequired) { "cannot store user without credentials required property" }
-
     txService.inTransaction {
       userRepository.save(user)
       userCredentialsService.storeUserCredentials(
@@ -83,7 +81,6 @@ constructor(
   }
 
   private fun deleteUserCredentialsUpdateUserNoTx(user: User): User {
-    val user = user.withCredentialsRequired(false)
     userRepository.save(user)
     userCredentialsService.deleteUserCredentials(user)
     return user
@@ -91,7 +88,7 @@ constructor(
 
   /**
    * Migrates a non-premium user account to a premium account using the provided Mojang ID. This
-   * updates the user's data and ensures proper handling of authentication credentials.
+   * updates the user's data and marks the user as premium. The user keeps their password.
    *
    * @param user The non-premium user to be migrated to a premium account.
    * @param mojangId The Mojang ID associated with the premium account to link to the user.
@@ -99,18 +96,10 @@ constructor(
    */
   fun migrateToPremium(user: User, mojangId: MojangId): User {
     val user = txService.inTransaction {
-      val credentials = userCredentialsService.findCredentials(user)!!
-      // require credentials only if there's 2FA enabled
-      val requireCredentials = credentials.isTwoFactorEnabled
-      val premiumUser = User.premium(user.uuid, user.username, mojangId, requireCredentials)
+      val premiumUser = User.premium(user.uuid, user.username, mojangId)
 
       userRepository.save(premiumUser)
-      if (requireCredentials) {
-        val newCredentials = credentials.withoutPassword()
-        userCredentialsService.storeUserCredentials(premiumUser, newCredentials)
-      } else {
-        userCredentialsService.deleteUserCredentials(premiumUser)
-      }
+      // User keeps their password, no credential changes needed
 
       return@inTransaction premiumUser
     }
@@ -132,10 +121,9 @@ constructor(
    * @throws IllegalArgumentException if the user is already a premium user.
    */
   fun migrateToNonPremium(user: User, newPassword: HashedPassword): User {
-    require(user.isPremium) { "cannot migrate non-premium user to non-premium" }
+    require(user.isPremium) { "cannot migrate premium user to non-premium" }
 
     val user = txService.inTransaction {
-      // make sure the user has credentials required
       val nonPremiumUser = user.toNonPremium()
       userRepository.save(nonPremiumUser)
 
@@ -185,7 +173,7 @@ constructor(
    * @return The updated user with the new username.
    * @throws UsernameAlreadyTakenException if another user already takes the new username.
    * @throws IllegalArgumentException If the user is a premium user, or the new username belongs to
-   *   a premium profile.
+   *   a premium user.
    */
   fun migrateData(user: User, newUsername: Username): User {
     require(!user.isPremium) { "cannot migrate premium user data" }
@@ -226,31 +214,18 @@ constructor(
     txService.inTransaction {
       val credentials =
         userCredentialsService.findCredentials(user)
-          ?: UserCredentials.create(user, null, totpSecret)
-
-      val userWithCredentials =
-        if (!user.credentialsRequired) {
-          val user = user.withCredentialsRequired()
-          userRepository.save(user)
-          user
-        } else {
-          user
-        }
+          ?: throw IllegalStateException("User must have credentials before enabling 2FA")
 
       val newCredentials = credentials.withTotpSecret(totpSecret)
-      userCredentialsService.storeUserCredentials(userWithCredentials, newCredentials)
+      userCredentialsService.storeUserCredentials(user, newCredentials)
     }
   }
 
   fun disableTwoFactorAuth(user: User) {
     txService.inTransaction {
       val credentials = userCredentialsService.findCredentials(user)!!
-      if (credentials.isPasswordRequired) {
-        val newCredentials = credentials.withoutTotpSecret()
-        userCredentialsService.storeUserCredentials(user, newCredentials)
-      } else {
-        deleteUserCredentialsUpdateUserNoTx(user)
-      }
+      val newCredentials = credentials.withoutTotpSecret()
+      userCredentialsService.storeUserCredentials(user, newCredentials)
     }
   }
 }

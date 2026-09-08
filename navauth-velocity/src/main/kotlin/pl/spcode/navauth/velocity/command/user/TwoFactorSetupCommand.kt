@@ -27,11 +27,9 @@ import dev.rollczi.litecommands.annotations.command.RootCommand
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import java.util.Optional
-import java.util.concurrent.CompletableFuture
 import net.kyori.adventure.text.minimessage.MiniMessage
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
-import pl.spcode.navauth.common.application.credentials.queue.EncryptionTaskAlreadyQueuedException
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.exception.MissingPermissionException
 import pl.spcode.navauth.common.config.MessagesConfig
@@ -74,51 +72,24 @@ constructor(
 
     val user = userService.findUserByUuid(UserUuid(sender.uniqueId))!!
     val credentials = userCredentialsService.findCredentials(user)
+
     if (credentials?.isTwoFactorEnabled == true) {
       multification.send(sender) { it.multification.twoFactorAlreadyEnabledError }
       return
     }
 
-    if (credentials?.isPasswordRequired == true) {
-      if (currentPassword.isEmpty) {
-        multification.send(sender) { it.multification.passwordRequiredError }
-        return
-      }
+    val secret = TOTP2FA().generateSecret()
+    val session = totpSetupSessionFactory.createSession(VelocityPlayerAdapter(sender), secret)
+    totpSetupSessionService.registerSession(UserUuid(sender.uniqueId), session)
 
-      try {
-        userCredentialsService
-          .enqueueVerifyPassword(credentials, currentPassword.get(), sender.uniqueId)
-          .whenComplete { isCorrect, throwable ->
-            CompletableFuture.supplyAsync {
-              if (throwable != null) {
-                multification.send(sender) { it.multification.unexpectedErrorOccurred }
-                return@supplyAsync
-              }
-              if (!isCorrect) {
-                multification.send(sender) { it.multification.wrongCredentialsError }
-                return@supplyAsync
-              }
-
-              val secret = TOTP2FA().generateSecret()
-              val session =
-                totpSetupSessionFactory.createSession(VelocityPlayerAdapter(sender), secret)
-              totpSetupSessionService.registerSession(UserUuid(sender.uniqueId), session)
-
-              val remainingSeconds = TotpSetupSessionService.SESSION_LIFETIME_SECONDS
-              multification
-                .create()
-                .player(sender.uniqueId)
-                .notice(messages.multification.twoFactorSetupInstruction)
-                .placeholder("%SECRET%", secret.value)
-                .placeholder("%REMAINING_SECONDS%", remainingSeconds.toString())
-                .send()
-            }
-          }
-      } catch (_: EncryptionTaskAlreadyQueuedException) {
-        multification.send(sender) { it.multification.processAlreadyInProgressError }
-      }
-      return
-    }
+    val remainingSeconds = TotpSetupSessionService.SESSION_LIFETIME_SECONDS
+    multification
+      .create()
+      .player(sender.uniqueId)
+      .notice(messages.multification.twoFactorSetupInstruction)
+      .placeholder("%SECRET%", secret.value)
+      .placeholder("%REMAINING_SECONDS%", remainingSeconds.toString())
+      .send()
   }
 
   @Async

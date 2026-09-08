@@ -64,7 +64,6 @@ constructor(
     val isPremium = user.isPremium
     val credentials = credentialsService.findCredentials(user)
     val isTwoFactorEnabled = credentials?.isTwoFactorEnabled ?: false
-    val isPasswordEnabled = credentials?.isPasswordRequired ?: false
     val username = user.username
     val uuid = user.uuid
     val mojangUuid = user.mojangUuid?.value
@@ -84,7 +83,6 @@ constructor(
 • <white>Premium:</white> <blue>${checkedIcon(isPremium)}</blue>
 • <white>UUID:</white> <dark_gray>$uuid</dark_gray> <click:copy_to_clipboard:$uuid><hover:show_text:"<dark_gray>Copy"><blue><u>[copy]</u></blue></hover></click>
 $mojangLine
-• <white>Password:</white> <blue>${checkedIcon(isPasswordEnabled)}</blue>
 • <white>2FA:</white> <blue>${checkedIcon(isTwoFactorEnabled)}</blue>
 • <white>Last IP:</white> <gray><click:copy_to_clipboard:$lastIp><hover:show_text:${lastIp ?: "-"}><b>HOVER TO REVEAL</b></hover> <hover:show_text:"<dark_gray>Copy"><blue><u>[copy]</u></blue></hover></click>
 
