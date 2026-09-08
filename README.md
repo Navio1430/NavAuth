@@ -23,7 +23,7 @@ We are working on additional configuration options and other improvements to pre
 <br>
 
 ## Join our Discord server
-[![discord](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/social/discord-plural_vector.svg)](https://discord.gg/kREwg5Drnn)
+[![discord](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/social/discord-plural_vector.svg)](https://discord.gg/eSTjEgtXBy)
 
 ## 🧱 Main principles
 - be an auth/login plugin not an anti-vpn plugin
