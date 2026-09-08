@@ -26,18 +26,13 @@ import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
-import java.util.Optional
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
-import pl.spcode.navauth.common.application.credentials.queue.EncryptionTaskAlreadyQueuedException
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.user.UserArgumentResolver
 import pl.spcode.navauth.common.command.user.UsernameOrUuidRaw
-import pl.spcode.navauth.common.extension.StringExtensions.Companion.applyPlaceholders
-import pl.spcode.navauth.common.shared.utils.StringUtils.Companion.generateRandomString
 import pl.spcode.navauth.velocity.command.Permissions
 import pl.spcode.navauth.velocity.multification.VelocityMultification
-import pl.spcode.navauth.velocity.util.CommandSourceUtils
 
 @Command(name = "forcecracked")
 @Permission(Permissions.ADMIN_FORCE_CRACKED)
@@ -59,7 +54,6 @@ constructor(
   fun forceCrackedMode(
     @Context sender: CommandSource,
     @Arg(value = "username|uuid") usernameOrUuidRaw: UsernameOrUuidRaw,
-    @Arg(value = "newPassword") newPasswordOpt: Optional<String>,
   ) {
     val user = userArgumentResolver.resolve(usernameOrUuidRaw)
 
@@ -71,29 +65,10 @@ constructor(
       return
     }
 
-    val newPassword = newPasswordOpt.orElseGet { generateRandomString(8) }
-
-    try {
-      userCredentialsService.enqueueHashPassword(newPassword, user.uuid.value).thenAccept {
-        hashedPassword ->
-        userService.migrateToNonPremium(user, hashedPassword)
-
-        val passwordText =
-          if (CommandSourceUtils.isConsoleOrRcon(sender)) {
-            "$newPassword"
-          } else {
-            val placeholders = mapOf(Pair("PASSWORD", newPassword))
-            multification.config.adminCopyPasswordText.applyPlaceholders(placeholders)
-          }
-
-        multification
-          .create(sender) { it.multification.adminCmdAccountMigratedToNonPremiumSuccess }
-          .placeholder("%USERNAME%", user.username.value)
-          .placeholder("%PASSWORD_TEXT%", passwordText)
-          .send()
-      }
-    } catch (_: EncryptionTaskAlreadyQueuedException) {
-      multification.create(sender) { it.multification.processAlreadyInProgressError }.send()
-    }
+    userService.migrateToNonPremium(user)
+    multification
+      .create(sender) { it.multification.adminCmdAccountMigratedToNonPremiumSuccess }
+      .placeholder("%USERNAME%", user.username.value)
+      .send()
   }
 }

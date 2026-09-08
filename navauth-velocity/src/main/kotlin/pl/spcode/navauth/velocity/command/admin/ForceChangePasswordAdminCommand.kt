@@ -62,14 +62,6 @@ constructor(
   ) {
     val user = userArgumentResolver.resolve(usernameOrUuidRaw)
 
-    if (user.isPremium) {
-      multification
-        .create(sender) { it.multification.adminCmdAccountIsPremiumError }
-        .placeholder("%USERNAME%", user.username.value)
-        .send()
-      return
-    }
-
     multification.create(sender) { it.multification.adminCmdPasswordSetUpdating }.send()
 
     try {
