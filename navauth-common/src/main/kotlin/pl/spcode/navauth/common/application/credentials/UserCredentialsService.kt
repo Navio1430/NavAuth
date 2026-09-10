@@ -107,8 +107,8 @@ constructor(
       operation = { finishTask ->
         try {
           val result = hasher.verify(password, passwordHash)
-          future.complete(result)
           finishTask()
+          future.complete(result)
         } catch (ex: Exception) {
           logger.error(
             "Unexpected error occurred while trying to verify user id='${playerId}' password",
