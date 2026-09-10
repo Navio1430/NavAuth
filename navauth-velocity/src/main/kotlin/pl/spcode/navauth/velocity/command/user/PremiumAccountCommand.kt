@@ -73,6 +73,6 @@ constructor(
     }
 
     userService.migrateToPremium(user, mojangProfile.uuid)
-    multification.create(sender) { it.multification.accountMigrationSuccess }
+    multification.create(sender) { it.multification.accountMigrationSuccess }.send()
   }
 }
