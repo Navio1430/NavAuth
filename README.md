@@ -61,6 +61,7 @@ Thanks to **NavAuth contributors**:
 - urhatedjack - logo design  
 - [KotreQ](https://github.com/KotreQ) - help with the QR code generation
 - [WejsoneKK](https://github.com/WejsoneKK) - commands configuration feature
+- [ThomasWega](https://github.com/ThomasWega) - bug hunting
 
 Thanks to **Discord support team**:
 - [Blavez](https://github.com/Blavezz)

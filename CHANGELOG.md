@@ -44,8 +44,9 @@
 ```
 
 ### New contributors
-WejsoneKK - implemented command aliases - Thanks!
-
+**Thanks!**
+- WejsoneKK - implemented command aliases
+- ThomasWega - bug hunting
 
 ## 0.2.0
 
