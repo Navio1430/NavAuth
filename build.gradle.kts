@@ -1,7 +1,7 @@
 
 plugins {
   id("java")
-  kotlin("jvm") version "2.2.21"
+  kotlin("jvm") version "2.4.10"
   alias(libs.plugins.spotless)
 }
 
@@ -11,7 +11,7 @@ repositories {
 
 allprojects {
   group = "pl.spcode.navauth"
-  version = "0.2.0-SNAPSHOT"
+  version = "0.3.0-SNAPSHOT"
 }
 
 tasks.register("formatAll") {
@@ -43,12 +43,15 @@ subprojects {
   }
 
   kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
   }
 
   java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    toolchain {
+      languageVersion = JavaLanguageVersion.of(25)
+      targetCompatibility = JavaVersion.VERSION_25
+      sourceCompatibility = JavaVersion.VERSION_25
+    }
   }
 
   tasks.test {
@@ -62,6 +65,7 @@ subprojects {
 
     dependsOn("spotlessJavaApply")
     dependsOn("spotlessKotlinApply")
+    dependsOn("spotlessCheck")
   }
 
   spotless {

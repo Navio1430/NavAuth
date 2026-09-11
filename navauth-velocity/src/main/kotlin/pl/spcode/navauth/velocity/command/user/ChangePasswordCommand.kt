@@ -26,6 +26,9 @@ import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
+import java.util.concurrent.CompletableFuture
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
 import pl.spcode.navauth.common.application.credentials.queue.EncryptionTaskAlreadyQueuedException
@@ -43,6 +46,10 @@ constructor(
   val multification: VelocityMultification,
 ) {
 
+  companion object {
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
+  }
+
   @Async
   @Execute
   @Description("Changes account password to new one. Requires current password.")
@@ -52,6 +59,12 @@ constructor(
     @Arg(value = "new_password") newPassword: String,
   ) {
     val user = userService.findUserByExactUsername(sender.username)!!
+
+    if (user.isPremium) {
+      multification.send(sender) { it.multification.accountNotNonPremiumError }
+      return
+    }
+
     val credentials = userCredentialsService.findCredentials(user)!!
 
     if (!credentials.isPasswordRequired) {
@@ -62,18 +75,23 @@ constructor(
     try {
       userCredentialsService
         .enqueueVerifyPassword(credentials, currentPassword, sender.uniqueId)
-        .whenComplete { isCorrect, throwable ->
-          if (throwable != null) {
-            multification.send(sender) { it.multification.unexpectedErrorOccurred }
-            return@whenComplete
-          }
+        .thenCompose { isCorrect ->
           if (!isCorrect) {
             multification.send(sender) { it.multification.wrongCredentialsError }
-            return@whenComplete
+            CompletableFuture.completedFuture(false)
+          } else {
+            userCredentialsService.updatePassword(user, newPassword).thenApply { true }
           }
-
-          userCredentialsService.updatePassword(user, newPassword)
-          multification.send(sender) { it.multification.newPasswordSetSuccess }
+        }
+        .thenAccept { updated ->
+          if (updated) {
+            multification.send(sender) { it.multification.newPasswordSetSuccess }
+          }
+        }
+        .exceptionally { ex ->
+          logger.error("Unexpected error occurred while trying to change user password", ex)
+          multification.send(sender) { it.multification.unexpectedErrorOccurred }
+          null
         }
     } catch (_: EncryptionTaskAlreadyQueuedException) {
       multification.send(sender) { it.multification.processAlreadyInProgressError }

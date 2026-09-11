@@ -29,7 +29,10 @@ class FakeProfileService : ProfileService {
     profiles[username] = profile
   }
 
-  override fun fetchProfileInfo(usernameCaseIgnored: Username): MojangProfile? {
+  override fun fetchProfileInfo(
+    usernameCaseIgnored: Username,
+    useNotFoundCache: Boolean,
+  ): MojangProfile? {
     return profiles[usernameCaseIgnored]
   }
 

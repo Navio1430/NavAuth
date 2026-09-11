@@ -26,20 +26,18 @@ Cracking the whole database of a bad plugin takes less than a **FEW MINUTES**.
 | Feature                                                         | NavAuth                                | LibreLoginProd                        |
 |:----------------------------------------------------------------|----------------------------------------|---------------------------------------|
 | Supported Platforms                                             | Velocity                               | Paper, Velocity                       |
-| Premium auto-login                                              | ✅                                      | ✅                                     |
+| Premium auto-login                                              | ✅                                     | ✅                                    |
 | Security                                                        | High                                   | Moderate                              |
 | Performance                                                     | Fast                                   | Moderate                              |
-| Large scale support                                             | ✅                                      | ❌                                     |
+| Commands aliases                                                | ✅                                     | ❌                                    |
 | Codebase quality                                                | Good                                   | Bad                                   |
 | Supported Databases                                             | PostgreSQL, MySQL, MariaDB, SQLite, H2 | PostgreSQL, MySQL, MariaDB, SQLite    |
-| [2FA](/general/2fa.html)                                        | ✅                                      | 🟧 (needs additional plugin)          |
-| [User sessions](/general/user-lookup.html#lookup-user-sessions) | ✅                                      | ❌                                     |
-| Active Maintenance                                              | ✅                                      | ❌                                     |
-| Active Support                                                  | ✅                                      | ❌                                     |
-| Multification                                                   | ✅                                      | ❌                                     |
-| Plugins migration                                               | ✅ (any db type)                        | 🟧 (only for specific configurations) |
-| Database type migration                                         | ✅                                      | 🟧 (partial)                          |
-| Floodgate                                                       | ❌ (planned)                            | ✅                                     |
+| [2FA](/general/2fa.html)                                        | ✅                                     | 🟧 (needs additional plugin)          |
+| [User sessions](/general/user-lookup.html#lookup-user-sessions) | ✅                                     | ❌                                    |
+| Multification                                                   | ✅                                     | ❌                                    |
+| Plugins migration                                               | ✅ (any db type)                       | 🟧 (only for specific configurations) |
+| Database type migration                                         | ✅                                     | 🟧 (partial)                          |
+| Floodgate                                                       | ❌ (planned)                           | ✅                                    |
 
 ## 🚀 Planned Features
 - ~~support Paper platform~~ based on experience with LibreLoginProd, I've decided not to continue with the idea of paper support

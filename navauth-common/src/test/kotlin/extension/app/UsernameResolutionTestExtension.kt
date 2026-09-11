@@ -30,6 +30,7 @@ import pl.spcode.navauth.common.application.mojang.ProfileService
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.module.DataPersistenceModule
 import pl.spcode.navauth.common.module.EventsModule
+import pl.spcode.navauth.common.module.ExecutorsModule
 import pl.spcode.navauth.common.module.HttpClientModule
 import pl.spcode.navauth.common.module.ServicesModule
 import utils.GuiceUtils
@@ -45,6 +46,7 @@ class UsernameResolutionTestExtension : TestInstancePostProcessor {
           TestsConfigModule(),
           HttpClientModule(),
           DataPersistenceModule(),
+          ExecutorsModule(),
           ServicesModule(),
         )
         .with(

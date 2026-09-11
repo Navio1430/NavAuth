@@ -28,6 +28,7 @@ import pl.spcode.navauth.common.application.auth.username.PostUsernameResolution
 import pl.spcode.navauth.common.application.auth.username.UsernameResFailureReason
 import pl.spcode.navauth.common.application.auth.username.UsernameResResult
 import pl.spcode.navauth.common.application.auth.username.UsernameResolutionService
+import pl.spcode.navauth.common.application.mojang.ProfileApiFetchException
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.domain.auth.handshake.EncryptionType
 import pl.spcode.navauth.common.domain.mojang.MojangProfile
@@ -54,7 +55,7 @@ class UsernameResolutionServiceTests :
     test("new premium user returns success, premium encryption type") {
       val username = Username(generateRandomString(10))
       val premiumProfile = MojangProfile(MojangId(UUID.randomUUID()), username)
-      every { mockProfileService.fetchProfileInfo(username) } returns premiumProfile
+      every { mockProfileService.fetchProfileInfo(username, any()) } returns premiumProfile
       every { mockUserService.findUserByMojangUuid(MojangId(any())) } returns null
 
       val result = service.resolveUsernameConflicts(username, null)
@@ -68,7 +69,7 @@ class UsernameResolutionServiceTests :
 
     test("new nonpremium user returns success, none encryption type") {
       val username = Username(generateRandomString(10))
-      every { mockProfileService.fetchProfileInfo(username) } returns null
+      every { mockProfileService.fetchProfileInfo(username, any()) } returns null
       every { mockUserService.findUserByMojangUuid(MojangId(any())) } returns null
 
       val result = service.resolveUsernameConflicts(username, null)
@@ -77,10 +78,32 @@ class UsernameResolutionServiceTests :
         UsernameResResult.Success(EncryptionType.NONE, PostUsernameResolutionState.NEW_ACCOUNT)
     }
 
+    test("returns ProfileAPIFailure when profile API fails for new user") {
+      val username = Username(generateRandomString(10))
+      every { mockProfileService.fetchProfileInfo(username, any()) } throws
+        ProfileApiFetchException(username, listOf(RuntimeException("minetools error")))
+
+      val result = service.resolveUsernameConflicts(username, null)
+
+      result shouldBe UsernameResResult.Failure(UsernameResFailureReason.ProfileAPIFailure)
+    }
+
+    test("returns ProfileAPIFailure when profile API fails for existing premium user") {
+      val username = Username(generateRandomString(10))
+      every { mockProfileService.fetchProfileInfo(username, any()) } throws
+        ProfileApiFetchException(username, listOf(RuntimeException("mojang error")))
+      val existingUser =
+        User.premium(UserUuid(UUID.randomUUID()), username, MojangId(UUID.randomUUID()))
+
+      val result = service.resolveUsernameConflicts(username, existingUser)
+
+      result shouldBe UsernameResResult.Failure(UsernameResFailureReason.ProfileAPIFailure)
+    }
+
     test("existing premium user same connection username returns success, premium encryption") {
       val username = Username(generateRandomString(10))
       val premiumProfile = MojangProfile(MojangId(UUID.randomUUID()), username)
-      every { mockProfileService.fetchProfileInfo(username) } returns premiumProfile
+      every { mockProfileService.fetchProfileInfo(username, any()) } returns premiumProfile
       val existingUser =
         User.premium(UserUuid(premiumProfile.uuid.value), username, premiumProfile.uuid, false)
 
@@ -95,7 +118,7 @@ class UsernameResolutionServiceTests :
 
     test("existing nonpremium user same connection username returns success, none encryption") {
       val username = Username(generateRandomString(10))
-      every { mockProfileService.fetchProfileInfo(username) } returns null
+      every { mockProfileService.fetchProfileInfo(username, any()) } returns null
       val existingUser = User.nonPremium(UserUuid(UUID.randomUUID()), username)
 
       val result = service.resolveUsernameConflicts(username, existingUser)
@@ -109,7 +132,7 @@ class UsernameResolutionServiceTests :
       // make sure the premium profile has a different username case
       val premiumUsername = Username(invertCase(username.value))
       val premiumProfile = MojangProfile(MojangId(UUID.randomUUID()), premiumUsername)
-      every { mockProfileService.fetchProfileInfo(username) } returns premiumProfile
+      every { mockProfileService.fetchProfileInfo(username, any()) } returns premiumProfile
       val existingUser = User.nonPremium(UserUuid(premiumProfile.uuid.value), username)
 
       val result = service.resolveUsernameConflicts(username, existingUser)
@@ -123,7 +146,7 @@ class UsernameResolutionServiceTests :
     test("premium username with existing nonpremium user and same username returns success") {
       val username = Username(generateRandomString(10))
       val premiumProfile = MojangProfile(MojangId(UUID.randomUUID()), username)
-      every { mockProfileService.fetchProfileInfo(username) } returns premiumProfile
+      every { mockProfileService.fetchProfileInfo(username, any()) } returns premiumProfile
       val existingUser = User.nonPremium(UserUuid(premiumProfile.uuid.value), username)
 
       val result = service.resolveUsernameConflicts(username, existingUser)
@@ -138,7 +161,7 @@ class UsernameResolutionServiceTests :
     test("existing nonpremium user different connection username failure") {
       val username = Username(generateRandomString(10))
       val connUsername = Username(generateRandomString(10))
-      every { mockProfileService.fetchProfileInfo(connUsername) } returns null
+      every { mockProfileService.fetchProfileInfo(connUsername, any()) } returns null
       val existingUser = User.nonPremium(UserUuid(UUID.randomUUID()), username)
 
       val result = service.resolveUsernameConflicts(connUsername, existingUser)
@@ -153,7 +176,7 @@ class UsernameResolutionServiceTests :
       val username = Username(generateRandomString(10))
       val connUsername = Username(generateRandomString(10))
       val premiumProfile = MojangProfile(MojangId(UUID.randomUUID()), username)
-      every { mockProfileService.fetchProfileInfo(connUsername) } returns premiumProfile
+      every { mockProfileService.fetchProfileInfo(connUsername, any()) } returns premiumProfile
       every { mockUserService.findUserByMojangUuid(MojangId(any())) } returns null
       val existingUser =
         User.premium(UserUuid(UUID.randomUUID()), username, premiumProfile.uuid, false)
@@ -172,7 +195,7 @@ class UsernameResolutionServiceTests :
       updatedUsername: Username,
     ): MojangProfile {
       val updatedProfile = MojangProfile(mojangId, updatedUsername)
-      every { mockProfileService.fetchProfileInfo(updatedUsername) } returns updatedProfile
+      every { mockProfileService.fetchProfileInfo(updatedUsername, any()) } returns updatedProfile
       every { mockUserService.findUserByMojangUuid(mojangId) } returns existingUser
       every { mockUserService.migrateUsername(existingUser, updatedUsername) } returns
         existingUser.withNewUsername(updatedUsername)

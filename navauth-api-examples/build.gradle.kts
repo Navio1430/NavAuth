@@ -14,7 +14,3 @@ dependencies {
   compileOnly(libs.velocitypowered.velocity.api)
   annotationProcessor(libs.velocitypowered.velocity.api)
 }
-
-kotlin {
-  jvmToolchain(21)
-}

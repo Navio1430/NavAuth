@@ -16,24 +16,28 @@
  *
  */
 
-package pl.spcode.navauth.common.application.credentials.queue
+package pl.spcode.navauth.common.infra.concurrent
 
-import java.util.UUID
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.atomic.AtomicInteger
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-class EncryptionTask(
-  val playerId: UUID?,
-  private val operation: (finishTask: () -> Unit) -> Unit,
-  val onCancelled: () -> Unit,
-) {
+class NamedThreadFactory(private val prefix: String) : ThreadFactory {
 
-  @Volatile var cancelled = false
+  private val counter = AtomicInteger(0)
 
-  fun run(finishTask: () -> Unit) {
-    if (cancelled) {
-      onCancelled.invoke()
-      return
+  override fun newThread(r: Runnable): Thread {
+    return Thread(r, "$prefix-${counter.getAndIncrement()}").apply {
+      isDaemon = false
+      priority = Thread.NORM_PRIORITY
+      setUncaughtExceptionHandler { thread, ex ->
+        logger.error("Uncaught exception in thread ${thread.name}", ex)
+      }
     }
+  }
 
-    operation(finishTask)
+  companion object {
+    private val logger: Logger = LoggerFactory.getLogger(NamedThreadFactory::class.java)
   }
 }

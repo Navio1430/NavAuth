@@ -31,7 +31,3 @@ tasks.register<JavaExec>("generate") {
   classpath = sourceSets.main.get().runtimeClasspath
   mainClass.set("pl.spcode.navauth.docsgen.MainKt")
 }
-
-kotlin {
-  jvmToolchain(21)
-}

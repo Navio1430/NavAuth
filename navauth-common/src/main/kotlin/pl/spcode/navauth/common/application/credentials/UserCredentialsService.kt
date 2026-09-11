@@ -20,9 +20,11 @@ package pl.spcode.navauth.common.application.credentials
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import com.google.inject.name.Named
 import java.util.UUID
 import java.util.concurrent.CancellationException
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ThreadPoolExecutor
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.application.credentials.queue.EncryptionQueueService
@@ -41,6 +43,7 @@ constructor(
   val transactionService: TransactionService,
   val credentialsHasherFactory: CredentialsHasherFactory,
   val encryptionQueueService: EncryptionQueueService,
+  @param:Named("db") val dbExecutor: ThreadPoolExecutor,
 ) {
 
   private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -81,6 +84,7 @@ constructor(
     credentialsRepository.deleteByUser(user)
   }
 
+  // TODO: add full link qualifier for exception (requires new formatting plugin)
   /**
    * @param password the raw (not hashed) password
    * @throws
@@ -100,9 +104,10 @@ constructor(
     val future = CompletableFuture<Boolean>()
     encryptionQueueService.submitTask(
       playerId = playerId,
-      operation = {
+      operation = { finishTask ->
         try {
           val result = hasher.verify(password, passwordHash)
+          finishTask()
           future.complete(result)
         } catch (ex: Exception) {
           logger.error(
@@ -121,21 +126,21 @@ constructor(
     return future
   }
 
+  // TODO: add full link qualifier for exception (requires new formatting plugin)
   /**
    * @param password the raw (not hashed) password
    * @param playerId the id of the player for queue tracking
-   * @throws
-   *   pl.spcode.navauth.common.application.credentials.queue.EncryptionTaskAlreadyQueuedException
-   *   if task is already queued
+   * @throws EncryptionTaskAlreadyQueuedException if task is already queued
    */
   fun enqueueHashPassword(password: String, playerId: UUID): CompletableFuture<HashedPassword> {
     val hasher = credentialsHasherFactory.createDefaultHasher()
     val future = CompletableFuture<HashedPassword>()
     encryptionQueueService.submitTask(
       playerId = playerId,
-      operation = {
+      operation = { finishTask ->
         try {
           val result = hasher.hash(password)
+          finishTask()
           future.complete(result)
         } catch (ex: Exception) {
           logger.error(
@@ -163,16 +168,21 @@ constructor(
    *
    * @param user the user whose password needs to be updated
    * @param newPassword the new raw password to be hashed and stored
+   * @throws EncryptionTaskAlreadyQueuedException if task is already queued
    */
-  fun updatePassword(user: User, newPassword: String) {
-    val hashedPassword = enqueueHashPassword(newPassword, user.uuid.value).join()
-
-    transactionService.inTransaction {
-      val credentials = findCredentials(user)
-      require(credentials != null) { "user does not have credentials" }
-
-      val newCredentials = credentials.withNewPassword(hashedPassword)
-      storeUserCredentials(user, newCredentials)
-    }
+  fun updatePassword(user: User, newPassword: String): CompletableFuture<Unit> {
+    return enqueueHashPassword(newPassword, user.uuid.value)
+      .thenApplyAsync(
+        { hashedPassword ->
+          transactionService.inTransaction {
+            val credentials =
+              findCredentials(user)
+                ?: throw IllegalArgumentException("user does not have credentials")
+            val newCredentials = credentials.withNewPassword(hashedPassword)
+            storeUserCredentials(user, newCredentials)
+          }
+        },
+        dbExecutor,
+      )
   }
 }

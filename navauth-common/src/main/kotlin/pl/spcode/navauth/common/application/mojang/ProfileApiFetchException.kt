@@ -16,24 +16,21 @@
  *
  */
 
-package pl.spcode.navauth.common.application.credentials.queue
+package pl.spcode.navauth.common.application.mojang
 
-import java.util.UUID
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import pl.spcode.navauth.common.domain.user.Username
 
-class EncryptionTask(
-  val playerId: UUID?,
-  private val operation: (finishTask: () -> Unit) -> Unit,
-  val onCancelled: () -> Unit,
-) {
+class ProfileApiFetchException(username: Username, val causes: List<Exception>) :
+  RuntimeException("All APIs failed to fetch profile for $username") {
 
-  @Volatile var cancelled = false
-
-  fun run(finishTask: () -> Unit) {
-    if (cancelled) {
-      onCancelled.invoke()
-      return
-    }
-
-    operation(finishTask)
+  init {
+    val logger: Logger = LoggerFactory.getLogger(ProfileApiFetchException::class.java)
+    logger.error(
+      "All APIs failed to fetch profile for {}. Following errors occurred:",
+      username.value,
+    )
+    causes.forEach { logger.error("  - {}", it.message, it) }
   }
 }

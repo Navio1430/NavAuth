@@ -22,5 +22,8 @@ import pl.spcode.navauth.common.domain.mojang.MojangProfile
 import pl.spcode.navauth.common.domain.user.Username
 
 interface ProfileService {
-  fun fetchProfileInfo(usernameCaseIgnored: Username): MojangProfile?
+  fun fetchProfileInfo(
+    usernameCaseIgnored: Username,
+    useNotFoundCache: Boolean = false,
+  ): MojangProfile?
 }

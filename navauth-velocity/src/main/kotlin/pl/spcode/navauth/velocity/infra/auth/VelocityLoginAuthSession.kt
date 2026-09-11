@@ -27,7 +27,7 @@ import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.infra.auth.LoginAuthSession
-import pl.spcode.navauth.velocity.application.event.VelocityEventDispatcher
+import pl.spcode.navauth.velocity.application.server.VelocityServerConnectService
 import pl.spcode.navauth.velocity.extension.PlayerDisconnectExtension.Companion.disconnectIfActive
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 import pl.spcode.navauth.velocity.multification.VelocityMultification
@@ -38,7 +38,7 @@ class VelocityLoginAuthSession(
   userCredentials: UserCredentials,
   userCredentialsService: UserCredentialsService,
   scheduler: NavAuthScheduler,
-  private val velocityEventDispatcher: VelocityEventDispatcher,
+  private val serverConnectService: VelocityServerConnectService,
   private val multification: VelocityMultification,
   generalConfig: GeneralConfig,
   private val messagesConfig: MessagesConfig,
@@ -92,7 +92,7 @@ class VelocityLoginAuthSession(
       .notice(messagesConfig.multification.loginSuccess)
       .player(player.uniqueId)
       .send()
-    velocityEventDispatcher.fireVelocityChooseInitialServerEventAsync(player)
+    serverConnectService.sendPlayerToInitialServer(player)
   }
 
   override fun onInvalidate() {

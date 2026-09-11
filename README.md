@@ -9,12 +9,12 @@ We are working on additional configuration options and other improvements to pre
   <p><b>NavAuth</b> is a next-generation Minecraft login plugin built for <b>speed</b>, <b>security</b>, and seamless player authentication. Designed with modern servers in mind, it combines <b>performance</b>, <b>reliability</b>, and <b>integration flexibility</b>.</p>
 
   [![Velocity](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/supported/velocity_vector.svg)](https://modrinth.com/plugin/navauth)
-  [![Modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg)](https://modrinth.com/plugin/navauth)
   [![Github](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/github_vector.svg)](https://github.com/Navio1430/NavAuth)
+
+[//]: # (  [![Modrinth]&#40;https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg&#41;]&#40;https://modrinth.com/plugin/navauth&#41;)
 
   [![Gradle](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/built-with/gradle_vector.svg)](https://gradle.org/)
   [![Kotlin](assets/built_with_kotlin.svg)](https://kotlinlang.org/docs/home.html)
-  ![Java](assets/built_with_java.svg)
 
   [![Documentation](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/documentation/generic_vector.svg)](https://navio1430.github.io/NavAuth/docs)
   [![Kotlin](assets/read_javadoc.svg)](https://navio1430.github.io/NavAuth/javadoc)
@@ -60,6 +60,8 @@ You can also use other plugins (like Anti-VPN's) for that.
 Thanks to **NavAuth contributors**:
 - urhatedjack - logo design  
 - [KotreQ](https://github.com/KotreQ) - help with the QR code generation
+- [WejsoneKK](https://github.com/WejsoneKK) - commands configuration feature
+- [ThomasWega](https://github.com/ThomasWega) - bug hunting
 
 Thanks to **Discord support team**:
 - [Blavez](https://github.com/Blavezz)
@@ -79,10 +81,11 @@ Thanks to people that kept **LibreLoginProd alive** until NavAuth release and ke
 
 ### 🧩 Requirements
 
-* Java 21
+* Java 25
+* Velocity 4.1.2+
 * Limbo server e.g., NanoLimbo, PicoLimbo
 * Velocity forwarding set to MODERN
-* All backend servers must be 1.13+
+* All backend servers must be 1.13+ (because of modern forward)
 
 ### FAQ
 Q: Why have I switched from maintaining LibreLoginProd?  
@@ -99,12 +102,4 @@ NavAuth is licensed under the GNU AGPL v3. See the license file for more informa
 [![GNU AGPL Logo](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/agpl-3.0.en.html)
 
 ## 💡 TODO List
-More planned features are described in [Documentation](https://navio1430.github.io/NavAuth/docs/offer.html#%F0%9F%9A%80-planned-features)
-- readme:
-   - add banner
-- github/gh actions:
-   - modrinth CD
-   - issue template:
-      - bug report
-      - feature request
-- commands and messages localization
+Planned features are described in [Documentation](https://navio1430.github.io/NavAuth/docs/offer.html#%F0%9F%9A%80-planned-features)

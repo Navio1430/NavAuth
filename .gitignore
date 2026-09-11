@@ -15,6 +15,7 @@ build/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
+.idea/AndroidProjectSystem.xml
 *.iws
 *.iml
 *.ipr

@@ -16,24 +16,30 @@
  *
  */
 
-package pl.spcode.navauth.common.application.credentials.queue
+package pl.spcode.navauth.common.module
 
-import java.util.UUID
+import com.google.inject.AbstractModule
+import com.google.inject.Provides
+import com.google.inject.Singleton
+import com.google.inject.name.Named
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
+import pl.spcode.navauth.common.infra.concurrent.NamedThreadFactory
 
-class EncryptionTask(
-  val playerId: UUID?,
-  private val operation: (finishTask: () -> Unit) -> Unit,
-  val onCancelled: () -> Unit,
-) {
+class ExecutorsModule : AbstractModule() {
 
-  @Volatile var cancelled = false
-
-  fun run(finishTask: () -> Unit) {
-    if (cancelled) {
-      onCancelled.invoke()
-      return
-    }
-
-    operation(finishTask)
+  @Provides
+  @Singleton
+  @Named("db")
+  fun provideDbExecutor(): ThreadPoolExecutor {
+    return ThreadPoolExecutor(
+      0,
+      2,
+      60L,
+      TimeUnit.SECONDS,
+      SynchronousQueue(),
+      NamedThreadFactory("navauth-db"),
+    )
   }
 }

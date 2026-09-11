@@ -43,12 +43,14 @@ import pl.spcode.navauth.common.command.exception.UserResolveException
 import pl.spcode.navauth.common.command.handler.UserResolveExceptionHandler
 import pl.spcode.navauth.common.command.user.UsernameOrUuidParser
 import pl.spcode.navauth.common.command.user.UsernameOrUuidRaw
+import pl.spcode.navauth.common.config.CommandsConfig
 import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.common.config.MigrationConfig
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 import pl.spcode.navauth.common.module.*
 import pl.spcode.navauth.velocity.command.CommandsRegistry
+import pl.spcode.navauth.velocity.command.configurer.CommandConfigurer
 import pl.spcode.navauth.velocity.infra.command.VelocityInvalidUsageHandler
 import pl.spcode.navauth.velocity.infra.command.VelocityMissingPermissionExceptionHandler
 import pl.spcode.navauth.velocity.infra.command.VelocityMissingPermissionHandler
@@ -105,6 +107,9 @@ constructor(
       val migrationConfigModule =
         YamlConfigModule(MigrationConfig::class, dataDirectory.resolve("migration.yml").toFile())
 
+      val commandsConfigModule =
+        YamlConfigModule(CommandsConfig::class, dataDirectory.resolve("commands.yml").toFile())
+
       injector =
         parentInjector.createChildInjector(
           PluginDirectoryModule(dataDirectory),
@@ -112,6 +117,8 @@ constructor(
           generalConfigModule,
           messagesConfigModule,
           migrationConfigModule,
+          commandsConfigModule,
+          ExecutorsModule(),
           EventsModule(),
           VelocityMultificationsModule(velocityViewerProvider),
           VelocityCommandsModule(),
@@ -162,6 +169,7 @@ constructor(
           UserResolveException::class.java,
           UserResolveExceptionHandler(VelocityAudienceProvider(proxyServer)),
         )
+        .editorGlobal(injector.getInstance(CommandConfigurer::class.java))
         .exception(
           MissingPermissionException::class.java,
           injector.getInstance(VelocityMissingPermissionExceptionHandler::class.java),

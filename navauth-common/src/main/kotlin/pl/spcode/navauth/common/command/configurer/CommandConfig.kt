@@ -16,24 +16,13 @@
  *
  */
 
-package pl.spcode.navauth.common.application.credentials.queue
+package pl.spcode.navauth.common.command.configurer
 
-import java.util.UUID
+import eu.okaeri.configs.OkaeriConfig
+import java.util.Collections.emptyList
 
-class EncryptionTask(
-  val playerId: UUID?,
-  private val operation: (finishTask: () -> Unit) -> Unit,
-  val onCancelled: () -> Unit,
-) {
-
-  @Volatile var cancelled = false
-
-  fun run(finishTask: () -> Unit) {
-    if (cancelled) {
-      onCancelled.invoke()
-      return
-    }
-
-    operation(finishTask)
-  }
-}
+class CommandConfig(
+  var name: String? = null, // new command name
+  var enabled: Boolean = true,
+  var aliases: List<String> = emptyList(),
+) : OkaeriConfig() {}

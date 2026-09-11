@@ -26,18 +26,28 @@ import pl.spcode.navauth.common.config.MojangAPIConfig
 import pl.spcode.navauth.common.domain.mojang.MojangProfile
 import pl.spcode.navauth.common.domain.user.Username
 
+sealed interface CachedProfile {
+  data class Found(val profile: MojangProfile) : CachedProfile
+
+  data object NotFound : CachedProfile
+}
+
 @Singleton
 class ProfileCache @Inject constructor(config: MojangAPIConfig) {
 
-  private val cache: Cache<String, MojangProfile> =
+  private val cache: Cache<String, CachedProfile> =
     CacheBuilder.newBuilder().expireAfterWrite(config.profileCacheTTL).build()
 
-  fun get(username: Username): MojangProfile? {
+  fun get(username: Username): CachedProfile? {
     return cache.getIfPresent(username.value)
   }
 
-  fun put(username: Username, profile: MojangProfile) {
-    cache.put(username.value, profile)
+  fun putFound(username: Username, profile: MojangProfile) {
+    cache.put(username.value, CachedProfile.Found(profile))
+  }
+
+  fun putNotFound(username: Username) {
+    cache.put(username.value, CachedProfile.NotFound)
   }
 
   fun invalidate(username: Username) {

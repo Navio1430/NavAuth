@@ -50,7 +50,10 @@ constructor(val httpClient: HttpClient, val gson: Gson, val config: MojangAPICon
     }
   }
 
-  override fun fetchProfileInfo(usernameCaseIgnored: Username): MojangProfile? {
+  override fun fetchProfileInfo(
+    usernameCaseIgnored: Username,
+    useNotFoundCache: Boolean,
+  ): MojangProfile? {
     val requestUri =
       URI.create(
         "https://api.minecraftservices.com/minecraft/profile/lookup/name/${usernameCaseIgnored.value}"

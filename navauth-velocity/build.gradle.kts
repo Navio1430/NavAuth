@@ -54,10 +54,10 @@ dependencies {
   kapt(libs.velocitypowered.velocity.api)
 
   // bstats
-  implementation("org.bstats:bstats-velocity:3.1.0")
+  implementation(libs.bstats.velocity)
 
   // Tribufu-Rcon used in itzg containers
-  compileOnly("com.tribufu:Tribufu-VelocityRcon:1.2.0")
+  compileOnly(libs.tribufu.velocity.rcon)
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {

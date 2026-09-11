@@ -24,9 +24,10 @@ sealed class UsernameResFailureReason {
   data class UsernameMigrationFailedUsernameAlreadyTaken(val username: String) :
     UsernameResFailureReason()
 
-  data class NonPremiumWithPremiumConflict(val premiumUsername: String) :
-    UsernameResFailureReason()
+  data class NonPremiumWithPremiumConflict(val premiumUsername: String) : UsernameResFailureReason()
 
   data class NonPremiumUsernameNotIdentical(val requiredUsername: String) :
     UsernameResFailureReason()
+
+  data object ProfileAPIFailure : UsernameResFailureReason()
 }

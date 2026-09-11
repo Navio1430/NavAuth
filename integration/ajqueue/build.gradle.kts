@@ -43,5 +43,5 @@ dependencies {
   compileOnly(project(":navauth-common"))
   compileOnly(libs.velocitypowered.velocity.api)
   kapt(libs.velocitypowered.velocity.api)
-  compileOnly("us.ajg0702.queue.api:api:2.9.1")
+  compileOnly(libs.ajqueue.api)
 }

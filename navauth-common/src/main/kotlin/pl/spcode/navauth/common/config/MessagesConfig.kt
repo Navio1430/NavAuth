@@ -55,6 +55,12 @@ open class MessagesConfig : OkaeriConfig() {
       "<red>Username '%USERNAME%' is already taken! Administrator needs to resolve the conflict.</red>"
     )
 
+  @Comment("Usually caused by API rate limit.")
+  var profileApiFailureKickMessage =
+    TextComponent(
+      "<red>We couldn't verify your profile with Mojang APIs. Please try again later.</red>"
+    )
+
   var loginTimeExceededError =
     TextComponent("<red>You've exceeded login time, please try again</red>")
 
@@ -87,7 +93,7 @@ open class MessagesConfig : OkaeriConfig() {
 
   class NoticesConfig : OkaeriConfig() {
 
-    val unexpectedErrorOccurred: Notice = Notice.chat("<red>An unexpected error occurred.")
+    var unexpectedErrorOccurred: Notice = Notice.chat("<red>An unexpected error occurred.")
     var processAlreadyInProgressError: Notice =
       Notice.chat("<red>Process is already in progress. Please wait...")
 
@@ -110,6 +116,10 @@ open class MessagesConfig : OkaeriConfig() {
       )
     var accountAlreadyPremiumError: Notice =
       Notice.chat("<red>Account is already set as a premium one.")
+    var accountNotNonPremiumError: Notice =
+      Notice.chat(
+        "<red>Can't execute this command right now: your account is not a non-premium one."
+      )
 
     var alreadyTryingToLoginError: Notice =
       Notice.chat(
@@ -170,7 +180,7 @@ open class MessagesConfig : OkaeriConfig() {
         <white><bold>YOUR SECRET:</bold>
         <bold><red>⚠ NEVER share this - even with admins!</red></bold>
         <yellow>%SECRET%</yellow>
-        
+
         <click:run_command:'/generate2faqr'><aqua><b>CLICK HERE TO GENERATE QR CODE</b></click>
 
         <gray><i>⏱ Time left: %REMAINING_SECONDS%s<gray></i>
@@ -198,6 +208,8 @@ open class MessagesConfig : OkaeriConfig() {
         "<red>Can't find '%USERNAME%' user in Mojang database. This player can't be migrated to premium mode."
       )
 
+    var adminCmdPasswordSetUpdating: Notice =
+      Notice.chat("<yellow>Updating password, please wait...")
     var adminCmdPasswordSetSuccess: Notice =
       Notice.chat("<green>Success! User '%USERNAME%' password was set.")
     var adminCmdAccountMigratedToNonPremiumSuccess: Notice =
