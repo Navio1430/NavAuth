@@ -109,7 +109,7 @@ constructor(
 
     session as VelocityLoginAuthSession
 
-    if (!session.userCredentials.isTwoFactorEnabled || session.userCredentials.isPasswordRequired) {
+    if (!session.userCredentials.isTwoFactorEnabled) {
       multification.send(sender) { it.multification.cantUseThisCommandNowError }
       return
     }

@@ -75,7 +75,10 @@ constructor(private val userService: UserService, private val profileService: Pr
       // check if the letter case changed
       if (
         correspondingPremiumProfile.name != existingUserIgnoreCase.username &&
-          correspondingPremiumProfile.name.value.equals(existingUserIgnoreCase.username.value, true)
+          correspondingPremiumProfile.name.value.equals(
+            existingUserIgnoreCase.username.value,
+            true,
+          )
       ) {
         userService.migrateUsername(existingUserIgnoreCase, correspondingPremiumProfile.name)
         return success(
@@ -87,7 +90,13 @@ constructor(private val userService: UserService, private val profileService: Pr
 
     if (existingUserIgnoreCase != null && !existingUserIgnoreCase.isPremium) {
       if (isPremiumNickname) {
-        return if (existingUserIgnoreCase.username == correspondingPremiumProfile.name) {
+        // Check if usernames match case-insensitively (allow case variants as same account)
+        val sameNameIgnoreCase =
+          existingUserIgnoreCase.username.value.equals(
+            correspondingPremiumProfile.name.value,
+            ignoreCase = true,
+          )
+        return if (sameNameIgnoreCase) {
           success(
             EncryptionType.NONE,
             PostUsernameResolutionState.NONPREMIUM_WITH_SAME_PREMIUM_NICKNAME,
@@ -131,10 +140,8 @@ constructor(private val userService: UserService, private val profileService: Pr
             )
           )
         }
-        return success(EncryptionType.ENFORCE_PREMIUM, PostUsernameResolutionState.NEW_ACCOUNT)
-      } else {
-        return success(EncryptionType.NONE, PostUsernameResolutionState.NEW_ACCOUNT)
       }
+      return success(EncryptionType.NONE, PostUsernameResolutionState.NEW_ACCOUNT)
     }
 
     throw IllegalStateException(

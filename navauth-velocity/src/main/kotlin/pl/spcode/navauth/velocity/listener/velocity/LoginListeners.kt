@@ -211,15 +211,7 @@ constructor(
     val existingUser = handshakeSession.existingUser
     val uniqueSessionId = VelocityUniqueSessionId(player)
     if (handshakeSession.requestedEncryptionType == EncryptionType.ENFORCE_PREMIUM) {
-      if (existingUser != null) {
-        if (existingUser.credentialsRequired) {
-          val session =
-            authSessionFactory.createLoginAuthSession(player, uniqueSessionId, existingUser)
-          session.state = AuthSessionState.WAITING_FOR_ALLOCATION
-          return
-        }
-      }
-
+      // Premium player - auto-authenticate
       val session = authSessionFactory.createPremiumAuthSession(player, uniqueSessionId)
       // we are in postLogin event, so we can assume
       // that velocity did the verification for us
@@ -229,6 +221,7 @@ constructor(
       session.authenticate()
       return
     } else if (handshakeSession.requestedEncryptionType == EncryptionType.NONE) {
+      // Offline/cracked player - show login/register
       val session =
         if (existingUser != null) {
           authSessionFactory.createLoginAuthSession(player, uniqueSessionId, existingUser)

@@ -30,7 +30,6 @@ fun User.toRecord(): UserRecord =
     mojangUuid = mojangUuid?.value,
     username = username.value,
     usernameLowercase = username.value.lowercase(),
-    credentialsRequired = credentialsRequired,
   )
 
 fun UserRecord.toDomain(): User =
@@ -39,7 +38,6 @@ fun UserRecord.toDomain(): User =
       id = UserUuid(uuid),
       username = Username(username),
       mojangUuid = MojangId(mojangUuid),
-      requiresCredentials = credentialsRequired,
     )
   } else {
     User.nonPremium(id = UserUuid(uuid), username = Username(username))

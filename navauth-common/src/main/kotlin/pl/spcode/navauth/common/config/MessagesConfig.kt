@@ -70,9 +70,6 @@ open class MessagesConfig : OkaeriConfig() {
   var loginTooManyAttemptsError =
     TextComponent("<red>Too many login attempts. Please try again later.")
 
-  var adminCopyPasswordText =
-    "<aqua><bold><click:copy_to_clipboard:%PASSWORD%>CLICK HERE TO COPY</click>"
-
   var yourAccountDataHasBeenMigrated =
     TextComponent("<green>Your account data has been migrated to '%USERNAME%'.")
 
@@ -97,29 +94,24 @@ open class MessagesConfig : OkaeriConfig() {
     var processAlreadyInProgressError: Notice =
       Notice.chat("<red>Process is already in progress. Please wait...")
 
-    var passwordRequiredError: Notice = Notice.chat("<red>Please provide your current password.")
     var twoFactorAlreadyEnabledError: Notice =
       Notice.chat("<red>Your account has 2FA enabled already!")
 
     var missingPermissionError: Notice =
       Notice.chat("<red>You don't have permission to execute this command.")
     var invalidUsageError: Notice = Notice.chat("<red>Invalid command usage!")
+
     @Comment("Invalid usage scheme line (single text component only).")
     var invalidUsageLine: TextComponent = TextComponent("<gray> • %SCHEME%")
 
     var cantUseThisCommandNowError: Notice = Notice.chat("<red>Can't use this command right now.")
-    var commandPasswordNotSetForAccountError: Notice =
-      Notice.chat("<red>Can't execute this command right now: your account has no password set.")
+
     var commandNoPremiumAccountWithUsername: Notice =
       Notice.chat(
         "<red>Can't set this account as premium because there's no premium account with username '%USERNAME%'."
       )
     var accountAlreadyPremiumError: Notice =
       Notice.chat("<red>Account is already set as a premium one.")
-    var accountNotNonPremiumError: Notice =
-      Notice.chat(
-        "<red>Can't execute this command right now: your account is not a non-premium one."
-      )
 
     var alreadyTryingToLoginError: Notice =
       Notice.chat(
@@ -134,8 +126,7 @@ open class MessagesConfig : OkaeriConfig() {
 
     var loginPasswordOnlyInstruction: Notice =
       Notice.chat("<green>Please login using \"/login <password>\" command.</green>")
-    var loginTwoFactorOnlyInstruction: Notice =
-      Notice.chat("<green>Please login using \"/2fa <code>\" command.</green>")
+
     var loginPasswordAndTwoFactorInstruction: Notice =
       Notice.chat("<green>Please login using \"/login <password> <2fa_code>\" command.</green>")
     var loggingInInfo: Notice = Notice.chat("<yellow>Logging in, please wait...</yellow>")
@@ -213,9 +204,7 @@ open class MessagesConfig : OkaeriConfig() {
     var adminCmdPasswordSetSuccess: Notice =
       Notice.chat("<green>Success! User '%USERNAME%' password was set.")
     var adminCmdAccountMigratedToNonPremiumSuccess: Notice =
-      Notice.chat(
-        "<green>User '%USERNAME%' has been successfully migrated to non-premium mode. Their new password is: %PASSWORD_TEXT%"
-      )
+      Notice.chat("<green>User '%USERNAME%' has been successfully migrated to non-premium mode.")
     var adminCmdUserDataMigratedSuccess: Notice =
       Notice.chat(
         "<green>Success! User '%OLD_USERNAME%' data has been migrated to '%NEW_USERNAME%'."

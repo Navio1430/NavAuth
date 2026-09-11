@@ -60,17 +60,7 @@ constructor(
   ) {
     val user = userService.findUserByExactUsername(sender.username)!!
 
-    if (user.isPremium) {
-      multification.send(sender) { it.multification.accountNotNonPremiumError }
-      return
-    }
-
     val credentials = userCredentialsService.findCredentials(user)!!
-
-    if (!credentials.isPasswordRequired) {
-      multification.send(sender) { it.multification.commandPasswordNotSetForAccountError }
-      return
-    }
 
     try {
       userCredentialsService
