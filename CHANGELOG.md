@@ -63,6 +63,7 @@
 ### Fixes
 - fix register command always using BCrypt instead of the selected algo
 - fix different letter case same username migration
+- fix concurrent logins of a renamed premium account throwing out of the PreLoginEvent handler
 
 ### API
 ```diff

@@ -47,15 +47,22 @@ constructor(private val userService: UserService, private val profileService: Pr
     if (existingUserIgnoreCase == null && isPremiumNickname) {
       val userByMojangUuid = userService.findUserByMojangUuid(correspondingPremiumProfile.uuid)
       if (userByMojangUuid != null) {
-        // user with the same mojang uuid exists, but with different nickname
-        try {
-          userService.migrateUsername(userByMojangUuid, correspondingPremiumProfile.name)
-        } catch (e: UsernameAlreadyTakenException) {
-          return failure(
-            UsernameResFailureReason.UsernameMigrationFailedUsernameAlreadyTaken(
-              correspondingPremiumProfile.name.value
+        // user with the same mojang uuid exists, but usually with a different nickname.
+        // The stored username can already be the profile one when a concurrent login for the same
+        // account committed the migration between the caller's lookup and this branch: then
+        // `existingUserIgnoreCase` is a stale null while the row is already migrated. There is
+        // nothing left to migrate, and asking UserService to do it anyway would throw
+        // IllegalArgumentException out of the login pipeline.
+        if (userByMojangUuid.username != correspondingPremiumProfile.name) {
+          try {
+            userService.migrateUsername(userByMojangUuid, correspondingPremiumProfile.name)
+          } catch (e: UsernameAlreadyTakenException) {
+            return failure(
+              UsernameResFailureReason.UsernameMigrationFailedUsernameAlreadyTaken(
+                correspondingPremiumProfile.name.value
+              )
             )
-          )
+          }
         }
         if (connUsername != correspondingPremiumProfile.name) {
           return failure(

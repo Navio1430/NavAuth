@@ -22,6 +22,11 @@ import com.google.inject.Inject
 import extension.app.UsernameResolutionTestExtension
 import fake.FakeProfileService
 import java.util.UUID
+import java.util.concurrent.Callable
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.CyclicBarrier
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -247,6 +252,80 @@ class UsernameResolutionServiceIntegrationTests {
       ),
       result,
     )
+  }
+
+  @Test
+  fun `premium user already renamed by a concurrent login resolves without failing`() {
+    val mojangId = MojangId(UUID.randomUUID())
+    val userUuid = UserUuid(UUID.randomUUID())
+    val username = Username(generateRandomString(10))
+    // State left behind by a login that already committed the rename.
+    userRepository.save(User.premium(userUuid, username, mojangId))
+    fakeProfileService.addProfile(username, MojangProfile(mojangId, username))
+
+    // The caller looked the user up before that rename was committed, so it hands over a stale
+    // null while the row already carries the Mojang username.
+    val result = usernameResolutionService.resolveUsernameConflicts(username, null)
+
+    assertEquals(
+      UsernameResResult.Success(
+        EncryptionType.ENFORCE_PREMIUM,
+        PostUsernameResolutionState.PREMIUM_USERNAME_MIGRATED,
+      ),
+      result,
+    )
+    assertEquals(username, userRepository.findByUserUuid(userUuid)!!.username)
+  }
+
+  @Test
+  fun `concurrent logins of a renamed premium user never fail the resolution`() {
+    val executor = Executors.newFixedThreadPool(2)
+    try {
+      repeat(32) {
+        val mojangId = MojangId(UUID.randomUUID())
+        val userUuid = UserUuid(UUID.randomUUID())
+        val oldUsername = Username(generateRandomString(10))
+        val newUsername = Username(generateRandomString(10))
+        userRepository.save(User.premium(userUuid, oldUsername, mojangId))
+        fakeProfileService.addProfile(newUsername, MojangProfile(mojangId, newUsername))
+
+        // Two PreLoginEvents racing for the same account. Both read the pre-rename state, then
+        // the second one resolves after the first has committed the migration, so it works on a
+        // stale null while the row already carries the new username. The latch only makes that
+        // interleaving deterministic; on a live proxy it is what two reconnects milliseconds
+        // apart produce.
+        val bothLookedUp = CyclicBarrier(2)
+        val firstResolved = CountDownLatch(1)
+        val logins =
+          (1..2).map { login ->
+            executor.submit(
+              Callable {
+                val existingUser = userService.findUserByUsernameIgnoreCase(newUsername.value)
+                bothLookedUp.await(20, TimeUnit.SECONDS)
+                if (login == 2) check(firstResolved.await(20, TimeUnit.SECONDS))
+                try {
+                  usernameResolutionService.resolveUsernameConflicts(newUsername, existingUser)
+                } finally {
+                  if (login == 1) firstResolved.countDown()
+                }
+              }
+            )
+          }
+
+        logins.forEach { login ->
+          assertEquals(
+            UsernameResResult.Success(
+              EncryptionType.ENFORCE_PREMIUM,
+              PostUsernameResolutionState.PREMIUM_USERNAME_MIGRATED,
+            ),
+            login.get(30, TimeUnit.SECONDS),
+          )
+        }
+        assertEquals(newUsername, userRepository.findByUserUuid(userUuid)!!.username)
+      }
+    } finally {
+      executor.shutdownNow()
+    }
   }
 
   @Test
