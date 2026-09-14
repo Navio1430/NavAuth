@@ -16,7 +16,7 @@ dependencies {
 
   // navauth-velocity module
   implementation("com.github.Steppschuh:Java-Markdown-Generator:1.3.2")
-  implementation("dev.rollczi:litecommands-velocity:3.10.6")
+  implementation("dev.rollczi:litecommands-velocity:3.11.0")
 
   implementation(libs.velocitypowered.velocity.api)
 }
