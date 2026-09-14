@@ -17,7 +17,7 @@ mysql = "26.7.0"
 postgresql = "42.7.13"
 sqlite = "3.53.4.0"
 zxing = "3.5.4"
-kotest = "6.2.4"
+kotest = "6.2.5"
 mockk = "1.14.11"
 ajqueue-api = "2.9.1"
 # plugins
