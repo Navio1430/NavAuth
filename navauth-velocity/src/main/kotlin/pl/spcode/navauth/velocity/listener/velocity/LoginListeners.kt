@@ -117,6 +117,9 @@ constructor(
             is UsernameResFailureReason.PremiumUsernameNotIdentical -> {
               premiumUsernameRequiredDeniedResult(connUsername, failureReason.requiredUsername)
             }
+            is UsernameResFailureReason.PremiumUsernameOwnedByAnotherAccount -> {
+              premiumUsernameOwnedByAnotherAccountDeniedResult(failureReason.username)
+            }
             is UsernameResFailureReason.NonPremiumWithPremiumConflict -> {
               usernameConflictDeniedResult(failureReason.premiumUsername)
             }
@@ -288,6 +291,19 @@ constructor(
       )
 
     return PreLoginEvent.PreLoginComponentResult.denied(component)
+  }
+
+  private fun premiumUsernameOwnedByAnotherAccountDeniedResult(
+    username: String
+  ): PreLoginEvent.PreLoginComponentResult {
+    val comp =
+      withSupportFooter(
+        componentWithUsernamePlaceholder(
+          messagesConfig.premiumUsernameOwnedByAnotherAccountError,
+          username,
+        )
+      )
+    return PreLoginEvent.PreLoginComponentResult.denied(comp)
   }
 
   private fun usernameConflictDeniedResult(

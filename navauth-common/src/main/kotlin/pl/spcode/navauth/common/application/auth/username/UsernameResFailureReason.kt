@@ -29,5 +29,8 @@ sealed class UsernameResFailureReason {
   data class NonPremiumUsernameNotIdentical(val requiredUsername: String) :
     UsernameResFailureReason()
 
+  data class PremiumUsernameOwnedByAnotherAccount(val username: String) :
+    UsernameResFailureReason()
+
   data object ProfileAPIFailure : UsernameResFailureReason()
 }

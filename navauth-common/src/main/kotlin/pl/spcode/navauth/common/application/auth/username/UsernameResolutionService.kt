@@ -112,6 +112,18 @@ constructor(private val userService: UserService, private val profileService: Pr
     }
 
     if (existingUserIgnoreCase != null && existingUserIgnoreCase.isPremium) {
+      // A premium account is bound to its Mojang UUID, not to its username. When the name is a
+      // premium name but the Mojang-verified UUID differs from the stored one, this is a DIFFERENT
+      // account that only re-claimed a released username - it must not be logged into the stored
+      // account. Without this guard a released-then-reclaimed username hands the previous owner's
+      // identity (and its permissions) to the new holder.
+      if (isPremiumNickname && existingUserIgnoreCase.mojangUuid != correspondingPremiumProfile.uuid) {
+        return failure(
+          UsernameResFailureReason.PremiumUsernameOwnedByAnotherAccount(
+            correspondingPremiumProfile.name.value
+          )
+        )
+      }
       if (connUsername.value != existingUserIgnoreCase.username.value) {
         return failure(
           UsernameResFailureReason.PremiumUsernameNotIdentical(
