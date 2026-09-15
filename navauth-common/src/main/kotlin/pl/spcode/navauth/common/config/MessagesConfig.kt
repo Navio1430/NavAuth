@@ -55,6 +55,12 @@ open class MessagesConfig : OkaeriConfig() {
       "<red>Username '%USERNAME%' is already taken! Administrator needs to resolve the conflict.</red>"
     )
 
+  var premiumUsernameOwnedByAnotherAccountError =
+    TextComponent(
+      "<red>This username '%USERNAME%' belongs to a different premium account and cannot be used " +
+        "to log in here.<br>It was registered by a previous owner before the name was released."
+    )
+
   @Comment("Usually caused by API rate limit.")
   var profileApiFailureKickMessage =
     TextComponent(
