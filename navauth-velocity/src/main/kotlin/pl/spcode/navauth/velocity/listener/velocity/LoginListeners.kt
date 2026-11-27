@@ -70,6 +70,25 @@ constructor(
   fun onPreLogin(event: PreLoginEvent) {
     if (!event.result.isAllowed) return
 
+    try {
+      handlePreLogin(event)
+    } catch (t: Throwable) {
+      logger.error(
+        "Unexpected error during PreLogin for username '{}', denying connection",
+        event.username,
+        t,
+      )
+      event.result =
+        PreLoginEvent.PreLoginComponentResult.denied(
+          Component.text(
+            "NavAuth: Internal authentication error, please try again.",
+            TextColors.RED,
+          )
+        )
+    }
+  }
+
+  private fun handlePreLogin(event: PreLoginEvent) {
     val connUsername = event.username
 
     if (usernameValidator.isValid(connUsername).not()) {
@@ -187,11 +206,31 @@ constructor(
   @Subscribe
   fun onGameProfile(event: GameProfileRequestEvent) {
     val sessionId = VelocityUniqueSessionId(event.username, event.connection.remoteAddress)
-    val session = authHandshakeSessionService.findSession(sessionId)!!
+    val session = authHandshakeSessionService.findSession(sessionId)
+    if (session == null) {
+      logger.warn(
+        "Player {} went through gameProfile event without auth handshake session",
+        event.username,
+      )
+      return
+    }
 
     val profile: GameProfile
     if (session.existingUser != null) {
       val user = session.existingUser!!
+      if (
+        session.requestedEncryptionType == EncryptionType.ENFORCE_PREMIUM &&
+          user.mojangUuid?.value != event.originalProfile.id
+      ) {
+        logger.warn(
+          "Mojang UUID mismatch in GameProfileRequestEvent for '{}': stored={}, verified={}",
+          event.username,
+          user.mojangUuid?.value,
+          event.originalProfile.id,
+        )
+        authHandshakeSessionService.closeSession(sessionId)
+        return
+      }
       profile = GameProfile(user.uuid.value, user.username.value, event.originalProfile.properties)
     } else {
       profile = event.originalProfile
@@ -211,6 +250,18 @@ constructor(
     val existingUser = handshakeSession.existingUser
     val uniqueSessionId = VelocityUniqueSessionId(player)
     if (handshakeSession.requestedEncryptionType == EncryptionType.ENFORCE_PREMIUM) {
+      if (!player.isOnlineMode) {
+        logger.warn(
+          "Rejected ENFORCE_PREMIUM session for offline-mode player {}:{}",
+          username,
+          player.uniqueId,
+        )
+        player.disconnectIfActive(
+          Component.text("NavAuth: Online-mode verification required.", TextColors.RED)
+        )
+        return
+      }
+
       if (existingUser != null) {
         if (existingUser.credentialsRequired) {
           val session =

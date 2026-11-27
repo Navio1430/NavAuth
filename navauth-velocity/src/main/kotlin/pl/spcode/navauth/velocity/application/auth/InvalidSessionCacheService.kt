@@ -22,10 +22,10 @@ import com.google.common.cache.CacheBuilder
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.velocitypowered.api.proxy.InboundConnection
+import java.net.InetAddress
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.toJavaDuration
 import pl.spcode.navauth.common.config.GeneralConfig
-import pl.spcode.navauth.common.domain.common.IPAddress
 
 /**
  * Service used to make the invalid session error more descriptive, which is a significant UX
@@ -42,7 +42,7 @@ class InvalidSessionCacheService @Inject constructor(val generalConfig: GeneralC
       .build<String, ConnectionCache>()
 
   fun cachePremiumConnection(username: String, connection: InboundConnection) {
-    val ip = IPAddress.fromInetAddress(connection.remoteAddress.address)
+    val ip = connection.remoteAddress.address
     val obj = ConnectionCache(username, ip, connection.protocolVersion.protocol)
     cache.put(username, obj)
   }
@@ -54,11 +54,8 @@ class InvalidSessionCacheService @Inject constructor(val generalConfig: GeneralC
   fun isInvalidSessionReconnect(username: String, connection: InboundConnection): Boolean {
     val cached = cache.getIfPresent(username) ?: return false
     if (!cached.passedEncryption) {
-      val ip = IPAddress.fromInetAddress(connection.remoteAddress.address)
-      if (
-        cached.ip.compareTo(ip) == 0 &&
-          cached.protocolVersion == connection.protocolVersion.protocol
-      ) {
+      val ip = connection.remoteAddress.address
+      if (cached.ip == ip && cached.protocolVersion == connection.protocolVersion.protocol) {
         return true
       }
     }
@@ -72,7 +69,7 @@ class InvalidSessionCacheService @Inject constructor(val generalConfig: GeneralC
   /** @param passedEncryption DO NOT USE THIS FOR SECURITY!!! */
   data class ConnectionCache(
     val username: String,
-    val ip: IPAddress,
+    val ip: InetAddress,
     val protocolVersion: Int,
     var passedEncryption: Boolean = false,
   )
