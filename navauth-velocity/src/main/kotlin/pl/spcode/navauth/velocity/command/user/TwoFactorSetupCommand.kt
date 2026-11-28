@@ -99,19 +99,7 @@ constructor(
                 return@supplyAsync
               }
 
-              val secret = TOTP2FA().generateSecret()
-              val session =
-                totpSetupSessionFactory.createSession(VelocityPlayerAdapter(sender), secret)
-              totpSetupSessionService.registerSession(UserUuid(sender.uniqueId), session)
-
-              val remainingSeconds = TotpSetupSessionService.SESSION_LIFETIME_SECONDS
-              multification
-                .create()
-                .player(sender.uniqueId)
-                .notice(messages.multification.twoFactorSetupInstruction)
-                .placeholder("%SECRET%", secret.value)
-                .placeholder("%REMAINING_SECONDS%", remainingSeconds.toString())
-                .send()
+              startSetupSession(sender)
             }
           }
       } catch (_: EncryptionTaskAlreadyQueuedException) {
@@ -119,6 +107,25 @@ constructor(
       }
       return
     }
+
+    // no password (premium account, or no credentials row yet): the player is already
+    // authenticated, so the setup starts without a password step
+    startSetupSession(sender)
+  }
+
+  private fun startSetupSession(sender: Player) {
+    val secret = TOTP2FA().generateSecret()
+    val session = totpSetupSessionFactory.createSession(VelocityPlayerAdapter(sender), secret)
+    totpSetupSessionService.registerSession(UserUuid(sender.uniqueId), session)
+
+    val remainingSeconds = TotpSetupSessionService.SESSION_LIFETIME_SECONDS
+    multification
+      .create()
+      .player(sender.uniqueId)
+      .notice(messages.multification.twoFactorSetupInstruction)
+      .placeholder("%SECRET%", secret.value)
+      .placeholder("%REMAINING_SECONDS%", remainingSeconds.toString())
+      .send()
   }
 
   @Async
