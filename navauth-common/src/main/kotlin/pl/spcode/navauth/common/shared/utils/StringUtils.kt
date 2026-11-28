@@ -18,12 +18,17 @@
 
 package pl.spcode.navauth.common.shared.utils
 
+import java.security.SecureRandom
+import kotlin.random.asKotlinRandom
+
 class StringUtils {
 
   companion object {
+    private val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+    private val random = SecureRandom().asKotlinRandom()
+
     fun generateRandomString(length: Int): String {
-      val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
-      return (1..length).map { allowedChars.random() }.joinToString("")
+      return (1..length).map { allowedChars.random(random) }.joinToString("")
     }
   }
 }
