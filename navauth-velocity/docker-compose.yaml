@@ -2,11 +2,11 @@ name: navauth-velocity
 
 services:
 
-  limbo:
-    image: ghcr.io/quozul/picolimbo:latest
-    restart: unless-stopped
-    volumes:
-      - ./run/limbo/server.toml:/usr/src/app/server.toml
+#  limbo:
+#    image: ghcr.io/quozul/picolimbo:latest
+#    restart: unless-stopped
+#    volumes:
+#      - ./run/limbo/server.toml:/usr/src/app/server.toml
 
   velocity:
     image: itzg/mc-proxy
@@ -19,27 +19,91 @@ services:
       - JVM_OPTS=-Dlog4j.configurationFile=log4j2.xml
       - JVM_XX_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
       - ENABLE_RCON=TRUE
-      - MINECRAFT_VERSION=1.21.10
-      - MODRINTH_PROJECTS=luckperms:release
-
+      - MINECRAFT_VERSION=LATEST
+#      - MODRINTH_PROJECTS=luckperms:release
+      - LUCKPERMS_STORAGE_METHOD=postgresql
+      - LUCKPERMS_DATA_ADDRESS=postgres:5432
+      - LUCKPERMS_DATA_DATABASE=db
+      - LUCKPERMS_DATA_USERNAME=admin
+      - LUCKPERMS_DATA_PASSWORD=password
     volumes:
       - ./run/velocity/plugins:/plugins
+      - ./run/velocity/minimotd-velocity:/server/plugins/minimotd-velocity
       - ./run/velocity/navauth:/server/plugins/navauth
+      - ./run/velocity/picolimbo:/server/plugins/pico_limbo_java_wrapper
+      - ./run/velocity/hivesync:/server/plugins/hivesync
+      - ./run/velocity/config:/config
+
+  velocity2:
+    image: itzg/mc-proxy
+    ports:
+      - "25578:25577"
+    environment:
+      - TYPE=VELOCITY
+      - EULA=TRUE
+      - JVM_OPTS=-Dlog4j.configurationFile=log4j2.xml
+      - JVM_XX_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+      - ENABLE_RCON=TRUE
+      - MINECRAFT_VERSION=1.21.10
+#      - MODRINTH_PROJECTS=luckperms:release
+      - LUCKPERMS_STORAGE_METHOD=postgresql
+      - LUCKPERMS_DATA_ADDRESS=postgres:5432
+      - LUCKPERMS_DATA_DATABASE=db
+      - LUCKPERMS_DATA_USERNAME=admin
+      - LUCKPERMS_DATA_PASSWORD=password
+    volumes:
+      - ./run/velocity/plugins:/plugins
+      - ./run/velocity/minimotd-velocity:/server/plugins/minimotd-velocity
+      - ./run/velocity/navauth:/server/plugins/navauth
+      - ./run/velocity/hivesync:/server/plugins/hivesync
       - ./run/velocity/config:/config
 
   paper:
     hostname: paper1
     image: itzg/minecraft-server
+    ports:
+      - "5006:5005"
     environment:
       - EULA=TRUE
       - TYPE=PAPER
       - VERSION=1.21.10
       - ONLINE_MODE=FALSE
-      - MODRINTH_PROJECTS=luckperms:beta,viaversion:beta,viabackwards:beta
+#      - MODRINTH_PROJECTS=luckperms:beta,viaversion:beta,viabackwards:beta
       - JVM_OPTS=-Dlog4j.configurationFile=log4j2.xml
-#      - JVM_XX_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+      - JVM_XX_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+      - REPLACE_ENV_VARIABLES="TRUE"
+      - ENV_VARIABLE_PREFIX="CFG_"
+      - LUCKPERMS_STORAGE_METHOD=postgresql
+      - LUCKPERMS_DATA_ADDRESS=postgres:5432
+      - LUCKPERMS_DATA_DATABASE=db
+      - LUCKPERMS_DATA_USERNAME=admin
+      - LUCKPERMS_DATA_PASSWORD=password
     volumes:
       - ./run/paper:/data/
+
+  paper2:
+    hostname: paper2
+    image: itzg/minecraft-server
+    ports:
+      - "5007:5005"
+    environment:
+      - EULA=TRUE
+      - TYPE=PAPER
+      - VERSION=1.21.10
+      - ONLINE_MODE=FALSE
+#      - MODRINTH_PROJECTS=luckperms:beta,viaversion:beta,viabackwards:beta
+      - JVM_OPTS=-Dlog4j.configurationFile=log4j2.xml
+      - JVM_XX_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+      - REPLACE_ENV_VARIABLES="TRUE"
+      - ENV_VARIABLE_PREFIX="CFG_"
+      - LUCKPERMS_STORAGE_METHOD=postgresql
+      - LUCKPERMS_DATA_ADDRESS=postgres:5432
+      - LUCKPERMS_DATA_DATABASE=db
+      - LUCKPERMS_DATA_USERNAME=admin
+      - LUCKPERMS_DATA_PASSWORD=password
+    volumes:
+      - ./run/paper/plugins:/data/plugins/
+      - ./run/paper2:/data/
 
   postgres:
     image: postgres
@@ -50,3 +114,22 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_USER: admin
       POSTGRES_DB: db
+
+  redis:
+    image: bitnami/redis:latest
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - '6379:6379'
+    volumes:
+      - 'redis_data:/bitnami/redis/data'
+
+volumes:
+  redis_data:
+    driver: local
+
+secrets:
+  velocity_secret:
+    file: ./run/velocity_secret.txt

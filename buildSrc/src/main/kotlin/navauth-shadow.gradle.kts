@@ -10,6 +10,9 @@ val relocatePrefix = "pl.spcode.navauth.lib"
 
 tasks.named<ShadowJar>("shadowJar") {
   duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+  // EXCLUDE would keep only the first jar's copy; Flyway finds its plugins only in the merged files
+  filesMatching("META-INF/services/**") { duplicatesStrategy = DuplicatesStrategy.INCLUDE }
+  mergeServiceFiles()
 
   fun relocatePrefixed(pkg: String) {
     relocate(pkg, "$relocatePrefix.$pkg")
@@ -25,11 +28,13 @@ tasks.named<ShadowJar>("shadowJar") {
 
   exclude("org/slf4j/**")
 
+  // also matches kotlinx (coroutines, datetime)
   relocatePrefixed("kotlin")
+  relocatePrefixed("_COROUTINE")
   relocatePrefixed("org.bstats")
   relocatePrefixed("at.favre")
   relocatePrefixed("com.eternalcode")
-  relocatePrefixed("com.j256")
+  relocatePrefixed("com.fasterxml")
   relocatePrefixed("com.mysql")
   relocatePrefixed("com.zaxxer")
   relocatePrefixed("dev.rollczi")
@@ -40,11 +45,14 @@ tasks.named<ShadowJar>("shadowJar") {
   relocatePrefixed("org.aopalliance")
   relocatePrefixed("org.bouncycastle")
   relocatePrefixed("org.checkerframework")
+  relocatePrefixed("org.flywaydb")
+  // keep this name: H2 database files store class names from this package
   relocatePrefixed("org.h2")
   relocatePrefixed("org.intellij")
   relocatePrefixed("org.jetbrains")
   relocatePrefixed("org.postgresql")
-  // todo make sure we relocate this or something
-//  relocatePrefixed("org.sqlite")
+  // not org.sqlite: its native code finds org/sqlite/core/NativeDB by name (NoClassDefFoundError)
   relocatePrefixed("org.yaml")
+  // Jackson 3, pulled in by Flyway
+  relocatePrefixed("tools.jackson")
 }
