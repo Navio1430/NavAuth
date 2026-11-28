@@ -198,6 +198,10 @@ open class MessagesConfig : OkaeriConfig() {
     var twoFactorWrongCodeError: Notice = Notice.chat("<red>Wrong 2FA code!")
     var twoFactorAlreadyDisabledError: Notice =
       Notice.chat("<red>Your account has 2FA disabled already.")
+    var twoFactorDisablePasswordRequiredError: Notice =
+      Notice.chat(
+        "<red>Your account has no password, so 2FA cannot be disabled. Ask an administrator to set a password first."
+      )
 
     var twoFactorSetupInstruction: Notice =
       Notice.chat(

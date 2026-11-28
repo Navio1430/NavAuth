@@ -60,6 +60,12 @@ constructor(
       return
     }
 
+    // a cracked account needs a password to log in once its 2FA secret is gone
+    if (!user.isPremium && !credentials.isPasswordRequired) {
+      multification.send(sender) { it.multification.twoFactorDisablePasswordRequiredError }
+      return
+    }
+
     if (!userCredentialsService.verifyCode(credentials, code)) {
       multification.send(sender) { it.multification.twoFactorWrongCodeError }
       return

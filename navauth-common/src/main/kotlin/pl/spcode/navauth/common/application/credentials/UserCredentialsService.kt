@@ -201,8 +201,9 @@ constructor(
   }
 
   /**
-   * Updates the password for a given user to a new hashed password. Validates that the user has
-   * existing credentials before updating.
+   * Updates the password for a given user to a new hashed password, keeping a 2FA secret. A
+   * non-premium user without a credentials row (left without one by an older release) gets a new
+   * row with the password; a premium user must already have credentials.
    *
    * @param user the user whose password needs to be updated
    * @param newPassword the new raw password to be hashed and stored
@@ -213,10 +214,13 @@ constructor(
       .thenApplyAsync(
         { hashedPassword ->
           transactionService.inTransaction {
-            val credentials =
-              findCredentials(user)
-                ?: throw IllegalArgumentException("user does not have credentials")
-            val newCredentials = credentials.withNewPassword(hashedPassword)
+            val credentials = findCredentials(user)
+            val newCredentials =
+              when {
+                credentials != null -> credentials.withNewPassword(hashedPassword)
+                !user.isPremium -> UserCredentials.create(user, hashedPassword, null)
+                else -> throw IllegalArgumentException("user does not have credentials")
+              }
             storeUserCredentials(user, newCredentials)
           }
         },

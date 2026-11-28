@@ -299,6 +299,8 @@ constructor(
         val newCredentials = credentials.withoutTotpSecret()
         userCredentialsService.storeUserCredentials(user, newCredentials)
       } else {
+        // a cracked account always needs credentials: deleting its only row would lock it out
+        check(user.isPremium) { "cannot disable 2FA of a non-premium account without a password" }
         deleteUserCredentialsUpdateUserNoTx(user)
       }
     }
