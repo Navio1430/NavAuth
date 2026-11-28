@@ -36,8 +36,19 @@ abstract class AuthSession<T : PlayerAdapter>(val playerAdapter: T, val eventBus
 
   var state: AuthSessionState = AuthSessionState.WAITING_FOR_ALLOCATION
 
+  @Volatile
   var isAuthenticated: Boolean = false
     private set
+
+  /** True once the auth service has closed this session. */
+  @Volatile
+  var isInvalidated: Boolean = false
+    private set
+
+  /** Marks the session as closed; called by the auth service before [onInvalidate]. */
+  fun markInvalidated() {
+    isInvalidated = true
+  }
 
   fun authenticate() {
     if (!playerAdapter.isOnline()) return

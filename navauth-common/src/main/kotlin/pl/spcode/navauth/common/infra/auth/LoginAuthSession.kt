@@ -19,6 +19,8 @@
 package pl.spcode.navauth.common.infra.auth
 
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import pl.spcode.navauth.api.domain.auth.AuthSessionType
 import pl.spcode.navauth.api.event.NavAuthEventBus
 import pl.spcode.navauth.common.application.credentials.UserCredentialsService
@@ -36,7 +38,10 @@ open class LoginAuthSession<T : PlayerAdapter>(
   eventBus: NavAuthEventBus,
 ) : AuthSession<T>(playerAdapter, eventBus) {
 
-  private var attemptsLeft = maxLoginAttempts
+  private val attemptsLeft = AtomicInteger(maxLoginAttempts)
+
+  /** Set while one authentication attempt of this session is being verified. */
+  private val attemptInProgress = AtomicBoolean(false)
 
   override fun getSessionType(): AuthSessionType {
     return AuthSessionType.LOGIN
@@ -58,28 +63,68 @@ open class LoginAuthSession<T : PlayerAdapter>(
    * @return CompletableFuture with AuthTaskResult
    * @throws IllegalArgumentException if `password` or `twoFactorCode` is required by the user
    *   credentials but not provided
-   * @throws EncryptionTaskAlreadyQueuedException if an encryption task is already queued
+   * @throws EncryptionTaskAlreadyQueuedException if an encryption task is already queued or another
+   *   attempt of this session is still being verified
+   *
+   * An attempt is not verified when the session is already authenticated (returns `Success`), was
+   * invalidated or has no attempts left (returns `FailedTooManyAttempts`).
    */
   fun enqueueAuthTask(
     password: String?,
     twoFactorCode: String?,
   ): CompletableFuture<AuthTaskResult> {
-    return tryAuth(password, twoFactorCode).thenApply { result ->
-      when (result) {
-        AuthTaskResult.WrongCredentials -> {
-          attemptsLeft -= 1
-          if (attemptsLeft <= 0) {
-            onTooManyLoginAttempts()
-            return@thenApply AuthTaskResult.FailedTooManyAttempts
-          }
-        }
-        AuthTaskResult.Success -> {
-          authenticate()
-        }
-        else -> {}
-      }
-      return@thenApply result
+    // only one attempt of this session is verified at a time, whatever the command thread
+    if (!attemptInProgress.compareAndSet(false, true)) {
+      throw EncryptionTaskAlreadyQueuedException()
     }
+
+    val verification: CompletableFuture<AuthTaskResult>
+    try {
+      if (isAuthenticated) {
+        attemptInProgress.set(false)
+        return CompletableFuture.completedFuture(AuthTaskResult.Success)
+      }
+      if (isInvalidated || attemptsLeft.get() <= 0) {
+        attemptInProgress.set(false)
+        return CompletableFuture.completedFuture(AuthTaskResult.FailedTooManyAttempts)
+      }
+      verification = tryAuth(password, twoFactorCode)
+    } catch (throwable: Throwable) {
+      attemptInProgress.set(false)
+      throw throwable
+    }
+
+    val resultFuture = CompletableFuture<AuthTaskResult>()
+    verification.whenComplete { result, throwable ->
+      val handled =
+        if (throwable != null) Result.failure(throwable) else runCatching { handleResult(result) }
+      // released only after the result is applied, so a following attempt sees the new state
+      attemptInProgress.set(false)
+      handled.fold(
+        onSuccess = { resultFuture.complete(it) },
+        onFailure = { resultFuture.completeExceptionally(it) },
+      )
+    }
+    return resultFuture
+  }
+
+  private fun handleResult(result: AuthTaskResult): AuthTaskResult {
+    when (result) {
+      AuthTaskResult.WrongCredentials -> {
+        val left = attemptsLeft.decrementAndGet()
+        if (left <= 0) {
+          if (left == 0) {
+            onTooManyLoginAttempts()
+          }
+          return AuthTaskResult.FailedTooManyAttempts
+        }
+      }
+      AuthTaskResult.Success -> {
+        authenticate()
+      }
+      else -> {}
+    }
+    return result
   }
 
   /**

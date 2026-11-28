@@ -74,10 +74,9 @@ class EncryptionQueueServiceImpl @Inject constructor(private val config: Encrypt
   ) {
     val task = EncryptionTask(playerId, operation, onCancelled)
 
-    if (activeTasks.containsKey(playerId)) {
+    if (activeTasks.putIfAbsent(playerId, task) != null) {
       throw EncryptionTaskAlreadyQueuedException()
     }
-    activeTasks[playerId] = task
 
     val finishTask = {
       activeTasks.remove(playerId, task)
