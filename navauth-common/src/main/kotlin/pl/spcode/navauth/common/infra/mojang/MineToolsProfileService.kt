@@ -19,6 +19,7 @@
 package pl.spcode.navauth.common.infra.mojang
 
 import com.google.gson.Gson
+import com.google.gson.JsonParseException
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import java.net.URI
@@ -48,12 +49,28 @@ constructor(val httpClient: HttpClient, val gson: Gson, val config: MojangAPICon
     val request = HttpRequest.newBuilder(requestUri).timeout(config.apiTimeout).GET().build()
     val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
 
-    val dto = gson.fromJson(response.body(), MineToolsProfileDto::class.java)
+    val statusCode = response.statusCode()
+    if (statusCode !in 200..299) {
+      // Never treat an error answer as "not found": the caller fails closed on exceptions.
+      throw IllegalStateException("MineTools profile lookup failed with HTTP status $statusCode")
+    }
 
-    if (dto.status != "OK" || dto.id == null || dto.name == null) {
+    val dto =
+      try {
+        gson.fromJson(response.body(), MineToolsProfileDto::class.java)
+      } catch (e: JsonParseException) {
+        throw IllegalStateException("MineTools profile lookup returned an unreadable answer", e)
+      } ?: throw IllegalStateException("MineTools profile lookup returned an empty answer")
+
+    if (dto.status == "OK" && dto.id != null && dto.name != null) {
+      return MojangProfile(MojangId(UuidUtils.from32(dto.id)), Username(dto.name))
+    }
+
+    // MineTools' explicit "unknown name" answer.
+    if (dto.status == "ERR" && dto.id == null && dto.name == null) {
       return null
     }
 
-    return MojangProfile(MojangId(UuidUtils.from32(dto.id)), Username(dto.name))
+    throw IllegalStateException("MineTools profile lookup returned an unexpected answer")
   }
 }

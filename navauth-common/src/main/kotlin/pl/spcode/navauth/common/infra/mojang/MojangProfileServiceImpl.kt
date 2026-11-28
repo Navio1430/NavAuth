@@ -19,6 +19,7 @@
 package pl.spcode.navauth.common.infra.mojang
 
 import com.google.gson.Gson
+import com.google.gson.JsonParseException
 import com.google.gson.annotations.SerializedName
 import com.google.inject.Inject
 import com.google.inject.Singleton
@@ -62,11 +63,27 @@ constructor(val httpClient: HttpClient, val gson: Gson, val config: MojangAPICon
 
     val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
 
-    if (response.statusCode() == HttpStatusCodes.NOT_FOUND) {
+    val statusCode = response.statusCode()
+    if (statusCode == HttpStatusCodes.NOT_FOUND) {
       return null
     }
+    if (statusCode !in 200..299) {
+      // Never treat an error answer as "not found": the caller fails closed on exceptions.
+      throw IllegalStateException("Mojang profile lookup failed with HTTP status $statusCode")
+    }
 
-    val profileDto = gson.fromJson(response.body(), MojangProfileDto::class.java)
+    val profileDto: MojangProfileDto? =
+      try {
+        gson.fromJson(response.body(), MojangProfileDto::class.java)
+      } catch (e: JsonParseException) {
+        throw IllegalStateException("Mojang profile lookup returned an unreadable answer", e)
+      }
+    // Gson does not enforce Kotlin's non-null types, so the fields are checked explicitly.
+    val uuidWithoutDashes: String? = profileDto?.uuidWithoutDashes
+    val name: String? = profileDto?.name
+    if (profileDto == null || uuidWithoutDashes == null || name == null) {
+      throw IllegalStateException("Mojang profile lookup returned an answer without id or name")
+    }
     return profileDto.toMojangProfile()
   }
 }
