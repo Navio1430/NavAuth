@@ -55,7 +55,10 @@ class LibreLoginSHACredentialsHasher : CredentialsHasher {
         plainHash(password, libreLoginHash.baseAlgorithm) + libreLoginHash.saltHex,
         libreLoginHash.baseAlgorithm,
       )
-    return hashedInput == libreLoginHash.hashHex
+    return MessageDigest.isEqual(
+      hashedInput.toByteArray(Charsets.UTF_8),
+      libreLoginHash.hashHex.toByteArray(Charsets.UTF_8),
+    )
   }
 
   private fun randomSalt(): String {
