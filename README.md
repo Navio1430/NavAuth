@@ -46,7 +46,7 @@ We are working on additional configuration options and other improvements to pre
 ### 🔒 In NavAuth password cracking takes more than TWELVE TRILLION (1.2 × 10^13) times longer than in the worst login plugins.
 Cracking the whole database of a bad plugin takes less than a **FEW MINUTES**.
 
-### What is not included?
+### ❗**NOT** included
 
 - **Anti-Bot** - use [Sonar](https://github.com/jonesdevelopment/sonar/) for that
 - **Anti-VPN**
