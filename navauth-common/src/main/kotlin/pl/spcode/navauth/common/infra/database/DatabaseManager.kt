@@ -23,6 +23,9 @@ import com.google.inject.Singleton
 import com.zaxxer.hikari.HikariDataSource
 import javax.sql.DataSource
 import org.jetbrains.exposed.v1.core.DatabaseConfig as ExposedDatabaseConfig
+import org.jetbrains.exposed.v1.core.SqlLogger
+import org.jetbrains.exposed.v1.core.Transaction
+import org.jetbrains.exposed.v1.core.statements.StatementContext
 import org.jetbrains.exposed.v1.jdbc.Database
 import pl.spcode.navauth.common.shared.PluginDirectory
 
@@ -125,10 +128,18 @@ constructor(val config: DatabaseConfig, val pluginDirectory: PluginDirectory) {
      *   must be quoted as written.
      * - `defaultMaxAttempts = 1`: Exposed retries a failed `transaction {}` block 3 times by
      *   default. A failure must surface once, and a block must never run twice.
+     * - `sqlLogger`: Exposed's default logger prints every statement with its bound values at
+     *   DEBUG, password hashes and TOTP secrets included. NavAuth never logs SQL.
      */
     fun exposedDatabaseConfig(): ExposedDatabaseConfig = ExposedDatabaseConfig {
       preserveIdentifierCasing = true
       defaultMaxAttempts = 1
+      sqlLogger = SilentSqlLogger
+    }
+
+    /** Logs nothing, so no bound value of a statement ever reaches a log. */
+    private object SilentSqlLogger : SqlLogger {
+      override fun log(context: StatementContext, transaction: Transaction) = Unit
     }
 
     /** Connects Exposed to [dataSource] with [exposedDatabaseConfig]. */

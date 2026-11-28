@@ -23,7 +23,10 @@ import com.zaxxer.hikari.HikariDataSource
 import io.kotest.assertions.throwables.shouldThrowAny
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import java.util.UUID
+import org.jetbrains.exposed.v1.core.Slf4jSqlDebugLogger
+import org.jetbrains.exposed.v1.core.StdOutSqlLogger
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import pl.spcode.navauth.common.infra.database.DatabaseDriverType
 import pl.spcode.navauth.common.infra.database.DatabaseManager
@@ -36,6 +39,14 @@ class ExposedConfigTests :
 
       config.preserveIdentifierCasing shouldBe true
       config.defaultMaxAttempts shouldBe 1
+    }
+
+    test("statements are not logged with their values") {
+      val config = DatabaseManager.exposedDatabaseConfig()
+
+      config.sqlLogger shouldNotBe null
+      config.sqlLogger shouldNotBe Slf4jSqlDebugLogger
+      config.sqlLogger shouldNotBe StdOutSqlLogger
     }
 
     test("a failing transaction block runs once") {
