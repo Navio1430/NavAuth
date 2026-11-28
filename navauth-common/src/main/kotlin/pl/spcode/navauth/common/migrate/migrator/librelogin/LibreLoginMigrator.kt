@@ -19,27 +19,29 @@
 package pl.spcode.navauth.common.migrate.migrator.librelogin
 
 import com.google.inject.Inject
-import com.j256.ormlite.dao.Dao
 import java.util.UUID
+import org.jetbrains.exposed.v1.core.SortOrder
+import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.application.validator.UsernameValidator
 import pl.spcode.navauth.common.config.MigrationConfig
 import pl.spcode.navauth.common.domain.common.TransactionService
 import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
-import pl.spcode.navauth.common.domain.credentials.TOTPSecret
-import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
-import pl.spcode.navauth.common.domain.user.*
+import pl.spcode.navauth.common.domain.user.UserRepository
+import pl.spcode.navauth.common.domain.user.Username
 import pl.spcode.navauth.common.infra.crypto.CryptoUtils
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
 import pl.spcode.navauth.common.infra.crypto.PasswordHash
 import pl.spcode.navauth.common.infra.crypto.hasher.SHACredentialsHasher
 import pl.spcode.navauth.common.infra.database.DatabaseManager
-import pl.spcode.navauth.common.infra.database.EntitiesRegistrar
 import pl.spcode.navauth.common.migrate.MigrationManager
 import pl.spcode.navauth.common.migrate.error.SourceDatabaseConnectException
 import pl.spcode.navauth.common.migrate.error.SourceTableNotFoundException
+import pl.spcode.navauth.common.migrate.migrator.MigrationChunkResult
 import pl.spcode.navauth.common.migrate.migrator.Migrator
 import pl.spcode.navauth.common.shared.PluginDirectory
 
@@ -56,12 +58,12 @@ constructor(
 
   val logger: Logger = LoggerFactory.getLogger(LibreLoginMigrator::class.java)
 
-  lateinit var sourceDao: Dao<LibreLoginUser, UUID>
+  val sourceDatabaseManager = DatabaseManager(migrationConfig.sourceDatabaseConfig, pluginDirectory)
 
-  val entitiesRegistrar = EntitiesRegistrar().registerEntity(LibreLoginUser::class, UUID::class)
+  private lateinit var sourceDatabase: Database
 
-  val sourceDatabaseManager =
-    DatabaseManager(migrationConfig.sourceDatabaseConfig, entitiesRegistrar, pluginDirectory)
+  /** A source row that cannot be imported; [reason] never contains password data. */
+  private class InvalidRowException(val reason: String) : Exception(reason)
 
   override fun init() {
     try {
@@ -70,73 +72,131 @@ constructor(
       throw SourceDatabaseConnectException(e)
     }
 
-    sourceDao = sourceDatabaseManager.getDao(LibreLoginUser::class)
-    if (!sourceDao.isTableExists) {
-      throw SourceTableNotFoundException(sourceDao.tableName)
+    sourceDatabase = DatabaseManager.connectExposed(sourceDatabaseManager.dataSource)
+
+    try {
+      transaction(sourceDatabase) { LibreLoginUserTable.selectAll().limit(1).toList() }
+    } catch (e: Exception) {
+      throw SourceTableNotFoundException(LibreLoginUserTable.tableName)
     }
   }
 
-  override fun getSourceUsersCount(): Long {
-    return sourceDao.countOf()
-  }
+  override fun getSourceUsersCount(): Long =
+    transaction(sourceDatabase) { LibreLoginUserTable.selectAll().count() }
 
-  override fun migrateNext(offset: Long, limit: Long): Long {
-    val qb = sourceDao.queryBuilder().orderBy("uuid", true).offset(offset).limit(limit).prepare()
-
-    val libreUsers = sourceDao.query(qb)
-    txService.inTransaction { libreUsers.forEach { lUser -> migrateSingleUser(lUser) } }
-
-    return libreUsers.size.toLong()
-  }
-
-  private fun migrateSingleUser(lUser: LibreLoginUser) {
-    val isPremium = lUser.premiumUuid != null
-    val twoFactorEnabled = lUser.secret != null
-
-    val username = usernameValidator.validate(lUser.lastNickname!!)
-    val userUuid = UserUuid(lUser.uuid!!)
-
-    // skip if the user already exists
-    val existingUser = userRepository.findByUsernameIgnoreCase(lUser.lastNickname!!)
-    if (existingUser != null) {
-      logger.info(
-        "User ${lUser.lastNickname}:${lUser.uuid} already exists. Found user: $existingUser. Skipping record..."
-      )
-      return
-    }
-
-    val hashedPassword = getHashedPassword(lUser)
-    if (!isPremium && hashedPassword == null && lUser.secret == null) {
-      logger.info(
-        "Non-Premium user ${lUser.lastNickname}:${lUser.uuid} has no password or 2FA secret which is an invalid record. Skipping record..."
-      )
-      return
-    }
-
-    val credentialsRequired: Boolean
-    if (lUser.secret != null || hashedPassword != null) {
-      val totpSecret = lUser.secret?.let { TOTPSecret(it) }
-      val credentials = UserCredentials.create(userUuid, hashedPassword, totpSecret)
-      userCredentialsRepository.save(credentials)
-      credentialsRequired = true
-    } else {
-      credentialsRequired = false
-    }
-
-    val targetUser =
-      if (isPremium) {
-        User.premium(userUuid, username, MojangId(lUser.premiumUuid!!), credentialsRequired)
-      } else {
-        User.nonPremium(userUuid, username)
+  override fun migrateNext(offset: Long, limit: Long): MigrationChunkResult {
+    val rows =
+      transaction(sourceDatabase) {
+        LibreLoginUserTable.selectAll()
+          .orderBy(LibreLoginUserTable.uuid, SortOrder.ASC)
+          .limit(limit.toInt())
+          .offset(offset)
+          .map { it.toLibreLoginRow() }
       }
 
-    userRepository.save(targetUser)
+    // Rows are validated and converted before the target transaction, so a damaged row is skipped
+    // and never rolls back the rest of the chunk.
+    val converted = rows.mapNotNull { row -> convertOrSkip(row) }
+    val migrated = txService.inTransaction { converted.count { storeOrSkip(it) } }.toLong()
+
+    val read = rows.size.toLong()
+    return MigrationChunkResult(read = read, migrated = migrated, skipped = read - migrated)
   }
 
+  private fun convertOrSkip(row: LibreLoginRow): LibreLoginConvertedUser? {
+    return try {
+      convert(row)
+    } catch (e: InvalidRowException) {
+      logger.warn("Skipping LibreLogin user {} (uuid {}): {}", row.lastNickname, row.uuid, e.reason)
+      null
+    }
+  }
+
+  /** @return null for a cracked row without a password and a 2FA secret (nothing to log in with) */
+  private fun convert(row: LibreLoginRow): LibreLoginConvertedUser? {
+    val uuid =
+      row.uuid?.let { parseUuid(it) } ?: throw InvalidRowException("missing or malformed uuid")
+    val nickname = row.lastNickname
+    if (nickname.isNullOrEmpty()) throw InvalidRowException("missing nickname")
+    if (!usernameValidator.isValid(nickname)) {
+      throw InvalidRowException("the nickname does not match usernamePattern")
+    }
+    val premiumUuid =
+      row.premiumUuid?.let { parseUuid(it) ?: throw InvalidRowException("malformed premium_uuid") }
+
+    val lUser =
+      LibreLoginUser(
+        uuid = uuid,
+        premiumUuid = premiumUuid,
+        passwordHash = row.passwordHash,
+        passwordSalt = row.passwordSalt,
+        passwordAlgo = row.passwordAlgo,
+        lastNickname = nickname,
+        secret = row.secret,
+      )
+
+    // premium players drop their password, so it is only converted for non-premium ones
+    val hashedPassword = if (premiumUuid == null) getHashedPassword(lUser) else null
+    val converted =
+      try {
+        convertLibreLoginUser(lUser, Username(nickname), hashedPassword)
+      } catch (e: IllegalArgumentException) {
+        throw InvalidRowException("invalid 2FA secret")
+      }
+    if (converted == null) {
+      logger.info(
+        "Skipping LibreLogin user {} (uuid {}): non-premium user without a password and a 2FA " +
+          "secret, nothing to log in with",
+        nickname,
+        uuid,
+      )
+    }
+    return converted
+  }
+
+  private fun parseUuid(value: String): UUID? =
+    try {
+      UUID.fromString(value.trim())
+    } catch (e: IllegalArgumentException) {
+      null
+    }
+
+  /**
+   * Writes the account unless NavAuth already has it (same name in any letter case, same uuid or
+   * same Mojang UUID); an existing account is never touched.
+   *
+   * @return true when the account was written
+   */
+  private fun storeOrSkip(records: LibreLoginConvertedUser): Boolean {
+    val user = records.user
+    val existingUser =
+      userRepository.findByUsernameIgnoreCase(user.username.value)
+        ?: userRepository.findByUserUuid(user.uuid)
+        ?: user.mojangUuid?.let { userRepository.findByMojangUuid(it) }
+    if (existingUser != null) {
+      logger.info(
+        "Skipping LibreLogin user {} (uuid {}): NavAuth already has this account ({})",
+        user.username,
+        user.uuid,
+        existingUser,
+      )
+      return false
+    }
+
+    records.credentials?.let { userCredentialsRepository.save(it) }
+    userRepository.save(user)
+    return true
+  }
+
+  /**
+   * @return null when the row stores no password
+   * @throws InvalidRowException when the stored password cannot be converted
+   */
   private fun getHashedPassword(libreUser: LibreLoginUser): HashedPassword? {
     val hashRaw = libreUser.passwordHash ?: return null
-    val saltRaw = libreUser.passwordSalt ?: return null
-    val algoRaw = libreUser.passwordAlgo ?: return null
+    val algoRaw =
+      libreUser.passwordAlgo ?: throw InvalidRowException("password without a hashing algorithm")
+    val saltRaw = libreUser.passwordSalt ?: throw InvalidRowException("password without a salt")
 
     val algo: HashingAlgorithm =
       if (algoRaw.startsWith("BCrypt-")) {
@@ -148,28 +208,30 @@ constructor(
           "LOGIT-SHA-512" -> HashingAlgorithm.SHA512
           "SHA-256" -> HashingAlgorithm.LIBRELOGIN_SHA256
           "SHA-512" -> HashingAlgorithm.LIBRELOGIN_SHA512
-          else ->
-            throw IllegalStateException(
-              "Unknown hashing algorithm: $algoRaw for user ${libreUser.lastNickname}:${libreUser.uuid}"
-            )
+          else -> throw InvalidRowException("unknown hashing algorithm '$algoRaw'")
         }
 
     val passwordHash =
-      when (algo) {
-        HashingAlgorithm.BCRYPT -> {
-          PasswordHash(convertToBCryptFull(hashRaw, saltRaw, algoRaw))
+      try {
+        when (algo) {
+          HashingAlgorithm.BCRYPT -> {
+            PasswordHash(convertToBCryptFull(hashRaw, saltRaw, algoRaw))
+          }
+          HashingAlgorithm.ARGON2 -> {
+            PasswordHash(convertToArgon2Full(hashRaw, saltRaw, algoRaw))
+          }
+          HashingAlgorithm.SHA256,
+          HashingAlgorithm.SHA512 -> {
+            PasswordHash(convertToShaFull(hashRaw, saltRaw, algo))
+          }
+          HashingAlgorithm.LIBRELOGIN_SHA256,
+          HashingAlgorithm.LIBRELOGIN_SHA512 -> {
+            PasswordHash(convertToLibreLoginShaFull(hashRaw, saltRaw, algo))
+          }
         }
-        HashingAlgorithm.ARGON2 -> {
-          PasswordHash(convertToArgon2Full(hashRaw, saltRaw, algoRaw))
-        }
-        HashingAlgorithm.SHA256,
-        HashingAlgorithm.SHA512 -> {
-          PasswordHash(convertToShaFull(hashRaw, saltRaw, algo))
-        }
-        HashingAlgorithm.LIBRELOGIN_SHA256,
-        HashingAlgorithm.LIBRELOGIN_SHA512 -> {
-          PasswordHash(convertToLibreLoginShaFull(hashRaw, saltRaw, algo))
-        }
+      } catch (e: Exception) {
+        // the exception can carry parts of the hash, so only the algorithm is reported
+        throw InvalidRowException("malformed $algoRaw password hash")
       }
 
     return HashedPassword(passwordHash, algo)

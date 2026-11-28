@@ -18,29 +18,53 @@
 
 package pl.spcode.navauth.common.migrate.migrator.librelogin
 
-import com.j256.ormlite.field.DataType
-import com.j256.ormlite.field.DatabaseField
-import com.j256.ormlite.table.DatabaseTable
-import java.sql.Timestamp
 import java.util.UUID
+import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.core.Table
 
-@DatabaseTable(tableName = "librepremium_data")
-class LibreLoginUser(
-  @DatabaseField(id = true, dataType = DataType.UUID, columnName = "uuid") var uuid: UUID? = null,
-  @DatabaseField(dataType = DataType.UUID, canBeNull = true, columnName = "premium_uuid")
-  var premiumUuid: UUID? = null,
-  @DatabaseField(canBeNull = true, columnName = "hashed_password") var passwordHash: String? = null,
-  @DatabaseField(canBeNull = true, columnName = "salt") var passwordSalt: String? = null,
-  @DatabaseField(canBeNull = true, columnName = "algo") var passwordAlgo: String? = null,
-  @DatabaseField(canBeNull = false, columnName = "last_nickname") var lastNickname: String? = null,
-  @DatabaseField(dataType = DataType.TIME_STAMP, columnName = "joined")
-  var joinDate: Timestamp? = null,
-  @DatabaseField(dataType = DataType.TIME_STAMP, columnName = "last_seen")
-  var lastSeen: Timestamp? = null,
-  @DatabaseField(canBeNull = true, columnName = "secret") var secret: String? = null,
-  @DatabaseField(canBeNull = true, columnName = "ip") var ip: String? = null,
-  @DatabaseField(dataType = DataType.TIME_STAMP, columnName = "last_authentication")
-  var lastAuthentication: Timestamp? = null,
-  @DatabaseField(canBeNull = true, columnName = "last_server") var lastServer: String? = null,
-  @DatabaseField(canBeNull = true, columnName = "email") var email: String? = null,
+/**
+ * LibreLogin's user table. Every column is read as nullable text, so a damaged row (missing
+ * nickname, malformed uuid) is skipped by the migrator instead of failing the whole chunk.
+ */
+object LibreLoginUserTable : Table("librepremium_data") {
+  val uuid = varchar("uuid", 255).nullable()
+  val premiumUuid = varchar("premium_uuid", 255).nullable()
+  val passwordHash = varchar("hashed_password", 255).nullable()
+  val passwordSalt = varchar("salt", 255).nullable()
+  val passwordAlgo = varchar("algo", 255).nullable()
+  val lastNickname = varchar("last_nickname", 255).nullable()
+  val secret = varchar("secret", 255).nullable()
+}
+
+/** One `librepremium_data` row as stored, before validation. */
+class LibreLoginRow(
+  val uuid: String?,
+  val premiumUuid: String?,
+  val passwordHash: String?,
+  val passwordSalt: String?,
+  val passwordAlgo: String?,
+  val lastNickname: String?,
+  val secret: String?,
 )
+
+/** A LibreLogin user whose uuids were parsed. */
+class LibreLoginUser(
+  val uuid: UUID?,
+  val premiumUuid: UUID?,
+  val passwordHash: String?,
+  val passwordSalt: String?,
+  val passwordAlgo: String?,
+  val lastNickname: String?,
+  val secret: String?,
+)
+
+fun ResultRow.toLibreLoginRow(): LibreLoginRow =
+  LibreLoginRow(
+    uuid = this[LibreLoginUserTable.uuid],
+    premiumUuid = this[LibreLoginUserTable.premiumUuid],
+    passwordHash = this[LibreLoginUserTable.passwordHash],
+    passwordSalt = this[LibreLoginUserTable.passwordSalt],
+    passwordAlgo = this[LibreLoginUserTable.passwordAlgo],
+    lastNickname = this[LibreLoginUserTable.lastNickname],
+    secret = this[LibreLoginUserTable.secret],
+  )

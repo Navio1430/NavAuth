@@ -30,11 +30,20 @@ interface Migrator {
   fun getSourceUsersCount(): Long
 
   /**
-   * Migrates a chunk of records starting from the specified offset.
+   * Migrates a chunk of source records starting from the specified offset. A record that cannot be
+   * imported is skipped and logged; it never fails the chunk.
    *
-   * @param offset the starting position of records to migrate
-   * @param limit the maximum number of records to migrate in this operation
-   * @return the number of records successfully migrated
+   * @param offset the position of the first source record of this chunk
+   * @param limit the maximum number of source records to read in this chunk
+   * @return what happened to the records of this chunk; the next chunk starts at `offset +
+   *   result.read`, and `read == 0` means no records are left
    */
-  fun migrateNext(offset: Long, limit: Long): Long
+  fun migrateNext(offset: Long, limit: Long): MigrationChunkResult
 }
+
+/**
+ * @property read source records read in this chunk, imported or skipped
+ * @property migrated NavAuth accounts written
+ * @property skipped source records not imported (already in NavAuth, invalid or unusable)
+ */
+data class MigrationChunkResult(val read: Long, val migrated: Long, val skipped: Long)
