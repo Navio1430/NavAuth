@@ -24,15 +24,43 @@ import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.command.CommandExecuteEvent
 import com.velocitypowered.api.event.command.PlayerAvailableCommandsEvent
 import com.velocitypowered.api.proxy.Player
+import java.util.Locale
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
+import pl.spcode.navauth.common.config.CommandsConfig
 import pl.spcode.navauth.velocity.infra.auth.VelocityUniqueSessionId
 import pl.spcode.navauth.velocity.infra.player.VelocityPlayerAdapter
 
 class CommandsListeners
 @Inject
-constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
+constructor(
+  val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
+  commandsConfig: CommandsConfig,
+) {
 
-  val whitelist = listOf("login", "register", "2fa")
+  companion object {
+    /** Original names of the commands a player who is not logged in may run. */
+    val AUTH_COMMANDS = listOf("login", "register", "2fa")
+
+    /**
+     * The names and aliases the auth commands are registered under, lower case (Velocity matches
+     * commands case-insensitively). `commands.yml` can rename them, replace their aliases or
+     * disable them, exactly as `CommandConfigurer` applies it; a disabled command is not allowed.
+     */
+    fun allowedCommandNames(commandsConfig: CommandsConfig): Set<String> =
+      AUTH_COMMANDS.flatMap { original ->
+          val config = commandsConfig.commands[original] ?: return@flatMap listOf(original)
+          if (!config.enabled) return@flatMap emptyList()
+          val name = config.name?.takeIf { it.isNotEmpty() } ?: original
+          listOf(name) + config.aliases.filter { it.isNotEmpty() }
+        }
+        .map { it.lowercase(Locale.ROOT) }
+        .toSet()
+  }
+
+  /** Commands a player who is not logged in may run, see [allowedCommandNames]. */
+  val whitelist: Set<String> = allowedCommandNames(commandsConfig)
+
+  private fun isWhitelisted(command: String) = whitelist.contains(command.lowercase(Locale.ROOT))
 
   @Subscribe(order = PostOrder.FIRST)
   fun onCommand(event: CommandExecuteEvent) {
@@ -41,8 +69,7 @@ constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
     }
 
     val command = event.command.split(" ", ignoreCase = true, limit = 2).first()
-    val whitelisted = whitelist.contains(command)
-    if (whitelisted) {
+    if (isWhitelisted(command)) {
       event.result = CommandExecuteEvent.CommandResult.allowed()
       return
     }
@@ -63,7 +90,7 @@ constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
     if (session == null) {
       event.rootNode.children.clear()
     } else if (!session.isAuthenticated) {
-      event.rootNode.children.removeIf { !whitelist.contains(it.name) }
+      event.rootNode.children.removeIf { !isWhitelisted(it.name) }
     }
   }
 }

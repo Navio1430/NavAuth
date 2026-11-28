@@ -36,11 +36,10 @@ constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
 
     val sessionId = VelocityUniqueSessionId(player)
     val session = authSessionService.findSession(sessionId)
-    if (session != null) {
-      @Suppress("DEPRECATION") // IDK why do they mark this as deprecated if there's no other option
-      if (!session.isAuthenticated) {
-        event.result = PlayerChatEvent.ChatResult.denied()
-      }
+    // a player without an auth session is not authenticated either
+    @Suppress("DEPRECATION") // IDK why do they mark this as deprecated if there's no other option
+    if (session == null || !session.isAuthenticated) {
+      event.result = PlayerChatEvent.ChatResult.denied()
     }
   }
 }

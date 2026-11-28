@@ -20,7 +20,9 @@ package pl.spcode.navauth.velocity.listener.velocity
 
 import com.google.inject.Inject
 import com.velocitypowered.api.event.PostOrder
+import com.velocitypowered.api.event.ResultedEvent
 import com.velocitypowered.api.event.Subscribe
+import com.velocitypowered.api.event.connection.LoginEvent
 import com.velocitypowered.api.event.connection.PostLoginEvent
 import com.velocitypowered.api.event.connection.PreLoginEvent
 import com.velocitypowered.api.event.player.GameProfileRequestEvent
@@ -70,7 +72,21 @@ constructor(
   fun onPreLogin(event: PreLoginEvent) {
     if (!event.result.isAllowed) return
 
+    try {
+      handlePreLogin(event)
+    } catch (e: Throwable) {
+      // Fail closed: an allowed result lets the connection continue, offline when Velocity runs
+      // with online-mode = false.
+      logger.error("Unexpected error in PreLogin of {}, denying the connection", event.username, e)
+      event.result = PreLoginEvent.PreLoginComponentResult.denied(unexpectedLoginErrorComponent())
+    }
+  }
+
+  private fun handlePreLogin(event: PreLoginEvent) {
     val connUsername = event.username
+    val sessionId = VelocityUniqueSessionId(connUsername, event.connection.remoteAddress)
+    // a handshake session left by an earlier connection with the same id is never reused
+    authHandshakeSessionService.closeSession(sessionId)
 
     if (usernameValidator.isValid(connUsername).not()) {
       val reason = messagesConfig.invalidUsernameError.toComponent()
@@ -117,6 +133,9 @@ constructor(
             is UsernameResFailureReason.PremiumUsernameNotIdentical -> {
               premiumUsernameRequiredDeniedResult(connUsername, failureReason.requiredUsername)
             }
+            is UsernameResFailureReason.PremiumUsernameOwnedByAnotherAccount -> {
+              premiumUsernameOwnedByAnotherAccountDeniedResult(failureReason.username)
+            }
             is UsernameResFailureReason.NonPremiumWithPremiumConflict -> {
               usernameConflictDeniedResult(failureReason.premiumUsername)
             }
@@ -145,12 +164,7 @@ constructor(
         existingUser
       }
 
-    authHandshakeSessionService.createSession(
-      VelocityUniqueSessionId(connUsername, event.connection.remoteAddress),
-      sessionUser,
-      connUsername,
-      res,
-    )
+    authHandshakeSessionService.createSession(sessionId, sessionUser, connUsername, res)
   }
 
   // event invoked after preLogin event for offline users and after preLogin + encryption protocol
@@ -158,8 +172,24 @@ constructor(
   @Subscribe(order = PostOrder.FIRST)
   fun onPostLogin(event: PostLoginEvent) {
     val player = event.player
+    val sessionId = VelocityUniqueSessionId(player.username, player.remoteAddress)
+    try {
+      handlePostLogin(player, sessionId)
+    } catch (e: Throwable) {
+      // fail closed: never leave a player on the proxy in an unknown auth state
+      logger.error(
+        "Unexpected error in PostLogin of {}, disconnecting the player",
+        player.username,
+        e,
+      )
+      player.disconnectIfActive(unexpectedLoginErrorComponent())
+    } finally {
+      authHandshakeSessionService.closeSession(sessionId)
+    }
+  }
+
+  private fun handlePostLogin(player: Player, sessionId: VelocityUniqueSessionId) {
     val username = player.username
-    val sessionId = VelocityUniqueSessionId(username, event.player.remoteAddress)
     val handshakeSession = authHandshakeSessionService.findSession(sessionId)
     if (handshakeSession == null) {
       logger.warn(
@@ -168,9 +198,13 @@ constructor(
         player.uniqueId,
       )
       // there must be an auth session for specified user, otherwise abort
-      player.disconnectIfActive(
-        Component.text("NavAuth: Auth session expired, please try again", TextColors.RED)
-      )
+      player.disconnectIfActive(authSessionExpiredComponent())
+      return
+    }
+
+    if (handshakeSession.premiumIdentityMismatch) {
+      // LoginEvent already denied this connection; never create an auth session for it
+      player.disconnectIfActive(refusedPremiumLoginComponent(player, handshakeSession))
       return
     }
 
@@ -179,19 +213,59 @@ constructor(
     }
 
     createAuthSession(player, handshakeSession, username)
-    authHandshakeSessionService.closeSession(sessionId)
   }
 
-  // this event is invoked just after online encryption, so we can
-  // assume the premium player was authenticated at this point
+  // invoked after online-mode encryption (the player is authenticated by Mojang then) and for
+  // offline connections
   @Subscribe
   fun onGameProfile(event: GameProfileRequestEvent) {
     val sessionId = VelocityUniqueSessionId(event.username, event.connection.remoteAddress)
-    val session = authHandshakeSessionService.findSession(sessionId)!!
+    try {
+      applyGameProfile(event, sessionId)
+    } catch (e: Throwable) {
+      // fail closed: without a handshake session LoginEvent denies the connection
+      logger.error(
+        "Unexpected error in GameProfileRequest of {}, denying the connection",
+        event.username,
+        e,
+      )
+      authHandshakeSessionService.closeSession(sessionId)
+    }
+  }
+
+  private fun applyGameProfile(event: GameProfileRequestEvent, sessionId: VelocityUniqueSessionId) {
+    val session = authHandshakeSessionService.findSession(sessionId)
+    if (session == null) {
+      // LoginEvent denies the connection
+      logger.warn(
+        "Player {} reached GameProfileRequest without an auth handshake session",
+        event.username,
+      )
+      return
+    }
 
     val profile: GameProfile
-    if (session.existingUser != null) {
-      val user = session.existingUser!!
+    val user = session.existingUser
+    if (!session.verifyPremiumIdentity(event.isOnlineMode, event.originalProfile.id)) {
+      // A premium handshake reached here offline (not authenticated by Mojang), or Mojang
+      // authenticated another account than the stored one (renamed owner, stale profile cache):
+      // keep the player's own identity, LoginEvent denies the connection.
+      if (event.isOnlineMode) {
+        logger.warn(
+          "Denied premium login of {}: Mojang account {} is not the stored owner {} of user {}",
+          event.username,
+          event.originalProfile.id,
+          user?.mojangUuid,
+          user?.uuid,
+        )
+      } else {
+        logger.warn(
+          "Denied premium login of {}: the connection was not authenticated by Mojang",
+          event.username,
+        )
+      }
+      profile = event.originalProfile
+    } else if (user != null) {
       profile = GameProfile(user.uuid.value, user.username.value, event.originalProfile.properties)
     } else {
       profile = event.originalProfile
@@ -203,6 +277,33 @@ constructor(
     event.gameProfile = profile
   }
 
+  // Invoked after GameProfileRequestEvent, before the player joins the proxy. Priority is
+  // Short.MIN_VALUE to have the final say: a plugin running later could otherwise allow a
+  // connection NavAuth denied. NavAuth only ever denies here and never allows a denied connection.
+  @Subscribe(priority = Short.MIN_VALUE)
+  fun onLogin(event: LoginEvent) {
+    val player = event.player
+    try {
+      val session =
+        authHandshakeSessionService.findSession(
+          VelocityUniqueSessionId(player.username, player.remoteAddress)
+        )
+      if (session == null) {
+        event.result = ResultedEvent.ComponentResult.denied(authSessionExpiredComponent())
+      } else if (session.premiumIdentityMismatch) {
+        event.result =
+          ResultedEvent.ComponentResult.denied(refusedPremiumLoginComponent(player, session))
+      }
+    } catch (e: Throwable) {
+      logger.error(
+        "Unexpected error in LoginEvent of {}, denying the connection",
+        player.username,
+        e,
+      )
+      event.result = ResultedEvent.ComponentResult.denied(unexpectedLoginErrorComponent())
+    }
+  }
+
   private fun createAuthSession(
     player: Player,
     handshakeSession: AuthHandshakeSession,
@@ -211,10 +312,24 @@ constructor(
     val existingUser = handshakeSession.existingUser
     val uniqueSessionId = VelocityUniqueSessionId(player)
     if (handshakeSession.requestedEncryptionType == EncryptionType.ENFORCE_PREMIUM) {
+      if (!player.isOnlineMode) {
+        // A premium handshake requires a connection authenticated by Mojang. GameProfileRequest
+        // already flags it; this keeps PostLogin safe on its own: no auto-login, no premium user
+        // created from an offline UUID.
+        logger.warn(
+          "Refused premium login of {}:{}: the connection was not authenticated by Mojang",
+          username,
+          player.uniqueId,
+        )
+        player.disconnectIfActive(unexpectedLoginErrorComponent())
+        return
+      }
+
       if (existingUser != null) {
-        if (existingUser.credentialsRequired) {
-          val session =
-            authSessionFactory.createLoginAuthSession(player, uniqueSessionId, existingUser)
+        // Mojang verified the owner, so a password an import left on the account can go
+        val user = userService.removeLeftoverPremiumPassword(existingUser)
+        if (user.credentialsRequired) {
+          val session = authSessionFactory.createLoginAuthSession(player, uniqueSessionId, user)
           session.state = AuthSessionState.WAITING_FOR_ALLOCATION
           return
         }
@@ -288,6 +403,47 @@ constructor(
       )
 
     return PreLoginEvent.PreLoginComponentResult.denied(component)
+  }
+
+  private fun premiumUsernameOwnedByAnotherAccountDeniedResult(
+    username: String
+  ): PreLoginEvent.PreLoginComponentResult {
+    return PreLoginEvent.PreLoginComponentResult.denied(premiumIdentityMismatchComponent(username))
+  }
+
+  /** Kick reason for a session flagged by [AuthHandshakeSession.verifyPremiumIdentity]. */
+  private fun refusedPremiumLoginComponent(
+    player: Player,
+    session: AuthHandshakeSession,
+  ): Component {
+    return if (player.isOnlineMode) {
+      premiumIdentityMismatchComponent(session.connUsername)
+    } else {
+      unexpectedLoginErrorComponent()
+    }
+  }
+
+  private fun authSessionExpiredComponent(): Component {
+    return Component.text("NavAuth: Auth session expired, please try again", TextColors.RED)
+  }
+
+  /** Never throws: it is the reason of every fail-closed denial. */
+  private fun unexpectedLoginErrorComponent(): Component {
+    return try {
+      withSupportFooter(messagesConfig.unexpectedLoginErrorKickMessage.toComponent())
+    } catch (e: Throwable) {
+      logger.error("Failed to build unexpectedLoginErrorKickMessage", e)
+      Component.text("NavAuth: internal error", TextColors.RED)
+    }
+  }
+
+  private fun premiumIdentityMismatchComponent(username: String): Component {
+    return withSupportFooter(
+      componentWithUsernamePlaceholder(
+        messagesConfig.premiumUsernameOwnedByAnotherAccountError,
+        username,
+      )
+    )
   }
 
   private fun usernameConflictDeniedResult(

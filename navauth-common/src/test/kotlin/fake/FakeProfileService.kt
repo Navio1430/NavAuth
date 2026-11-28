@@ -18,25 +18,45 @@
 
 package fake
 
+import pl.spcode.navauth.common.application.mojang.ProfileApiFetchException
 import pl.spcode.navauth.common.application.mojang.ProfileService
 import pl.spcode.navauth.common.domain.mojang.MojangProfile
 import pl.spcode.navauth.common.domain.user.Username
 
+/**
+ * In-memory Mojang profile API. Lookups ignore letter case like the real API. Tests simulate Mojang
+ * name changes with [addProfile] / [removeProfile], and stale caches by simply not updating it.
+ */
 class FakeProfileService : ProfileService {
-  private val profiles = mutableMapOf<Username, MojangProfile>()
+
+  private val profiles = mutableMapOf<String, MojangProfile>()
+
+  /** When true, every lookup fails like an unreachable or rate-limited API. */
+  var failing: Boolean = false
 
   fun addProfile(username: Username, profile: MojangProfile) {
-    profiles[username] = profile
+    profiles[username.value.lowercase()] = profile
+  }
+
+  /** Registers [profile] under its own name. */
+  fun addProfile(profile: MojangProfile) = addProfile(profile.name, profile)
+
+  fun removeProfile(username: Username) {
+    profiles.remove(username.value.lowercase())
   }
 
   override fun fetchProfileInfo(
     usernameCaseIgnored: Username,
     useNotFoundCache: Boolean,
   ): MojangProfile? {
-    return profiles[usernameCaseIgnored]
+    if (failing) {
+      throw ProfileApiFetchException(usernameCaseIgnored, listOf(RuntimeException("API down")))
+    }
+    return profiles[usernameCaseIgnored.value.lowercase()]
   }
 
   fun reset() {
     profiles.clear()
+    failing = false
   }
 }

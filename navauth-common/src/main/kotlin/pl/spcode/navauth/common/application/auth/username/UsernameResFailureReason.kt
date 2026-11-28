@@ -29,5 +29,11 @@ sealed class UsernameResFailureReason {
   data class NonPremiumUsernameNotIdentical(val requiredUsername: String) :
     UsernameResFailureReason()
 
+  /**
+   * The stored premium account with this username belongs to another Mojang account than the one
+   * that owns the name now (the stored owner renamed and someone else claimed the name).
+   */
+  data class PremiumUsernameOwnedByAnotherAccount(val username: String) : UsernameResFailureReason()
+
   data object ProfileAPIFailure : UsernameResFailureReason()
 }

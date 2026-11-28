@@ -18,6 +18,7 @@
 
 package pl.spcode.navauth.common.application.auth.handshake
 
+import com.google.common.base.Ticker
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import com.google.inject.Singleton
@@ -29,13 +30,23 @@ import pl.spcode.navauth.common.domain.auth.UniqueSessionId
 import pl.spcode.navauth.common.domain.auth.handshake.AuthHandshakeSession
 import pl.spcode.navauth.common.domain.user.User
 
+/**
+ * Handshake sessions live from PreLogin until PostLogin and expire [SESSION_TTL] after they were
+ * created; a connection whose session expired is denied at `LoginEvent`.
+ *
+ * @param ticker time source of the expiry; the system ticker unless a test replaces it
+ */
 @Singleton
-class AuthHandshakeSessionService {
+class AuthHandshakeSessionService(ticker: Ticker = Ticker.systemTicker()) {
+
+  companion object {
+    val SESSION_TTL: Duration = Duration.ofSeconds(15)
+  }
 
   private val logger: Logger = LoggerFactory.getLogger(AuthHandshakeSessionService::class.java)
 
   private val sessionsCache: Cache<UniqueSessionId, AuthHandshakeSession> =
-    CacheBuilder.newBuilder().expireAfterWrite(Duration.ofSeconds(15)).build()
+    CacheBuilder.newBuilder().ticker(ticker).expireAfterWrite(SESSION_TTL).build()
 
   /**
    * @param sessionId id which must be unique for each connection of using the same user data at the

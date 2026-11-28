@@ -18,6 +18,7 @@
 
 package pl.spcode.navauth.common.domain.auth.handshake
 
+import java.util.UUID
 import pl.spcode.navauth.common.application.auth.username.PostUsernameResolutionState
 import pl.spcode.navauth.common.domain.user.User
 
@@ -38,7 +39,35 @@ class AuthHandshakeSession(
   val postUsernameResolutionState: PostUsernameResolutionState,
 ) {
 
+  /**
+   * True once [verifyPremiumIdentity] refused the connection: it was not authenticated by Mojang,
+   * or Mojang authenticated another account than [existingUser]'s.
+   */
+  var premiumIdentityMismatch: Boolean = false
+    private set
+
+  /**
+   * Checks the connection against this handshake. [EncryptionType.ENFORCE_PREMIUM] requires a
+   * connection authenticated by Mojang (online mode), for new and existing accounts alike: an
+   * offline connection proves nothing about who the player is. For an existing account, the Mojang
+   * UUID the proxy authenticated must also be the stored one. Username resolution decides from
+   * (cached) profile API answers; this check uses the session server's answer, so it also holds
+   * when the profile cache is stale.
+   *
+   * @param onlineMode whether the proxy authenticated this connection with Mojang
+   * @param authenticatedMojangId UUID of the connection's profile (the Mojang UUID in online mode)
+   * @return false when the player must not receive a premium identity, stored or new; the session
+   *   is then flagged with [premiumIdentityMismatch]
+   */
+  fun verifyPremiumIdentity(onlineMode: Boolean, authenticatedMojangId: UUID): Boolean {
+    if (requestedEncryptionType != EncryptionType.ENFORCE_PREMIUM) return true
+    val user = existingUser
+    val matches = onlineMode && (user == null || user.mojangUuid?.value == authenticatedMojangId)
+    if (!matches) premiumIdentityMismatch = true
+    return matches
+  }
+
   override fun toString(): String {
-    return "AuthHandshakeSession(existingUser=$existingUser, connUsername='$connUsername', requestedEncryptionType=$requestedEncryptionType, postUsernameResolutionState=$postUsernameResolutionState)"
+    return "AuthHandshakeSession(existingUser=$existingUser, connUsername='$connUsername', requestedEncryptionType=$requestedEncryptionType, postUsernameResolutionState=$postUsernameResolutionState, premiumIdentityMismatch=$premiumIdentityMismatch)"
   }
 }

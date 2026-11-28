@@ -37,7 +37,6 @@ import org.bstats.velocity.Metrics
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.api.NavAuthAPI
-import pl.spcode.navauth.api.event.NavAuthEventBus
 import pl.spcode.navauth.common.command.exception.MissingPermissionException
 import pl.spcode.navauth.common.command.exception.UserResolveException
 import pl.spcode.navauth.common.command.handler.UserResolveExceptionHandler
@@ -56,7 +55,6 @@ import pl.spcode.navauth.velocity.infra.command.VelocityMissingPermissionExcepti
 import pl.spcode.navauth.velocity.infra.command.VelocityMissingPermissionHandler
 import pl.spcode.navauth.velocity.infra.component.VelocityAudienceProvider
 import pl.spcode.navauth.velocity.listener.VelocityListenersRegistry
-import pl.spcode.navauth.velocity.listener.application.UserAuthenticatedEventListener
 import pl.spcode.navauth.velocity.module.SchedulerModule
 import pl.spcode.navauth.velocity.module.VelocityCommandsModule
 import pl.spcode.navauth.velocity.module.VelocityMultificationsModule
@@ -131,9 +129,8 @@ constructor(
           MigrationModule(),
         )
 
-      val eventBus = injector.getInstance(NavAuthEventBus::class.java)
-      eventBus.register(injector.getInstance(UserAuthenticatedEventListener::class.java))
-
+      // Database must be connected (and migrated) before any repository/service is resolved,
+      // because repositories depend on the bound Exposed Database.
       connectAndInitDatabase()
 
       val apiImpl = injector.getInstance(NavAuthApiImpl::class.java)
@@ -145,7 +142,8 @@ constructor(
 
       registerListeners(injector)
       registerCommands(injector)
-    } catch (ex: Exception) {
+    } catch (ex: Throwable) {
+      // a LinkageError (missing bundled class) must stop the proxy too, never leave it without auth
       logger.error("Could not initialize NavAuth plugin, shutting down the server...", ex)
       proxyServer.shutdown(Component.text("NavAuth initialization failure"))
     }
@@ -184,11 +182,15 @@ constructor(
     listeners.forEach { proxyServer.eventManager.register(this, it) }
   }
 
-  @Suppress("UNNECESSARY_SAFE_CALL")
   @Subscribe
   fun shutdown(event: ProxyShutdownEvent) {
-    injector?.getInstance(DatabaseManager::class.java)?.closeConnections()
-    liteCommands?.unregister()
+    // both stay uninitialized when the startup failed
+    if (::injector.isInitialized) {
+      injector.getInstance(DatabaseManager::class.java).closeConnections()
+    }
+    if (::liteCommands.isInitialized) {
+      liteCommands.unregister()
+    }
 
     logger.info("Goodbye!")
   }
