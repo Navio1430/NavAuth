@@ -24,6 +24,11 @@ interface UserCredentialsRepository {
 
   fun save(userCredentials: UserCredentials)
 
+  /**
+   * Stores new credentials; fails when credentials with the same uuid exist, which stay unchanged.
+   */
+  fun insert(userCredentials: UserCredentials)
+
   fun findByUser(user: User): UserCredentials?
 
   fun deleteByUser(user: User)

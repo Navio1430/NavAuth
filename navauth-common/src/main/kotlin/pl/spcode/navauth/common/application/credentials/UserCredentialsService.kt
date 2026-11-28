@@ -72,6 +72,24 @@ constructor(
   }
 
   /**
+   * Stores the first credentials of a new user; fails when credentials with the same uuid exist,
+   * which stay unchanged.
+   *
+   * @throws IllegalArgumentException if the provided credentials do not match the user or if the
+   *   user does not require credentials
+   */
+  fun storeNewUserCredentials(user: User, userCredentials: UserCredentials) {
+    require(userCredentials.userUuid == user.uuid) {
+      "provided credentials do not belong to the provided user"
+    }
+    require(user.credentialsRequired) {
+      "cannot store credentials for a user without credentials required property"
+    }
+
+    credentialsRepository.insert(userCredentials)
+  }
+
+  /**
    * Deletes the credentials associated with the given user.
    *
    * @param user the user whose credentials are to be deleted

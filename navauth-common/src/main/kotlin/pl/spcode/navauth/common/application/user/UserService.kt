@@ -68,22 +68,37 @@ constructor(
     return userRepository.findByMojangUuid(uuid)
   }
 
+  /**
+   * Stores a new non-premium user with its first credentials. Never changes an existing account.
+   *
+   * @throws UsernameAlreadyTakenException if an account already has the user's uuid or its username
+   *   in any letter case
+   */
   fun createAndStoreUserWithNewCredentials(user: User, password: HashedPassword) {
     require(user.credentialsRequired) { "cannot store user without credentials required property" }
 
     txService.inTransaction {
-      userRepository.save(user)
-      userCredentialsService.storeUserCredentials(
+      if (userRepository.findByUserUuid(user.uuid) != null) {
+        throw UsernameAlreadyTakenException("uuid ${user.uuid.value} already belongs to a user")
+      }
+      if (userRepository.findByUsernameIgnoreCase(user.username.value) != null) {
+        throw UsernameAlreadyTakenException("username ${user.username.value} is already taken")
+      }
+      userRepository.insert(user)
+      userCredentialsService.storeNewUserCredentials(
         user,
         UserCredentials.create(user, password, null),
       )
     }
   }
 
+  /**
+   * Stores a new premium user; fails when a user with the same uuid exists, which stays unchanged.
+   */
   fun storePremiumUser(user: User) {
     require(user.isPremium) { "cannot store non-premium user" }
 
-    userRepository.save(user)
+    userRepository.insert(user)
   }
 
   private fun deleteUserCredentialsUpdateUserNoTx(user: User): User {

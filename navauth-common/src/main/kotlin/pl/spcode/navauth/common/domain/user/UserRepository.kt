@@ -21,6 +21,9 @@ package pl.spcode.navauth.common.domain.user
 interface UserRepository {
   fun save(user: User)
 
+  /** Stores a new user; fails when a user with the same uuid exists, which stays unchanged. */
+  fun insert(user: User)
+
   fun findByExactUsername(username: String): User?
 
   fun findByUsernameIgnoreCase(username: String): User?

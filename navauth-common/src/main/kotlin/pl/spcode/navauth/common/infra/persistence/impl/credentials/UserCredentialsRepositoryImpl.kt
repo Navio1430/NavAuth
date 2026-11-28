@@ -23,6 +23,7 @@ import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.statements.UpsertStatement
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.upsert
@@ -49,6 +50,17 @@ class UserCredentialsRepositoryImpl @Inject constructor(private val database: Da
         CredentialsTable.upsert(body = setValues)
       } else {
         CredentialsTable.upsert(CredentialsTable.uuid, body = setValues)
+      }
+    }
+  }
+
+  override fun insert(userCredentials: UserCredentials) {
+    transaction(database) {
+      CredentialsTable.insert { stmt ->
+        stmt[CredentialsTable.uuid] = userCredentials.userUuid.value
+        stmt[CredentialsTable.passwordHash] = userCredentials.hashedPassword?.passwordHash?.value
+        stmt[CredentialsTable.algo] = userCredentials.hashedPassword?.algo
+        stmt[CredentialsTable.twoFactorSecret] = userCredentials.totpSecret?.value
       }
     }
   }

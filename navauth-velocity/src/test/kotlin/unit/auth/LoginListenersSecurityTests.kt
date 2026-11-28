@@ -155,6 +155,7 @@ class LoginListenersSecurityTests :
     beforeTest {
       userService = mockk(relaxed = true)
       every { userService.removeLeftoverPremiumPassword(any()) } answers { firstArg() }
+      every { userService.findUserByUuid(any()) } returns null
       authHandshakeSessionService = AuthHandshakeSessionService()
       usernameResolutionService = mockk()
       invalidSessionCacheService = InvalidSessionCacheService(GeneralConfig())
@@ -252,6 +253,50 @@ class LoginListenersSecurityTests :
       val loginEvent = LoginEvent(player(ipv4, onlineMode = false), null)
       listeners.onLogin(loginEvent)
       loginEvent.result.isAllowed.shouldBeFalse()
+    }
+
+    test("a new player whose UUID belongs to an account is denied and gets no auth session") {
+      val session =
+        authHandshakeSessionService.createSession(
+          VelocityUniqueSessionId("Admin", ipv4),
+          null,
+          "Admin",
+          UsernameResResult.Success(EncryptionType.NONE, PostUsernameResolutionState.NO_CHANGE),
+        )
+      val profile = GameProfile(UUID.randomUUID(), "Admin", emptyList())
+      every { userService.findUserByUuid(UserUuid(profile.id)) } returns
+        User.nonPremium(UserUuid(profile.id), Username("Renamed"))
+      val profileEvent = GameProfileRequestEvent(connection(ipv4), profile, false)
+
+      listeners.onGameProfile(profileEvent)
+
+      session.uuidInUseByAnotherAccount.shouldBeTrue()
+      val offlinePlayer = player(ipv4, onlineMode = false, uuid = profile.id)
+      val loginEvent = LoginEvent(offlinePlayer, null)
+      listeners.onLogin(loginEvent)
+      loginEvent.result.isAllowed.shouldBeFalse()
+
+      listeners.onPostLogin(PostLoginEvent(offlinePlayer))
+      verify(exactly = 0) { authSessionFactory.createRegisterAuthSession(any(), any()) }
+      verify(atLeast = 1) { offlinePlayer.disconnect(any()) }
+    }
+
+    test("a new player whose UUID belongs to no account is not flagged") {
+      val session =
+        authHandshakeSessionService.createSession(
+          VelocityUniqueSessionId("Admin", ipv4),
+          null,
+          "Admin",
+          UsernameResResult.Success(EncryptionType.NONE, PostUsernameResolutionState.NO_CHANGE),
+        )
+      val profile = GameProfile(UUID.randomUUID(), "Admin", emptyList())
+
+      listeners.onGameProfile(GameProfileRequestEvent(connection(ipv4), profile, false))
+
+      session.uuidInUseByAnotherAccount.shouldBeFalse()
+      val loginEvent = LoginEvent(player(ipv4, onlineMode = false, uuid = profile.id), null)
+      listeners.onLogin(loginEvent)
+      loginEvent.result.isAllowed.shouldBeTrue()
     }
 
     test("Mojang UUID other than the stored one keeps its own profile and is denied") {

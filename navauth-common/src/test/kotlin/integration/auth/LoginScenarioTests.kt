@@ -23,6 +23,7 @@ import extension.app.UsernameResolutionTestExtension
 import fake.FakeProfileService
 import java.util.UUID
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
@@ -98,6 +99,9 @@ class LoginScenarioTests {
 
     /** Offline connection without an account: the player must register. */
     data object Register : Outcome
+
+    /** A connection without an account whose UUID already belongs to an account; refused. */
+    data object UsernameUnavailable : Outcome
   }
 
   /**
@@ -144,6 +148,9 @@ class LoginScenarioTests {
         if (!handshake.verifyPremiumIdentity(proxyOnlineMode, profileId)) {
           return if (proxyOnlineMode) Outcome.IdentityMismatch else Outcome.NotAuthenticatedByMojang
         }
+        if (sessionUser == null && userService.findUserByUuid(UserUuid(profileId)) != null) {
+          return Outcome.UsernameUnavailable
+        }
         val user =
           sessionUser?.let { userService.removeLeftoverPremiumPassword(it) }
             ?: User.premium(UserUuid(profileId), Username(connUsername), MojangId(profileId)).also {
@@ -152,7 +159,10 @@ class LoginScenarioTests {
         Outcome.PremiumLogin(user)
       }
       EncryptionType.NONE ->
-        if (sessionUser != null) Outcome.PasswordLogin(sessionUser) else Outcome.Register
+        if (sessionUser != null) Outcome.PasswordLogin(sessionUser)
+        else if (userService.findUserByUuid(UserUuid(offlineUuid(connUsername))) != null)
+          Outcome.UsernameUnavailable
+        else Outcome.Register
     }
   }
 
@@ -198,6 +208,73 @@ class LoginScenarioTests {
 
   private fun ownedByAnother(storedName: String) =
     Outcome.Denied(UsernameResFailureReason.PremiumUsernameOwnedByAnotherAccount(storedName))
+
+  // ---------------------------------------------------------------------------------------------
+  // names of renamed accounts
+  // ---------------------------------------------------------------------------------------------
+
+  @Test
+  fun `the former name of a renamed account cannot join or register and the account is unchanged`() {
+    val oldName = newName()
+    val renamedTo = newName()
+    val original = User.nonPremium(UserUuid(offlineUuid(oldName)), Username(oldName))
+    userService.createAndStoreUserWithNewCredentials(original, password())
+    userService.enableTwoFactorAuth(original, TOTPSecret("JBSWY3DPEHPK3PXP"))
+    val renamed = userService.migrateUsername(original, Username(renamedTo))
+    val credentialsBefore = credentialsRepository.findByUser(renamed)
+
+    assertEquals(Outcome.UsernameUnavailable, join(oldName, client = null))
+
+    val otherPassword = HashedPassword(PasswordHash("other-hash"), HashingAlgorithm.BCRYPT)
+    assertFailsWith<UsernameAlreadyTakenException> {
+      userService.createAndStoreUserWithNewCredentials(
+        User.nonPremium(UserUuid(offlineUuid(oldName)), Username(oldName)),
+        otherPassword,
+      )
+    }
+
+    val after = assertNotNull(userService.findUserByUuid(original.uuid))
+    assertEquals(renamed, after)
+    assertEquals(renamedTo, after.username.value)
+    assertNull(stored(oldName))
+    val credentialsAfter = assertNotNull(credentialsRepository.findByUser(after))
+    assertEquals(credentialsBefore, credentialsAfter)
+    assertEquals("password-hash", credentialsAfter.hashedPassword?.passwordHash?.value)
+    assertEquals("JBSWY3DPEHPK3PXP", credentialsAfter.totpSecret?.value)
+  }
+
+  @Test
+  fun `a new premium account is not stored over an account that has its uuid`() {
+    val name = newName()
+    val id = mojangAccount(newName())
+    val existing = User.nonPremium(UserUuid(id.value), Username(name))
+    userService.createAndStoreUserWithNewCredentials(existing, password())
+    val credentialsBefore = credentialsRepository.findByUser(existing)
+
+    assertFails {
+      userService.storePremiumUser(User.premium(UserUuid(id.value), Username(newName()), id))
+    }
+
+    assertEquals(existing, userService.findUserByUuid(existing.uuid))
+    assertNull(userService.findUserByMojangUuid(id))
+    assertEquals(credentialsBefore, credentialsRepository.findByUser(existing))
+  }
+
+  @Test
+  fun `registering a name taken in another letter case fails and changes nothing`() {
+    val name = newName()
+    val existing = registerCracked(name)
+
+    assertFailsWith<UsernameAlreadyTakenException> {
+      userService.createAndStoreUserWithNewCredentials(
+        User.nonPremium(UserUuid(offlineUuid(invertCase(name))), Username(invertCase(name))),
+        password(),
+      )
+    }
+
+    assertEquals(existing, stored(name))
+    assertNull(userService.findUserByUuid(UserUuid(offlineUuid(invertCase(name)))))
+  }
 
   // ---------------------------------------------------------------------------------------------
   // new players

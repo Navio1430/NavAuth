@@ -47,6 +47,19 @@ class AuthHandshakeSession(
     private set
 
   /**
+   * True when this connection has no account but the UUID the proxy assigned to it already belongs
+   * to an account (that account was renamed). The connection must be refused: it would otherwise
+   * act as, and create an account over, the other account.
+   */
+  var uuidInUseByAnotherAccount: Boolean = false
+    private set
+
+  /** Flags this session with [uuidInUseByAnotherAccount]. */
+  fun markUuidInUseByAnotherAccount() {
+    uuidInUseByAnotherAccount = true
+  }
+
+  /**
    * Checks the connection against this handshake. [EncryptionType.ENFORCE_PREMIUM] requires a
    * connection authenticated by Mojang (online mode), for new and existing accounts alike: an
    * offline connection proves nothing about who the player is. For an existing account, the Mojang
@@ -68,6 +81,6 @@ class AuthHandshakeSession(
   }
 
   override fun toString(): String {
-    return "AuthHandshakeSession(existingUser=$existingUser, connUsername='$connUsername', requestedEncryptionType=$requestedEncryptionType, postUsernameResolutionState=$postUsernameResolutionState, premiumIdentityMismatch=$premiumIdentityMismatch)"
+    return "AuthHandshakeSession(existingUser=$existingUser, connUsername='$connUsername', requestedEncryptionType=$requestedEncryptionType, postUsernameResolutionState=$postUsernameResolutionState, premiumIdentityMismatch=$premiumIdentityMismatch, uuidInUseByAnotherAccount=$uuidInUseByAnotherAccount)"
   }
 }

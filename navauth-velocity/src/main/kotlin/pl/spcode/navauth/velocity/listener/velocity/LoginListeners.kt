@@ -208,6 +208,12 @@ constructor(
       return
     }
 
+    if (handshakeSession.uuidInUseByAnotherAccount) {
+      // LoginEvent already denied this connection; never create an auth session for it
+      player.disconnectIfActive(usernameUnavailableComponent(handshakeSession.connUsername))
+      return
+    }
+
     if (generalConfig.descriptiveInvalidSessionEnabled && player.isOnlineMode) {
       invalidSessionCacheService.markAsEncryptedPremiumConnection(player.username)
     }
@@ -268,6 +274,18 @@ constructor(
     } else if (user != null) {
       profile = GameProfile(user.uuid.value, user.username.value, event.originalProfile.properties)
     } else {
+      val owner = userService.findUserByUuid(UserUuid(event.originalProfile.id))
+      if (owner != null) {
+        // the UUID the proxy assigned to this new player already belongs to an account (renamed
+        // since): LoginEvent denies the connection, it never acts as that account
+        logger.warn(
+          "Denied login of {}: its UUID {} already belongs to user {}",
+          event.username,
+          event.originalProfile.id,
+          owner.username.value,
+        )
+        session.markUuidInUseByAnotherAccount()
+      }
       profile = event.originalProfile
     }
 
@@ -293,6 +311,9 @@ constructor(
       } else if (session.premiumIdentityMismatch) {
         event.result =
           ResultedEvent.ComponentResult.denied(refusedPremiumLoginComponent(player, session))
+      } else if (session.uuidInUseByAnotherAccount) {
+        event.result =
+          ResultedEvent.ComponentResult.denied(usernameUnavailableComponent(session.connUsername))
       }
     } catch (e: Throwable) {
       logger.error(
@@ -435,6 +456,12 @@ constructor(
       logger.error("Failed to build unexpectedLoginErrorKickMessage", e)
       Component.text("NavAuth: internal error", TextColors.RED)
     }
+  }
+
+  private fun usernameUnavailableComponent(username: String): Component {
+    return withSupportFooter(
+      componentWithUsernamePlaceholder(messagesConfig.usernameUnavailableKickMessage, username)
+    )
   }
 
   private fun premiumIdentityMismatchComponent(username: String): Component {
