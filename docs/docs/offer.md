@@ -33,7 +33,6 @@ Cracking the whole database of a bad plugin takes less than a **FEW MINUTES**.
 | Codebase quality                                                | Good                                   | Bad                                   |
 | Supported Databases                                             | PostgreSQL, MySQL, MariaDB, SQLite, H2 | PostgreSQL, MySQL, MariaDB, SQLite    |
 | [2FA](/general/2fa.html)                                        | ✅                                     | 🟧 (needs additional plugin)          |
-| [User sessions](/general/user-lookup.html#lookup-user-sessions) | ✅                                     | ❌                                    |
 | Multification                                                   | ✅                                     | ❌                                    |
 | Plugins migration                                               | ✅ (any db type)                       | 🟧 (only for specific configurations) |
 | Database type migration                                         | ✅                                     | 🟧 (partial)                          |
