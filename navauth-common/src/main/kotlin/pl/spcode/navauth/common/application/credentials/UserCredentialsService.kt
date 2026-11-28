@@ -24,6 +24,7 @@ import com.google.inject.name.Named
 import java.util.UUID
 import java.util.concurrent.CancellationException
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ThreadPoolExecutor
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -32,6 +33,7 @@ import pl.spcode.navauth.common.domain.common.TransactionService
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
 import pl.spcode.navauth.common.domain.user.User
+import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
 import pl.spcode.navauth.common.infra.crypto.TOTP2FA
 
@@ -47,6 +49,9 @@ constructor(
 ) {
 
   private val logger: Logger = LoggerFactory.getLogger(javaClass)
+
+  /** The last TOTP time step accepted per account (see [verifyCode]). */
+  private val lastAcceptedTotpSteps = ConcurrentHashMap<UserUuid, Long>()
 
   fun findCredentials(user: User): UserCredentials? {
     return credentialsRepository.findByUser(user)
@@ -175,9 +180,24 @@ constructor(
     return future
   }
 
+  /**
+   * Verifies a TOTP [code] of [credentials]. A time step is accepted at most once per account: a
+   * code of the last accepted step or an older one is refused. Kept in memory of this proxy.
+   */
   fun verifyCode(credentials: UserCredentials, code: String): Boolean {
     require(credentials.totpSecret != null) { "credentials do not have a TOTP secret" }
-    return TOTP2FA().verifyTOTP(credentials.totpSecret, code)
+    val step = TOTP2FA().findMatchingStep(credentials.totpSecret, code) ?: return false
+
+    var accepted = false
+    lastAcceptedTotpSteps.compute(credentials.userUuid) { _, lastStep ->
+      if (lastStep == null || step > lastStep) {
+        accepted = true
+        step
+      } else {
+        lastStep
+      }
+    }
+    return accepted
   }
 
   /**
