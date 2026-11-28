@@ -72,15 +72,23 @@ constructor(private val migrationConfig: MigrationConfig, val migratorFactory: M
     val total = migrator.getSourceUsersCount()
     logger.info("Starting migration of $total users")
 
+    // the offset counts source rows read (imported or skipped), never rows written
     var offset = 0L
+    var migrated = 0L
+    var skipped = 0L
     while (true) {
-      val migrated = migrator.migrateNext(offset, migrationConfig.chunkSize)
-      if (migrated <= 0) break
+      val chunk = migrator.migrateNext(offset, migrationConfig.chunkSize)
+      if (chunk.read <= 0) break
 
-      offset += migrated
-      logger.info("Migrated $offset / $total users")
+      offset += chunk.read
+      migrated += chunk.migrated
+      skipped += chunk.skipped
+      logger.info("Processed $offset / $total users ($migrated imported, $skipped skipped)")
     }
 
-    logger.info("Migration finished, migrated $offset users in total")
+    logger.info(
+      "Migration finished: $offset users read, $migrated imported, $skipped skipped" +
+        if (skipped > 0) " (each skipped user is listed above with the reason)" else ""
+    )
   }
 }

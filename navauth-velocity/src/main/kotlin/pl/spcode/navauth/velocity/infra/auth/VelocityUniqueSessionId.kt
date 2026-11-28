@@ -23,7 +23,9 @@ import java.net.InetSocketAddress
 import pl.spcode.navauth.common.domain.auth.UniqueSessionId
 
 /**
- * Unique id based on nickname and socket port. Structure: "username:port"
+ * Unique id of one connection, based on nickname, remote IP address and socket port. Structure:
+ * "username:ip:port". The IP is part of the id because clients on different hosts can use the same
+ * source port at the same time.
  *
  * NOTE: Do not use this as an identifier outside single host. This ID loses its uniqueness in a
  * distributed system.
@@ -36,7 +38,10 @@ class VelocityUniqueSessionId : UniqueSessionId {
     this.id = id
   }
 
-  constructor(username: String, socket: InetSocketAddress) : this("$username:${socket.port}")
+  constructor(
+    username: String,
+    socket: InetSocketAddress,
+  ) : this("$username:${socket.address?.hostAddress ?: socket.hostString}:${socket.port}")
 
   constructor(player: Player) : this(player.username, player.remoteAddress)
 

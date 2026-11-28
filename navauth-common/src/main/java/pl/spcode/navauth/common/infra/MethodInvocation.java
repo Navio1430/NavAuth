@@ -25,7 +25,7 @@ import java.lang.reflect.Method;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class MethodInvocation implements Invocation, Comparable<MethodInvocation> {
+class MethodInvocation implements Invocation {
 
   private static final Logger logger = LoggerFactory.getLogger(MethodInvocation.class);
 
@@ -56,7 +56,7 @@ class MethodInvocation implements Invocation, Comparable<MethodInvocation> {
   }
 
   @Override
-  public int compareTo(MethodInvocation o) {
-    return Integer.compare(o.priority, priority);
+  public int getPriority() {
+    return priority;
   }
 }

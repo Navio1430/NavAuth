@@ -25,6 +25,8 @@ Even if you have password enabled, you can still use 2FA.
 ## Enabling 2FA
 
 Every registered player can enable 2FA using the [/setup2fa](/general/commands.html#setup2fa) command.
+A player with a password confirms it first (`/setup2fa <current_password>`); a premium player
+without a password just runs `/setup2fa`.
 - 1. User will receive a secret that they need to enter in the authenticator app or they can scan generated QR code.
 
 ![secret.png](/2fa/secret.png)
@@ -40,4 +42,10 @@ For simplicity scannable QR code can be generated too.
 
 ## Disabling 2FA
 
-To disable 2FA use the [/disable2fa](/general/commands.html#disable2fa) command.
+To disable 2FA use the [/disable2fa](/general/commands.html#disable2fa) command with a code from
+your authenticator app.
+
+A non-premium account that has no password (only 2FA, possible after an import) cannot disable 2FA,
+because it would be left without a way to log in. An admin first sets a password with
+[/forcesetpassword](/general/commands.html#forcesetpassword); `/forcesetpassword` also repairs a
+non-premium account that has no credentials at all.

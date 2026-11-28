@@ -70,6 +70,38 @@ class MojangProfileServiceImplTest :
       profile.shouldBeNull()
     }
 
+    listOf(400, 429, 500, 503).forEach { status ->
+      test("throws on HTTP $status") {
+        every { response.statusCode() } returns status
+        every { response.body() } returns
+          """{"id":"853c80ef3c3749fdaa49938b674adae6","name":"Notch"}"""
+        every { httpClient.send(any<HttpRequest>(), any<BodyHandler<String>>()) } returns response
+
+        val exception =
+          shouldThrow<IllegalStateException> { service.fetchProfileInfo(Username("notch")) }
+        exception.message.shouldNotBeNull().contains("$status") shouldBe true
+      }
+    }
+
+    test("throws on 2xx without id or name") {
+      every { response.statusCode() } returns 200
+      every { response.body() } returns """{"errorMessage":"something"}"""
+      every { httpClient.send(any<HttpRequest>(), any<BodyHandler<String>>()) } returns response
+
+      shouldThrow<IllegalStateException> { service.fetchProfileInfo(Username("notch")) }
+    }
+
+    test("throws on an empty or unparsable 2xx body") {
+      every { response.statusCode() } returns 200
+      every { httpClient.send(any<HttpRequest>(), any<BodyHandler<String>>()) } returns response
+
+      every { response.body() } returns ""
+      shouldThrow<IllegalStateException> { service.fetchProfileInfo(Username("notch")) }
+
+      every { response.body() } returns "<html>Bad Gateway</html>"
+      shouldThrow<IllegalStateException> { service.fetchProfileInfo(Username("notch")) }
+    }
+
     test("throws on network error") {
       every { httpClient.send(any<HttpRequest>(), any<BodyHandler<String>>()) } throws
         RuntimeException("connection refused")

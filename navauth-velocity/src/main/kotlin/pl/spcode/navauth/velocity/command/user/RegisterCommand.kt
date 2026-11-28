@@ -26,6 +26,8 @@ import dev.rollczi.litecommands.annotations.async.Async
 import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import pl.spcode.navauth.api.domain.auth.AuthSessionType
 import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
@@ -53,6 +55,10 @@ constructor(
   val passwordValidator: PasswordValidator,
   val multification: VelocityMultification,
 ) {
+
+  companion object {
+    private val logger: Logger = LoggerFactory.getLogger(RegisterCommand::class.java)
+  }
 
   @Async
   @Execute
@@ -89,15 +95,22 @@ constructor(
     }
 
     try {
-      userCredentialsService.enqueueHashPassword(password, sender.uniqueId).thenAccept {
-        hashedPassword ->
-        userService.createAndStoreUserWithNewCredentials(
-          User.nonPremium(UserUuid(sender.uniqueId), Username(sender.username)),
-          hashedPassword,
-        )
-        // register session will send success message
-        session.authenticate()
-      }
+      userCredentialsService
+        .enqueueHashPassword(password, sender.uniqueId)
+        .thenAccept { hashedPassword ->
+          userService.createAndStoreUserWithNewCredentials(
+            User.nonPremium(UserUuid(sender.uniqueId), Username(sender.username)),
+            hashedPassword,
+          )
+          // register session will send success message
+          session.authenticate()
+        }
+        .exceptionally { ex ->
+          // the account was not created: the session stays unauthenticated
+          logger.error("Could not create the account of {}", sender.username, ex)
+          multification.send(sender) { it.multification.unexpectedErrorOccurred }
+          null
+        }
       multification.send(sender) { it.multification.registeringInfo }
     } catch (_: EncryptionTaskAlreadyQueuedException) {
       multification.send(sender) { it.multification.processAlreadyInProgressError }

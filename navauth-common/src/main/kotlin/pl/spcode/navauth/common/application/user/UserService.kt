@@ -20,6 +20,8 @@ package pl.spcode.navauth.common.application.user
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import pl.spcode.navauth.api.event.NavAuthEventBus
 import pl.spcode.navauth.api.event.user.UserNonPremiumMigrationEvent
 import pl.spcode.navauth.api.event.user.UserPremiumMigrationEvent
@@ -48,6 +50,8 @@ constructor(
   val eventBus: NavAuthEventBus,
 ) {
 
+  private val logger: Logger = LoggerFactory.getLogger(UserService::class.java)
+
   fun findUserByExactUsername(username: String): User? {
     return userRepository.findByExactUsername(username)
   }
@@ -64,22 +68,37 @@ constructor(
     return userRepository.findByMojangUuid(uuid)
   }
 
+  /**
+   * Stores a new non-premium user with its first credentials. Never changes an existing account.
+   *
+   * @throws UsernameAlreadyTakenException if an account already has the user's uuid or its username
+   *   in any letter case
+   */
   fun createAndStoreUserWithNewCredentials(user: User, password: HashedPassword) {
     require(user.credentialsRequired) { "cannot store user without credentials required property" }
 
     txService.inTransaction {
-      userRepository.save(user)
-      userCredentialsService.storeUserCredentials(
+      if (userRepository.findByUserUuid(user.uuid) != null) {
+        throw UsernameAlreadyTakenException("uuid ${user.uuid.value} already belongs to a user")
+      }
+      if (userRepository.findByUsernameIgnoreCase(user.username.value) != null) {
+        throw UsernameAlreadyTakenException("username ${user.username.value} is already taken")
+      }
+      userRepository.insert(user)
+      userCredentialsService.storeNewUserCredentials(
         user,
         UserCredentials.create(user, password, null),
       )
     }
   }
 
+  /**
+   * Stores a new premium user; fails when a user with the same uuid exists, which stays unchanged.
+   */
   fun storePremiumUser(user: User) {
     require(user.isPremium) { "cannot store non-premium user" }
 
-    userRepository.save(user)
+    userRepository.insert(user)
   }
 
   private fun deleteUserCredentialsUpdateUserNoTx(user: User): User {
@@ -242,6 +261,37 @@ constructor(
     }
   }
 
+  /**
+   * A premium account never keeps a password: `/premium` removes it, but imports from other login
+   * plugins could leave one behind together with `credentialsRequired`, so the player was asked to
+   * `/login`. Call it only after Mojang verified that the connection is the account's owner. The
+   * password is dropped, a 2FA secret stays, and the account as it is now is returned.
+   */
+  fun removeLeftoverPremiumPassword(user: User): User {
+    if (!user.isPremium || !user.credentialsRequired) return user
+
+    return txService.inTransaction {
+      val credentials = userCredentialsService.findCredentials(user)
+      when {
+        credentials == null -> {
+          val repaired = user.withCredentialsRequired(false)
+          userRepository.save(repaired)
+          repaired
+        }
+        !credentials.isPasswordRequired -> user
+        credentials.isTwoFactorEnabled -> {
+          userCredentialsService.storeUserCredentials(user, credentials.withoutPassword())
+          logger.info("Removed a leftover password from premium account {} (2FA kept)", user.uuid)
+          user
+        }
+        else -> {
+          logger.info("Removed a leftover password from premium account {}", user.uuid)
+          deleteUserCredentialsUpdateUserNoTx(user)
+        }
+      }
+    }
+  }
+
   fun disableTwoFactorAuth(user: User) {
     txService.inTransaction {
       val credentials = userCredentialsService.findCredentials(user)!!
@@ -249,6 +299,8 @@ constructor(
         val newCredentials = credentials.withoutTotpSecret()
         userCredentialsService.storeUserCredentials(user, newCredentials)
       } else {
+        // a cracked account always needs credentials: deleting its only row would lock it out
+        check(user.isPremium) { "cannot disable 2FA of a non-premium account without a password" }
         deleteUserCredentialsUpdateUserNoTx(user)
       }
     }

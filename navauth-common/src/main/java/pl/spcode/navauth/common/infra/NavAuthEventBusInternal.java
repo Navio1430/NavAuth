@@ -22,12 +22,11 @@ import com.google.inject.Singleton;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.spcode.navauth.api.event.NavAuthEvent;
@@ -40,8 +39,13 @@ public class NavAuthEventBusInternal implements NavAuthEventBus {
 
   private final Logger logger = LoggerFactory.getLogger(NavAuthEventBusInternal.class);
 
-  private final Map<Class<?>, PriorityBlockingQueue<Invocation>> listeners =
+  /**
+   * Invocations per event class, ordered by priority (higher first); equal priorities keep their
+   * registration order. Writers lock the list; {@link #post} iterates a snapshot without locking.
+   */
+  private final Map<Class<?>, CopyOnWriteArrayList<Invocation>> listeners =
       new ConcurrentHashMap<>();
+
   private final Map<Object, Set<Class<?>>> registrations = new ConcurrentHashMap<>();
 
   @Override
@@ -60,7 +64,14 @@ public class NavAuthEventBusInternal implements NavAuthEventBus {
       Subscribe sub = method.getAnnotation(Subscribe.class);
       try {
         Invocation inv = new MethodInvocation(method, listener, sub.priority());
-        listeners.computeIfAbsent(eventType, k -> new PriorityBlockingQueue<>()).add(inv);
+        listeners.compute(
+            eventType,
+            (k, list) -> {
+              CopyOnWriteArrayList<Invocation> target =
+                  list != null ? list : new CopyOnWriteArrayList<>();
+              insertByPriority(target, inv);
+              return target;
+            });
         types.add(eventType);
       } catch (Exception e) {
         logger.error("Failed to register method", e);
@@ -75,9 +86,11 @@ public class NavAuthEventBusInternal implements NavAuthEventBus {
     if (types != null) {
       types.forEach(
           eventType -> {
-            PriorityBlockingQueue<Invocation> queue = listeners.get(eventType);
-            if (queue != null) {
-              queue.removeIf(inv -> listener.equals(inv.getTarget()));
+            CopyOnWriteArrayList<Invocation> list = listeners.get(eventType);
+            if (list != null) {
+              synchronized (list) {
+                list.removeIf(inv -> listener.equals(inv.getTarget()));
+              }
             }
           });
       cleanupEmpty();
@@ -87,14 +100,15 @@ public class NavAuthEventBusInternal implements NavAuthEventBus {
   public void post(NavAuthEvent event) {
     Class<?> clazz = event.getClass();
     for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
-      PriorityBlockingQueue<Invocation> queue = listeners.get(clazz);
-      if (queue != null) {
-        Iterator<Invocation> it = queue.iterator();
-        while (it.hasNext()) {
-          Invocation inv = it.next();
+      CopyOnWriteArrayList<Invocation> list = listeners.get(clazz);
+      if (list != null) {
+        // the iterator is a snapshot in priority order; listeners may (un)register meanwhile
+        for (Invocation inv : list) {
           Object target = inv.getTarget();
           if (target == null) {
-            it.remove();
+            synchronized (list) {
+              list.remove(inv);
+            }
             continue;
           }
           try {
@@ -106,6 +120,20 @@ public class NavAuthEventBusInternal implements NavAuthEventBus {
       }
     }
     cleanupEmpty();
+  }
+
+  /**
+   * Inserts {@code inv} after every invocation with the same or a higher priority, so higher
+   * priorities run first and equal priorities run in registration order.
+   */
+  private static void insertByPriority(List<Invocation> list, Invocation inv) {
+    synchronized (list) {
+      int index = list.size();
+      while (index > 0 && list.get(index - 1).getPriority() < inv.getPriority()) {
+        index--;
+      }
+      list.add(index, inv);
+    }
   }
 
   private void cleanupEmpty() {

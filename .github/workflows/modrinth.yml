@@ -1,0 +1,130 @@
+# Publishes the navauth-velocity jar of a GitHub release to Modrinth.
+#
+# Flow: pushing a `v*` tag builds a draft release (release.yml); publishing that draft runs this
+# workflow, which uploads the exact jar attached to the release. Re-running it for a version that
+# Modrinth already has does nothing.
+#
+# Setup (repository settings, once):
+#   - variable MODRINTH_PROJECT_ID: the Modrinth project id or slug
+#   - secret   MODRINTH_TOKEN: a Modrinth personal access token with the VERSION_CREATE scope
+#     (it can live in the `modrinth` environment, which can also require a reviewer)
+name: Publish to Modrinth
+
+on:
+  release:
+    types: [ published ]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to publish, e.g. v0.4.0
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: modrinth-${{ github.event.release.tag_name || inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: modrinth
+
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      MODRINTH_API: https://api.modrinth.com/v2
+      MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}
+      MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+      # Oldest Minecraft release listed on Modrinth: modern forwarding needs 1.13.1+ backends
+      # (docs/docs/requirements.md). Every newer release is listed automatically.
+      MIN_GAME_VERSION: "1.13.1"
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Check configuration
+        run: |
+          [ -n "$MODRINTH_PROJECT_ID" ] || { echo "::error::Set the repository variable MODRINTH_PROJECT_ID"; exit 1; }
+          [ -n "$MODRINTH_TOKEN" ] || { echo "::error::Set the secret MODRINTH_TOKEN"; exit 1; }
+          case "$TAG" in v*) ;; *) echo "::error::Release tag '$TAG' must start with v"; exit 1 ;; esac
+          echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
+          echo "USER_AGENT=$GITHUB_REPOSITORY/${TAG#v} (GitHub Actions)" >> "$GITHUB_ENV"
+
+      - name: Checkout the release tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.TAG }}
+          persist-credentials: false
+
+      - name: Skip a version Modrinth already has
+        id: existing
+        run: |
+          existing=$(curl --fail-with-body -sS \
+            -H "Authorization: $MODRINTH_TOKEN" -H "User-Agent: $USER_AGENT" \
+            "$MODRINTH_API/project/$MODRINTH_PROJECT_ID/version" \
+            | jq -r --arg v "$VERSION" '[.[] | select(.version_number == $v)] | length')
+          if [ "$existing" != "0" ]; then
+            echo "::notice::Modrinth already has version $VERSION; nothing to publish"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download the release jar
+        if: steps.existing.outputs.skip != 'true'
+        run: |
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern 'navauth-velocity-*.jar' --dir dist
+          jars=(dist/navauth-velocity-*.jar)
+          [ "${#jars[@]}" -eq 1 ] || { echo "::error::Expected one navauth-velocity jar, found: ${jars[*]}"; exit 1; }
+          echo "JAR=${jars[0]}" >> "$GITHUB_ENV"
+
+      - name: Build the version metadata
+        if: steps.existing.outputs.skip != 'true'
+        run: |
+          # changelog: this version's section of CHANGELOG.md, else the release notes
+          tr -d '\r' < CHANGELOG.md \
+            | awk -v v="$VERSION" '/^## / { if (found) exit; if ($2 == v) { found = 1; next } } found' \
+            > changelog.md
+          if [ ! -s changelog.md ]; then
+            gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body > changelog.md
+          fi
+
+          prerelease=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isPrerelease --jq .isPrerelease)
+          version_type=$([ "$prerelease" = "true" ] && echo beta || echo release)
+
+          curl --fail-with-body -sS -H "User-Agent: $USER_AGENT" "$MODRINTH_API/tag/game_version" > game_versions.json
+          min_date=$(jq -r --arg v "$MIN_GAME_VERSION" '.[] | select(.version == $v) | .date' game_versions.json)
+          [ -n "$min_date" ] || { echo "::error::Unknown game version $MIN_GAME_VERSION"; exit 1; }
+          game_versions=$(jq -c --arg d "$min_date" \
+            '[.[] | select(.version_type == "release" and .date >= $d) | .version]' game_versions.json)
+
+          jq -n \
+            --arg name "NavAuth $VERSION" \
+            --arg version "$VERSION" \
+            --rawfile changelog changelog.md \
+            --argjson game_versions "$game_versions" \
+            --arg version_type "$version_type" \
+            --arg project_id "$MODRINTH_PROJECT_ID" \
+            '{
+              name: $name,
+              version_number: $version,
+              changelog: $changelog,
+              dependencies: [],
+              game_versions: $game_versions,
+              version_type: $version_type,
+              loaders: ["velocity"],
+              featured: false,
+              status: "listed",
+              project_id: $project_id,
+              file_parts: ["file"],
+              primary_file: "file"
+            }' > version.json
+          jq 'del(.changelog)' version.json
+
+      - name: Publish to Modrinth
+        if: steps.existing.outputs.skip != 'true'
+        run: |
+          curl --fail-with-body -sS -X POST "$MODRINTH_API/version" \
+            -H "Authorization: $MODRINTH_TOKEN" \
+            -H "User-Agent: $USER_AGENT" \
+            -F "data=<version.json;type=application/json" \
+            -F "file=@$JAR;type=application/java-archive" \
+            | jq '{id, name, version_number, version_type, files: [.files[].filename]}'

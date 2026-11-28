@@ -58,6 +58,12 @@ dependencies {
 
   // Tribufu-Rcon used in itzg containers
   compileOnly(libs.tribufu.velocity.rcon)
+
+  // tests
+  testImplementation(libs.velocitypowered.velocity.api)
+  testImplementation(libs.kotest.runner.junit5)
+  testImplementation(libs.kotest.assertions.core)
+  testImplementation(libs.mockk)
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {

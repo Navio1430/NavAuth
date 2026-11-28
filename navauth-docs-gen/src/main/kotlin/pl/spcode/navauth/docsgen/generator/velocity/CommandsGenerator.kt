@@ -37,8 +37,7 @@ class CommandsGenerator : Generator {
       val baseCommandAnnotation = kClass.findAnnotation<Command>()
       val classPermissionAnnotation = kClass.findAnnotation<Permission>()
 
-      val basePermission =
-        classPermissionAnnotation?.value?.joinToString(" ") ?: "available by default"
+      val classPermissions = classPermissionAnnotation?.value?.toList() ?: emptyList()
       val baseCommandName = baseCommandAnnotation?.name?.trimStart('/') ?: ""
 
       kClass.functions.forEach { function ->
@@ -52,7 +51,11 @@ class CommandsGenerator : Generator {
             "$baseCommandName ${executeAnnotation.name.trimStart('/')}".trim()
           }
 
-        val permission = functionPermissionAnnotation?.value?.joinToString(" ") ?: basePermission
+        // LiteCommands checks the class and the method permission: a player needs both
+        val permissions =
+          classPermissions + (functionPermissionAnnotation?.value?.toList() ?: emptyList())
+        val permission =
+          if (permissions.isEmpty()) "available by default" else permissions.joinToString(" + ")
 
         val descriptionAnnotation = function.findAnnotation<Description>()
         val description = descriptionAnnotation?.value?.joinToString(" ") ?: "No description"

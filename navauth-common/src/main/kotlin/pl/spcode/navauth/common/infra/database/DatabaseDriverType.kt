@@ -18,19 +18,26 @@
 
 package pl.spcode.navauth.common.infra.database
 
-enum class DatabaseDriverType(val driverClassName: String, val jdbcUrlFormat: String) {
+enum class DatabaseDriverType(
+  val driverClassName: String,
+  val jdbcUrlFormat: String,
+  val migrationDir: String,
+) {
+
+  // case-insensitive identifiers: OrmLite created H2 names upper case, V001/Exposed quote lower
+  // case
 
   /** in-memory database, jdbc:h2:mem:database_name */
-  H2_MEM("org.h2.Driver", "jdbc:h2:mem:%s"),
+  H2_MEM("org.h2.Driver", "jdbc:h2:mem:%s;CASE_INSENSITIVE_IDENTIFIERS=TRUE", "h2"),
 
   /** file-based database, jdbc:h2:database_path */
-  H2_FILE("org.h2.Driver", "jdbc:h2:%s"),
+  H2_FILE("org.h2.Driver", "jdbc:h2:%s;CASE_INSENSITIVE_IDENTIFIERS=TRUE", "h2"),
 
   /** works for both mysql and mariadb */
-  MYSQL("com.mysql.cj.jdbc.Driver", "jdbc:mysql://%s:%s/%s?sslMode=%s"),
-  MARIADB(MYSQL.driverClassName, MYSQL.jdbcUrlFormat),
-  SQLITE("org.sqlite.JDBC", "jdbc:sqlite:%s"),
-  POSTGRESQL("org.postgresql.Driver", "jdbc:postgresql://%s:%s/%s?sslmode=%s");
+  MYSQL("com.mysql.cj.jdbc.Driver", "jdbc:mysql://%s:%s/%s?sslMode=%s", "mysql"),
+  MARIADB(MYSQL.driverClassName, MYSQL.jdbcUrlFormat, "mariadb"),
+  SQLITE("org.sqlite.JDBC", "jdbc:sqlite:%s", "sqlite"),
+  POSTGRESQL("org.postgresql.Driver", "jdbc:postgresql://%s:%s/%s?sslmode=%s", "postgresql");
 
   companion object {
     fun sslParamForMySQL(enabled: Boolean): String {

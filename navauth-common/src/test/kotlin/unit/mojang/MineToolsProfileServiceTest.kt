@@ -49,6 +49,7 @@ class MineToolsProfileServiceTest :
     }
 
     test("returns profile on successful response with status OK") {
+      every { response.statusCode() } returns 200
       every { response.body() } returns
         """{"id":"853c80ef3c3749fdaa49938b674adae6","name":"Notch","status":"OK"}"""
       every { httpClient.send(any<HttpRequest>(), any<BodyHandler<String>>()) } returns response
@@ -61,6 +62,7 @@ class MineToolsProfileServiceTest :
     }
 
     test("returns null when status is ERR") {
+      every { response.statusCode() } returns 200
       every { response.body() } returns """{"status":"ERR"}"""
       every { httpClient.send(any<HttpRequest>(), any<BodyHandler<String>>()) } returns response
 
@@ -69,23 +71,79 @@ class MineToolsProfileServiceTest :
       profile.shouldBeNull()
     }
 
-    test("returns null when status is OK but id is null") {
-      every { response.body() } returns """{"id":null,"name":"test","status":"OK"}"""
+    test("returns null on the not-found answer, which echoes the queried name") {
+      every { response.statusCode() } returns 200
+      every { response.body() } returns
+        """{"cache":{"HIT":false,"cache_time":86400},"id":null,"name":"nonexistent","status":"ERR"}"""
       every { httpClient.send(any<HttpRequest>(), any<BodyHandler<String>>()) } returns response
 
-      val profile = service.fetchProfileInfo(Username("test"))
+      val profile = service.fetchProfileInfo(Username("nonexistent"))
 
       profile.shouldBeNull()
     }
 
-    test("returns null when status is OK but name is null") {
+    test("returns null on the explicit not-found answer with null id and name") {
+      every { response.statusCode() } returns 200
+      every { response.body() } returns """{"id":null,"name":null,"status":"ERR"}"""
+      every { httpClient.send(any<HttpRequest>(), any<BodyHandler<String>>()) } returns response
+
+      val profile = service.fetchProfileInfo(Username("nonexistent"))
+
+      profile.shouldBeNull()
+    }
+
+    test("throws when status is OK but id is null") {
+      every { response.statusCode() } returns 200
+      every { response.body() } returns """{"id":null,"name":"test","status":"OK"}"""
+      every { httpClient.send(any<HttpRequest>(), any<BodyHandler<String>>()) } returns response
+
+      shouldThrow<IllegalStateException> { service.fetchProfileInfo(Username("test")) }
+    }
+
+    test("throws when status is OK but name is null") {
+      every { response.statusCode() } returns 200
       every { response.body() } returns
         """{"id":"853c80ef3c3749fdaa49938b674adae6","name":null,"status":"OK"}"""
       every { httpClient.send(any<HttpRequest>(), any<BodyHandler<String>>()) } returns response
 
-      val profile = service.fetchProfileInfo(Username("test"))
+      shouldThrow<IllegalStateException> { service.fetchProfileInfo(Username("test")) }
+    }
 
-      profile.shouldBeNull()
+    test("throws when status is ERR but a profile is present") {
+      every { response.statusCode() } returns 200
+      every { response.body() } returns
+        """{"id":"853c80ef3c3749fdaa49938b674adae6","name":"Notch","status":"ERR"}"""
+      every { httpClient.send(any<HttpRequest>(), any<BodyHandler<String>>()) } returns response
+
+      shouldThrow<IllegalStateException> { service.fetchProfileInfo(Username("notch")) }
+    }
+
+    test("throws on an empty body") {
+      every { response.statusCode() } returns 200
+      every { response.body() } returns ""
+      every { httpClient.send(any<HttpRequest>(), any<BodyHandler<String>>()) } returns response
+
+      shouldThrow<IllegalStateException> { service.fetchProfileInfo(Username("notch")) }
+    }
+
+    test("throws on an unparsable body") {
+      every { response.statusCode() } returns 200
+      every { response.body() } returns "<html>Bad Gateway</html>"
+      every { httpClient.send(any<HttpRequest>(), any<BodyHandler<String>>()) } returns response
+
+      shouldThrow<IllegalStateException> { service.fetchProfileInfo(Username("notch")) }
+    }
+
+    listOf(404, 429, 500, 503).forEach { status ->
+      test("throws on HTTP $status even with a not-found body") {
+        every { response.statusCode() } returns status
+        every { response.body() } returns """{"id":null,"name":null,"status":"ERR"}"""
+        every { httpClient.send(any<HttpRequest>(), any<BodyHandler<String>>()) } returns response
+
+        val exception =
+          shouldThrow<IllegalStateException> { service.fetchProfileInfo(Username("notch")) }
+        exception.message.shouldNotBeNull().contains("$status") shouldBe true
+      }
     }
 
     test("throws on network error") {

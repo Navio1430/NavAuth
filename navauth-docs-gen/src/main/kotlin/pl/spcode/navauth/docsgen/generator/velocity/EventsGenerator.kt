@@ -37,6 +37,8 @@ class EventsGenerator : Generator {
 
     VelocityListenersRegistry.Companion.listenersClasses.forEach { kClass ->
       kClass.declaredMemberFunctions.forEach { fn ->
+        // only event handlers; helper functions can take an event parameter too
+        val subscribe = fn.findAnnotation<Subscribe>() ?: return@forEach
         val firstParam = fn.parameters.getOrNull(1) ?: return@forEach // 0 is "this"
         val paramType = firstParam.type
 
@@ -49,14 +51,8 @@ class EventsGenerator : Generator {
 
         if (!isVelocityEvent) return@forEach
 
-        val subscribe = fn.findAnnotation<Subscribe>()
-        val order = subscribe?.order ?: PostOrder.NORMAL
-
         val eventName = paramType.toString().substringAfterLast('.')
-        tableBuilder.addRow(eventName, order)
-
-        //        println("eventType: ${paramType.toString().substringAfterLast('.')}, order:
-        // $order")
+        tableBuilder.addRow(eventName, describeOrder(subscribe))
       }
     }
 
@@ -67,5 +63,17 @@ class EventsGenerator : Generator {
 
   override fun getFileName(): String {
     return "events-table.md"
+  }
+
+  /** Velocity uses `priority` when `order` is left at NORMAL; higher priorities run earlier. */
+  @Suppress("DEPRECATION")
+  private fun describeOrder(subscribe: Subscribe): String {
+    if (subscribe.order != PostOrder.NORMAL) return subscribe.order.name
+    return when (subscribe.priority) {
+      0.toShort() -> PostOrder.NORMAL.name
+      Short.MAX_VALUE -> "FIRST (priority ${Short.MAX_VALUE})"
+      Short.MIN_VALUE -> "LAST (priority ${Short.MIN_VALUE})"
+      else -> "priority ${subscribe.priority}"
+    }
   }
 }

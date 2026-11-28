@@ -94,8 +94,6 @@ open class GeneralConfig : OkaeriConfig() {
   @Comment("Mojang API and profile resolution config")
   var mojangAPIConfig: MojangAPIConfig = MojangAPIConfig()
 
-  var sessionsConfig = SessionsConfig()
-
   @Variable("CONFIG_VERSION")
   @Comment("Config version. DO NOT CHANGE this property!")
   var configVersion: Int = 0

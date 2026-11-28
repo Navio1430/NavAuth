@@ -1,3 +1,5 @@
+.mcp.json
+
 **/run/
 !**/run/log4j2-debug.xml
 target/
@@ -47,3 +49,9 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Local planning (PRDs), never committed ###
+roadmap/
+
+### Local test servers (minecraft-mcp) ###
+.run/

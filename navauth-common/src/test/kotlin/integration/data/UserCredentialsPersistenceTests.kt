@@ -23,6 +23,7 @@ import common.Factory
 import extension.app.DataPersistenceTestExtension
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
 import org.junit.jupiter.api.extension.ExtendWith
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
 
@@ -42,5 +43,16 @@ class UserCredentialsPersistenceTests {
     assertEquals(user.uuid, savedCredentials.userUuid)
     assertEquals(credentials.hashedPassword, savedCredentials.hashedPassword)
     assertEquals(credentials.totpSecret, savedCredentials.totpSecret)
+  }
+
+  @Test
+  fun `inserting credentials for a uuid that has credentials fails and changes nothing`() {
+    val user = Factory.createNonPremiumUser()
+    val credentials = Factory.createUserCredentials(user)
+    userCredentialsRepository.insert(credentials)
+
+    assertFails { userCredentialsRepository.insert(Factory.createUserCredentials(user)) }
+
+    assertEquals(credentials, userCredentialsRepository.findByUser(user))
   }
 }

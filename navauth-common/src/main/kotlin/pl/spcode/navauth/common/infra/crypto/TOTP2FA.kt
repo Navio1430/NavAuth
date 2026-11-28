@@ -20,6 +20,7 @@ package pl.spcode.navauth.common.infra.crypto
 
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 import java.security.SecureRandom
 import org.bouncycastle.crypto.Mac
 import org.bouncycastle.crypto.digests.SHA1Digest
@@ -75,15 +76,32 @@ class TOTP2FA {
   }
 
   fun verifyTOTP(secret: TOTPSecret, code: String, window: Int = 1): Boolean {
-    val timestampSeconds = System.currentTimeMillis() / 1000
-    val currentStep = timestampSeconds / TIME_STEP_SECONDS
+    return findMatchingStep(secret, code, window) != null
+  }
 
+  /**
+   * Returns the time step whose code equals [code] within [window] steps around the step of
+   * [timestampSeconds], or null when none does. Every step is checked and compared in constant
+   * time.
+   */
+  fun findMatchingStep(
+    secret: TOTPSecret,
+    code: String,
+    window: Int = 1,
+    timestampSeconds: Long = System.currentTimeMillis() / 1000,
+  ): Long? {
+    val currentStep = timestampSeconds / TIME_STEP_SECONDS
+    val codeBytes = code.toByteArray(StandardCharsets.UTF_8)
+
+    var matchedStep: Long? = null
     for (i in -window..window) {
-      val stepTime = (currentStep + i) * TIME_STEP_SECONDS
-      if (generateTOTP(secret, stepTime) == code) {
-        return true
+      val step = currentStep + i
+      val expected =
+        generateTOTP(secret, step * TIME_STEP_SECONDS).toByteArray(StandardCharsets.UTF_8)
+      if (MessageDigest.isEqual(expected, codeBytes) && matchedStep == null) {
+        matchedStep = step
       }
     }
-    return false
+    return matchedStep
   }
 }

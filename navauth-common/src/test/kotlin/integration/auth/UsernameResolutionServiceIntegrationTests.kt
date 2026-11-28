@@ -172,14 +172,11 @@ class UsernameResolutionServiceIntegrationTests {
 
   @Test
   fun `existing premium user different connection username failure`() {
-    val username = Username(generateRandomString(10))
-    val connUsername = Username(generateRandomString(10))
+    val username = Username(generateRandomString(10, withNumbers = false))
+    val connUsername = Username(invertCase(username.value))
     val mojangId = MojangId(UUID.randomUUID())
     userRepository.save(User.premium(UserUuid(UUID.randomUUID()), username, mojangId))
-    fakeProfileService.addProfile(
-      connUsername,
-      MojangProfile(MojangId(UUID.randomUUID()), connUsername),
-    )
+    fakeProfileService.addProfile(username, MojangProfile(mojangId, username))
 
     val existingUser = userService.findUserByUsernameIgnoreCase(username.value)!!
     val result = usernameResolutionService.resolveUsernameConflicts(connUsername, existingUser)

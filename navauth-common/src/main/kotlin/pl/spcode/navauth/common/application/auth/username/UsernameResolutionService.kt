@@ -43,6 +43,24 @@ constructor(private val userService: UserService, private val profileService: Pr
       }
     val isPremiumNickname = correspondingPremiumProfile != null
 
+    // A premium account belongs to its Mojang UUID, not to its name. When Mojang reports this name
+    // under another UUID, the stored owner renamed and another account claimed the name. That
+    // account must never get the stored identity (UUID, permissions, data), and the stored account
+    // must not be renamed to its spelling either. The name is freed when the stored owner joins
+    // with their new name (the Mojang UUID lookup below renames the stored account).
+    if (
+      existingUserIgnoreCase != null &&
+        existingUserIgnoreCase.isPremium &&
+        isPremiumNickname &&
+        existingUserIgnoreCase.mojangUuid != correspondingPremiumProfile.uuid
+    ) {
+      return failure(
+        UsernameResFailureReason.PremiumUsernameOwnedByAnotherAccount(
+          existingUserIgnoreCase.username.value
+        )
+      )
+    }
+
     // check if the user changed their nickname (does not check letter cases)
     if (existingUserIgnoreCase == null && isPremiumNickname) {
       val userByMojangUuid = userService.findUserByMojangUuid(correspondingPremiumProfile.uuid)

@@ -52,6 +52,9 @@ constructor(
     }
 
     val exceptions: MutableList<Exception> = mutableListOf()
+    // Mojang's own "not found" is the authoritative answer; another API's failure cannot override
+    // it
+    var mojangNotFound = false
     for (api in config.apiOrder) {
       try {
         val profile =
@@ -64,12 +67,15 @@ constructor(
           profileCache.putFound(username, profile)
           return profile
         }
+        if (api == MojangProfileApi.MOJANG) {
+          mojangNotFound = true
+        }
       } catch (ex: Exception) {
         exceptions.add(ex)
       }
     }
 
-    if (exceptions.isNotEmpty()) {
+    if (exceptions.isNotEmpty() && !mojangNotFound) {
       throw ProfileApiFetchException(usernameCaseIgnored, exceptions)
     }
     if (useNotFoundCache) {

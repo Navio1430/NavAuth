@@ -55,11 +55,37 @@ open class MessagesConfig : OkaeriConfig() {
       "<red>Username '%USERNAME%' is already taken! Administrator needs to resolve the conflict.</red>"
     )
 
+  @Comment(
+    "Shown when a premium username now belongs to another Mojang account than the one stored",
+    "(the previous owner renamed). The name is freed once the previous owner joins with their new",
+    "name, or when an administrator resolves it.",
+  )
+  var premiumUsernameOwnedByAnotherAccountError =
+    TextComponent(
+      "<red>The username '%USERNAME%' still belongs to another account on this server.</red>" +
+        "<br><gray>Its previous owner must join once with their new username, " +
+        "or an administrator must resolve the conflict."
+    )
+
+  @Comment("Shown when a new player's username cannot be used on this server.")
+  var usernameUnavailableKickMessage =
+    TextComponent(
+      "<red>The username '%USERNAME%' cannot be used on this server.</red>" +
+        "<br><gray>Please choose another username."
+    )
+
   @Comment("Usually caused by API rate limit.")
   var profileApiFailureKickMessage =
     TextComponent(
       "<red>We couldn't verify your profile with Mojang APIs. Please try again later.</red>"
     )
+
+  @Comment(
+    "Shown when a login is refused because of an internal error (the cause is in the proxy log),",
+    "or because a premium login reached the proxy without Mojang authentication.",
+  )
+  var unexpectedLoginErrorKickMessage =
+    TextComponent("<red>We couldn't verify your login because of an internal error.</red>")
 
   var loginTimeExceededError =
     TextComponent("<red>You've exceeded login time, please try again</red>")
@@ -116,6 +142,10 @@ open class MessagesConfig : OkaeriConfig() {
       )
     var accountAlreadyPremiumError: Notice =
       Notice.chat("<red>Account is already set as a premium one.")
+    var mojangAccountAlreadyLinkedError: Notice =
+      Notice.chat(
+        "<red>Can't set this account as premium because this Mojang account is already linked to another account."
+      )
     var accountNotNonPremiumError: Notice =
       Notice.chat(
         "<red>Can't execute this command right now: your account is not a non-premium one."
@@ -165,6 +195,10 @@ open class MessagesConfig : OkaeriConfig() {
     var twoFactorWrongCodeError: Notice = Notice.chat("<red>Wrong 2FA code!")
     var twoFactorAlreadyDisabledError: Notice =
       Notice.chat("<red>Your account has 2FA disabled already.")
+    var twoFactorDisablePasswordRequiredError: Notice =
+      Notice.chat(
+        "<red>Your account has no password, so 2FA cannot be disabled. Ask an administrator to set a password first."
+      )
 
     var twoFactorSetupInstruction: Notice =
       Notice.chat(
@@ -206,6 +240,10 @@ open class MessagesConfig : OkaeriConfig() {
     var adminCmdUsernameNotPremiumError: Notice =
       Notice.chat(
         "<red>Can't find '%USERNAME%' user in Mojang database. This player can't be migrated to premium mode."
+      )
+    var adminCmdMojangAccountAlreadyLinkedError: Notice =
+      Notice.chat(
+        "<red>The Mojang account for '%USERNAME%' is already linked to another NavAuth account. This player can't be migrated to premium mode."
       )
 
     var adminCmdPasswordSetUpdating: Notice =

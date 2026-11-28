@@ -24,6 +24,7 @@ import com.google.inject.name.Named
 import java.util.UUID
 import java.util.concurrent.CancellationException
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ThreadPoolExecutor
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -32,6 +33,7 @@ import pl.spcode.navauth.common.domain.common.TransactionService
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
 import pl.spcode.navauth.common.domain.user.User
+import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
 import pl.spcode.navauth.common.infra.crypto.TOTP2FA
 
@@ -47,6 +49,9 @@ constructor(
 ) {
 
   private val logger: Logger = LoggerFactory.getLogger(javaClass)
+
+  /** The last TOTP time step accepted per account (see [verifyCode]). */
+  private val lastAcceptedTotpSteps = ConcurrentHashMap<UserUuid, Long>()
 
   fun findCredentials(user: User): UserCredentials? {
     return credentialsRepository.findByUser(user)
@@ -69,6 +74,26 @@ constructor(
     }
 
     credentialsRepository.save(userCredentials)
+  }
+
+  /**
+   * Stores the first credentials of a user that was just inserted in the same transaction. A
+   * credentials row already under that uuid belongs to no account (the user insert would have
+   * failed otherwise), e.g. after a user row was deleted by hand, so it is replaced.
+   *
+   * @throws IllegalArgumentException if the provided credentials do not match the user or if the
+   *   user does not require credentials
+   */
+  fun storeNewUserCredentials(user: User, userCredentials: UserCredentials) {
+    require(userCredentials.userUuid == user.uuid) {
+      "provided credentials do not belong to the provided user"
+    }
+    require(user.credentialsRequired) {
+      "cannot store credentials for a user without credentials required property"
+    }
+
+    credentialsRepository.deleteByUser(user)
+    credentialsRepository.insert(userCredentials)
   }
 
   /**
@@ -157,14 +182,44 @@ constructor(
     return future
   }
 
-  fun verifyCode(credentials: UserCredentials, code: String): Boolean {
+  /**
+   * The time step of [code] when it is a valid 2FA code that this account has not used yet, else
+   * null. Does not use the code up: call [useCodeStep] once the whole login succeeded.
+   */
+  fun findUnusedCodeStep(credentials: UserCredentials, code: String): Long? {
     require(credentials.totpSecret != null) { "credentials do not have a TOTP secret" }
-    return TOTP2FA().verifyTOTP(credentials.totpSecret, code)
+    val step = TOTP2FA().findMatchingStep(credentials.totpSecret, code) ?: return null
+    val lastStep = lastAcceptedTotpSteps[credentials.userUuid]
+    return if (lastStep == null || step > lastStep) step else null
   }
 
   /**
-   * Updates the password for a given user to a new hashed password. Validates that the user has
-   * existing credentials before updating.
+   * Marks the code of [step] as used for this account. False when that step or a later one was used
+   * in the meantime; the code must then be refused.
+   */
+  fun useCodeStep(credentials: UserCredentials, step: Long): Boolean {
+    var accepted = false
+    lastAcceptedTotpSteps.compute(credentials.userUuid) { _, lastStep ->
+      if (lastStep == null || step > lastStep) {
+        accepted = true
+        step
+      } else {
+        lastStep
+      }
+    }
+    return accepted
+  }
+
+  /** Checks a 2FA code and uses it up: each code is accepted once per account. */
+  fun verifyCode(credentials: UserCredentials, code: String): Boolean {
+    val step = findUnusedCodeStep(credentials, code) ?: return false
+    return useCodeStep(credentials, step)
+  }
+
+  /**
+   * Updates the password for a given user to a new hashed password, keeping a 2FA secret. A
+   * non-premium user without a credentials row (left without one by an older release) gets a new
+   * row with the password; a premium user must already have credentials.
    *
    * @param user the user whose password needs to be updated
    * @param newPassword the new raw password to be hashed and stored
@@ -175,10 +230,13 @@ constructor(
       .thenApplyAsync(
         { hashedPassword ->
           transactionService.inTransaction {
-            val credentials =
-              findCredentials(user)
-                ?: throw IllegalArgumentException("user does not have credentials")
-            val newCredentials = credentials.withNewPassword(hashedPassword)
+            val credentials = findCredentials(user)
+            val newCredentials =
+              when {
+                credentials != null -> credentials.withNewPassword(hashedPassword)
+                !user.isPremium -> UserCredentials.create(user, hashedPassword, null)
+                else -> throw IllegalArgumentException("user does not have credentials")
+              }
             storeUserCredentials(user, newCredentials)
           }
         },

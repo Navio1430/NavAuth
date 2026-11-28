@@ -8,6 +8,7 @@ import io.mockk.verify
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import pl.spcode.navauth.common.application.credentials.queue.EncryptionTaskAlreadyQueuedException
 import pl.spcode.navauth.common.config.EncryptionQueueConfig
 import pl.spcode.navauth.common.infra.crypto.queue.EncryptionQueueServiceImpl
@@ -57,6 +58,40 @@ class EncryptionQueueServiceTests :
       }
 
       blocker.countDown()
+    }
+
+    test("concurrent submitTask for one playerId accepts exactly one task") {
+      val service = createService()
+      repeat(50) {
+        val playerId = UUID.randomUUID()
+        val blocker = CountDownLatch(1)
+        val start = CountDownLatch(1)
+        val accepted = AtomicInteger()
+        val refused = AtomicInteger()
+        val threads =
+          (1..2).map {
+            Thread {
+              start.await()
+              try {
+                service.submitTask(
+                  playerId = playerId,
+                  operation = { blocker.await(5, TimeUnit.SECONDS) },
+                  onCancelled = {},
+                )
+                accepted.incrementAndGet()
+              } catch (_: EncryptionTaskAlreadyQueuedException) {
+                refused.incrementAndGet()
+              }
+            }
+          }
+        threads.forEach { it.start() }
+        start.countDown()
+        threads.forEach { it.join(5000) }
+
+        accepted.get() shouldBe 1
+        refused.get() shouldBe 1
+        blocker.countDown()
+      }
     }
 
     test("submitTask allows different playerIds") {

@@ -18,10 +18,15 @@
 
 package pl.spcode.navauth.api.event;
 
+/**
+ * Common values for {@link Subscribe#priority()}. Listeners with a higher priority are called
+ * earlier; listeners with the same priority are called in registration order. Any {@code int} is
+ * accepted, these constants are only named steps.
+ */
 public class EventPriority {
-  static final int LOWEST = 0;
-  static final int LOW = 10;
-  static final int NORMAL = 20;
-  static final int HIGH = 30;
-  static final int HIGHEST = 40;
+  public static final int LOWEST = 0;
+  public static final int LOW = 10;
+  public static final int NORMAL = 20;
+  public static final int HIGH = 30;
+  public static final int HIGHEST = 40;
 }

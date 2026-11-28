@@ -29,7 +29,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
 import pl.spcode.navauth.common.application.credentials.queue.EncryptionQueueService
-import pl.spcode.navauth.common.application.user.UserActivitySessionService
 import pl.spcode.navauth.common.component.TextColors
 import pl.spcode.navauth.common.config.GeneralConfig
 import pl.spcode.navauth.common.domain.auth.session.AuthSession
@@ -45,7 +44,6 @@ constructor(
   val authSessionService: AuthSessionService<VelocityPlayerAdapter>,
   val encryptionQueueService: EncryptionQueueService,
   val serverSelectionService: VelocityServerSelectionService,
-  val userActivitySessionService: UserActivitySessionService,
   val generalConfig: GeneralConfig,
 ) {
 
@@ -55,14 +53,20 @@ constructor(
   fun onDisconnect(event: DisconnectEvent) {
     authSessionService.closeSession(VelocityUniqueSessionId(event.player))
     encryptionQueueService.dequeueTask(event.player.uniqueId)
-    userActivitySessionService.storePlayerSessionOnLeave(VelocityPlayerAdapter(event.player))
   }
 
   /** Priority is Short.MIN_VALUE to always have the final say */
   @Subscribe(priority = Short.MIN_VALUE)
   fun onServerPreConnect(event: ServerPreConnectEvent) {
+    // deny-only: a connection an earlier listener denied stays denied
+    if (!event.result.isAllowed) {
+      return
+    }
     val player = event.player
-    disconnectOnUnexpectedError(player) {
+    disconnectOnUnexpectedError(
+      player,
+      { event.result = ServerPreConnectEvent.ServerResult.denied() },
+    ) {
       val uniqueSessionId = VelocityUniqueSessionId(player)
       val authSession = authSessionService.findSession(uniqueSessionId)
 
@@ -95,7 +99,9 @@ constructor(
           return@disconnectOnUnexpectedError
         }
 
-        if (!generalConfig.limboServers.contains(event.originalServer.serverInfo.name)) {
+        // Velocity connects to the result's server, which an earlier listener may have changed
+        val targetServer = event.result.server.orElse(event.originalServer)
+        if (!generalConfig.limboServers.contains(targetServer.serverInfo.name)) {
           player.disconnectIfActive(
             Component.text(
               "NavAuth: Tried to connect into different server than limbo, while waiting for limbo handler.",
@@ -113,7 +119,7 @@ constructor(
   @Subscribe(priority = Short.MIN_VALUE)
   fun onPlayerChooseInitialServer(event: PlayerChooseInitialServerEvent) {
     val player = event.player
-    disconnectOnUnexpectedError(player) {
+    disconnectOnUnexpectedError(player, { event.setInitialServer(null) }) {
       val uniqueSessionId = VelocityUniqueSessionId(event.player)
       val authSession = authSessionService.findSession(uniqueSessionId)
 
@@ -127,6 +133,7 @@ constructor(
             TextColors.RED,
           )
         )
+        event.setInitialServer(null)
         return@disconnectOnUnexpectedError
       } else {
         logger.debug(
@@ -184,6 +191,7 @@ constructor(
           TextColors.RED,
         )
       )
+      event.setInitialServer(null)
       return
     }
 
@@ -196,6 +204,7 @@ constructor(
       player.disconnectIfActive(
         Component.text("NavAuth: initial limbo server not found.", TextColors.RED)
       )
+      event.setInitialServer(null)
       return
     }
 
@@ -209,10 +218,19 @@ constructor(
     authSession.state = AuthSessionState.WAITING_FOR_HANDLER
   }
 
-  private fun disconnectOnUnexpectedError(player: Player, block: () -> Unit) {
+  /**
+   * Fails closed: on an exception [denyEvent] refuses what the event would allow and the player is
+   * disconnected.
+   */
+  private fun disconnectOnUnexpectedError(
+    player: Player,
+    denyEvent: () -> Unit,
+    block: () -> Unit,
+  ) {
     try {
       block()
     } catch (e: Throwable) {
+      denyEvent()
       player.disconnectIfActive(Component.text("NavAuth: internal error", TextColors.RED))
       logger.error("unexpected internal error occurred", e)
     }

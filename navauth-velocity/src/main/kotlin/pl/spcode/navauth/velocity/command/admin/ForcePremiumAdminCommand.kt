@@ -27,6 +27,7 @@ import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
 import pl.spcode.navauth.common.annotation.Description
+import pl.spcode.navauth.common.application.mojang.ProfileApiFetchException
 import pl.spcode.navauth.common.application.mojang.ProfileService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.user.UserArgumentResolver
@@ -62,10 +63,26 @@ constructor(
       return
     }
 
-    val profile = profileService.fetchProfileInfo(user.username)
+    val profile =
+      try {
+        profileService.fetchProfileInfo(user.username)
+      } catch (_: ProfileApiFetchException) {
+        multification.send(sender) { it.multification.unexpectedErrorOccurred }
+        return
+      }
     if (profile == null) {
       multification
         .create(sender) { it.multification.adminCmdUsernameNotPremiumError }
+        .placeholder("%USERNAME%", user.username.value)
+        .send()
+      return
+    }
+
+    // a Mojang account may be attached to one NavAuth account only
+    val linkedUser = userService.findUserByMojangUuid(profile.uuid)
+    if (linkedUser != null && linkedUser.uuid != user.uuid) {
+      multification
+        .create(sender) { it.multification.adminCmdMojangAccountAlreadyLinkedError }
         .placeholder("%USERNAME%", user.username.value)
         .send()
       return

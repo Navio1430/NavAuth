@@ -12,7 +12,13 @@ dependencies {
 
   // database
   implementation(libs.hikaricp)
-  api(libs.ormlite.jdbc)
+  // brings kotlinx-coroutines: DatabaseConfig creates Dispatchers.IO even for plain transactions
+  api(libs.exposed.core)
+  api(libs.exposed.jdbc)
+  implementation(libs.flyway.core)
+  implementation(libs.flyway.mysql)
+  implementation(libs.flyway.postgresql)
+  implementation(libs.flyway.sqlite)
 
   // config
   api(libs.okaeri.configs.yaml.snakeyaml)
@@ -40,4 +46,11 @@ dependencies {
   testImplementation(libs.kotest.runner.junit5)
   testImplementation(libs.kotest.assertions.core)
   testImplementation(libs.mockk)
+  // TextComponent (messages config) needs MiniMessage; Velocity provides it at runtime
+  testImplementation(libs.adventure.text.minimessage)
+  testImplementation(platform(libs.testcontainers.bom))
+  testImplementation(libs.testcontainers.junit)
+  testImplementation(libs.testcontainers.mysql)
+  testImplementation(libs.testcontainers.mariadb)
+  testImplementation(libs.testcontainers.postgresql)
 }

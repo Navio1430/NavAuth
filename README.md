@@ -34,7 +34,6 @@ We are working on additional configuration options and other improvements to pre
 ### 🚀 Some of the NavAuth features
 - **Premium Auto-Login**
 - **[2FA](https://navio1430.github.io/NavAuth/docs/general/2fa.html)**
-- **[User sessions](https://navio1430.github.io/NavAuth/docs/general/user-lookup.html#lookup-user-sessions)**
 - **[Multification](https://navio1430.github.io/NavAuth/docs/configuration/multification.html)**
 - [Migration from other plugins](https://navio1430.github.io/NavAuth/docs/migration/migration.html)
 - [Database type migrations](https://navio1430.github.io/NavAuth/docs/migration/database-type-migration.html)
@@ -47,13 +46,12 @@ We are working on additional configuration options and other improvements to pre
 ### 🔒 In NavAuth password cracking takes more than TWELVE TRILLION (1.2 × 10^13) times longer than in the worst login plugins.
 Cracking the whole database of a bad plugin takes less than a **FEW MINUTES**.
 
-### What is not included?
+### ❗**NOT** included
 
 - **Anti-Bot** - use [Sonar](https://github.com/jonesdevelopment/sonar/) for that
 - **Anti-VPN**
-- block multiple accounts per IP - currently not supported.
-We've implemented user sessions which can be later used for an advanced mutli-account blocking solution.
-You can also use other plugins (like Anti-VPN's) for that.
+- block multiple accounts per IP - not supported. NavAuth stores no IP addresses; use other plugins
+  (like Anti-VPN's) for that.
 
 ## 👥 Contributors
 
