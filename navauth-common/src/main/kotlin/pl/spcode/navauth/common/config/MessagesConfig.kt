@@ -55,11 +55,30 @@ open class MessagesConfig : OkaeriConfig() {
       "<red>Username '%USERNAME%' is already taken! Administrator needs to resolve the conflict.</red>"
     )
 
+  @Comment(
+    "Shown when a premium username now belongs to another Mojang account than the one stored",
+    "(the previous owner renamed). The name is freed once the previous owner joins with their new",
+    "name, or when an administrator resolves it.",
+  )
+  var premiumUsernameOwnedByAnotherAccountError =
+    TextComponent(
+      "<red>The username '%USERNAME%' still belongs to another account on this server.</red>" +
+        "<br><gray>Its previous owner must join once with their new username, " +
+        "or an administrator must resolve the conflict."
+    )
+
   @Comment("Usually caused by API rate limit.")
   var profileApiFailureKickMessage =
     TextComponent(
       "<red>We couldn't verify your profile with Mojang APIs. Please try again later.</red>"
     )
+
+  @Comment(
+    "Shown when a login is refused because of an internal error (the cause is in the proxy log),",
+    "or because a premium login reached the proxy without Mojang authentication.",
+  )
+  var unexpectedLoginErrorKickMessage =
+    TextComponent("<red>We couldn't verify your login because of an internal error.</red>")
 
   var loginTimeExceededError =
     TextComponent("<red>You've exceeded login time, please try again</red>")

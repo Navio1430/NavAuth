@@ -24,6 +24,7 @@ import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
+import pl.spcode.navauth.common.annotation.Description
 import pl.spcode.navauth.common.config.MessagesConfig
 import pl.spcode.navauth.velocity.command.Permissions
 import pl.spcode.navauth.velocity.multification.VelocityMultification
@@ -35,6 +36,7 @@ constructor(val config: MessagesConfig, val multification: VelocityMultification
 
   @Execute(name = "reload")
   @Permission(Permissions.ADMIN_RELOAD)
+  @Description("Reloads the messages config (`messages.yml`).")
   fun reload(@Context sender: CommandSource) {
     multification
       .create(sender) { it.multification.adminCmdReloadingConfig }

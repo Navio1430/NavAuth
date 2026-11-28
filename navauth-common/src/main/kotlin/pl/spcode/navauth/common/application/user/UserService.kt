@@ -20,6 +20,8 @@ package pl.spcode.navauth.common.application.user
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import pl.spcode.navauth.api.event.NavAuthEventBus
 import pl.spcode.navauth.api.event.user.UserNonPremiumMigrationEvent
 import pl.spcode.navauth.api.event.user.UserPremiumMigrationEvent
@@ -47,6 +49,8 @@ constructor(
   val txService: TransactionService,
   val eventBus: NavAuthEventBus,
 ) {
+
+  private val logger: Logger = LoggerFactory.getLogger(UserService::class.java)
 
   fun findUserByExactUsername(username: String): User? {
     return userRepository.findByExactUsername(username)
@@ -239,6 +243,37 @@ constructor(
 
       val newCredentials = credentials.withTotpSecret(totpSecret)
       userCredentialsService.storeUserCredentials(userWithCredentials, newCredentials)
+    }
+  }
+
+  /**
+   * A premium account never keeps a password: `/premium` removes it, but imports from other login
+   * plugins could leave one behind together with `credentialsRequired`, so the player was asked to
+   * `/login`. Call it only after Mojang verified that the connection is the account's owner. The
+   * password is dropped, a 2FA secret stays, and the account as it is now is returned.
+   */
+  fun removeLeftoverPremiumPassword(user: User): User {
+    if (!user.isPremium || !user.credentialsRequired) return user
+
+    return txService.inTransaction {
+      val credentials = userCredentialsService.findCredentials(user)
+      when {
+        credentials == null -> {
+          val repaired = user.withCredentialsRequired(false)
+          userRepository.save(repaired)
+          repaired
+        }
+        !credentials.isPasswordRequired -> user
+        credentials.isTwoFactorEnabled -> {
+          userCredentialsService.storeUserCredentials(user, credentials.withoutPassword())
+          logger.info("Removed a leftover password from premium account {} (2FA kept)", user.uuid)
+          user
+        }
+        else -> {
+          logger.info("Removed a leftover password from premium account {}", user.uuid)
+          deleteUserCredentialsUpdateUserNoTx(user)
+        }
+      }
     }
   }
 
