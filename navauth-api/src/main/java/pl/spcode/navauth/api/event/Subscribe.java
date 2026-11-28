@@ -26,5 +26,9 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Subscribe {
+  /**
+   * Listeners with a higher priority are called earlier; equal priorities are called in
+   * registration order. See {@link EventPriority} for named values.
+   */
   int priority() default EventPriority.NORMAL;
 }

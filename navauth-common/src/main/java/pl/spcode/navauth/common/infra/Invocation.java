@@ -22,4 +22,7 @@ public interface Invocation {
   void invoke(Object event);
 
   Object getTarget();
+
+  /** The listener priority; a higher value runs earlier. */
+  int getPriority();
 }
