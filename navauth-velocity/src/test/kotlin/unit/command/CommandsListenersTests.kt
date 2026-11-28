@@ -142,6 +142,24 @@ class CommandsListenersTests :
 
     fun CommandExecuteEvent.CommandResult.isDenied() = !isAllowed && !isForwardToServer
 
+    test("other plugins see the command of a player who is not logged in as denied") {
+      val listeners = listeners(CommandsConfig())
+      val event = CommandExecuteEvent(player(), "spawn")
+
+      listeners.onCommandFirst(event)
+
+      event.result.isDenied().shouldBeTrue()
+    }
+
+    test("the first check leaves login commands allowed") {
+      val listeners = listeners(CommandsConfig())
+      val event = CommandExecuteEvent(player(), "login secret")
+
+      listeners.onCommandFirst(event)
+
+      event.result.isAllowed.shouldBeTrue()
+    }
+
     test("a command another plugin allowed again is denied before login") {
       val listeners = listeners(CommandsConfig())
 

@@ -19,6 +19,7 @@
 package pl.spcode.navauth.velocity.listener.velocity
 
 import com.google.inject.Inject
+import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.command.CommandExecuteEvent
 import com.velocitypowered.api.event.command.PlayerAvailableCommandsEvent
@@ -62,12 +63,25 @@ constructor(
   private fun isWhitelisted(command: String) = whitelist.contains(command.lowercase(Locale.ROOT))
 
   /**
+   * Runs first so that other plugins already see the command of a player who is not logged in as
+   * denied. Deny-only; [onCommand] checks again after every other plugin.
+   */
+  @Subscribe(order = PostOrder.FIRST)
+  fun onCommandFirst(event: CommandExecuteEvent) {
+    denyIfNotAllowedBeforeLogin(event, event.command)
+  }
+
+  /**
    * Priority is Short.MIN_VALUE to always have the final say. Deny-only: a result that is already
    * denied stays denied, and the decision is made on the command Velocity will actually run or
    * forward (the result's command when an earlier listener replaced it, else the typed command).
    */
   @Subscribe(priority = Short.MIN_VALUE)
   fun onCommand(event: CommandExecuteEvent) {
+    denyIfNotAllowedBeforeLogin(event, event.result.command.orElse(event.command))
+  }
+
+  private fun denyIfNotAllowedBeforeLogin(event: CommandExecuteEvent, effectiveCommand: String) {
     val player = event.commandSource as? Player ?: return
 
     val result = event.result
@@ -81,7 +95,6 @@ constructor(
       return
     }
 
-    val effectiveCommand = result.command.orElse(event.command)
     val commandName = effectiveCommand.split(" ", ignoreCase = true, limit = 2).first()
     if (!isWhitelisted(commandName)) {
       event.result = CommandExecuteEvent.CommandResult.denied()

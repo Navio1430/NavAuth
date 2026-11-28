@@ -18,6 +18,7 @@
 
 package unit.auth
 
+import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.command.CommandExecuteEvent
 import com.velocitypowered.api.event.command.PlayerAvailableCommandsEvent
@@ -169,6 +170,18 @@ class SessionListenersSecurityTests :
       event.result.isAllowed.shouldBeFalse()
     }
 
+    test("other plugins see the chat of a player who is not logged in as denied") {
+      val session = mockk<AuthSession<VelocityPlayerAdapter>>()
+      every { session.isAuthenticated } returns false
+      val authSessionService = mockk<AuthSessionService<VelocityPlayerAdapter>>()
+      every { authSessionService.findSession(any()) } returns session
+      val event = PlayerChatEvent(player(), "hello")
+
+      ChatListeners(authSessionService).onChatFirst(event)
+
+      event.result.isAllowed.shouldBeFalse()
+    }
+
     test("an exception at PlayerChooseInitialServer leaves no initial server") {
       val authSessionService = mockk<AuthSessionService<VelocityPlayerAdapter>>()
       every { authSessionService.findSession(any()) } throws RuntimeException("unexpected")
@@ -202,5 +215,19 @@ class SessionListenersSecurityTests :
         "onServerPreConnect",
         ServerPreConnectEvent::class.java,
       ) shouldBe Short.MIN_VALUE
+    }
+
+    test("chat and command listeners also run first") {
+      fun orderOf(listener: Class<*>, method: String, event: Class<*>) =
+        @Suppress("DEPRECATION")
+        listener.getMethod(method, event).getAnnotation(Subscribe::class.java).order
+
+      orderOf(ChatListeners::class.java, "onChatFirst", PlayerChatEvent::class.java) shouldBe
+        PostOrder.FIRST
+      orderOf(
+        CommandsListeners::class.java,
+        "onCommandFirst",
+        CommandExecuteEvent::class.java,
+      ) shouldBe PostOrder.FIRST
     }
   })
