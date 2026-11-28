@@ -18,29 +18,27 @@
 
 package pl.spcode.navauth.common.infra.persistence.mapper
 
+import org.jetbrains.exposed.v1.core.ResultRow
 import pl.spcode.navauth.common.domain.user.MojangId
 import pl.spcode.navauth.common.domain.user.User
 import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.domain.user.Username
-import pl.spcode.navauth.common.infra.persistence.ormlite.user.UserRecord
+import pl.spcode.navauth.common.infra.persistence.exposed.UsersTable
 
-fun User.toRecord(): UserRecord =
-  UserRecord(
-    uuid = uuid.value,
-    mojangUuid = mojangUuid?.value,
-    username = username.value,
-    usernameLowercase = username.value.lowercase(),
-    credentialsRequired = credentialsRequired,
-  )
+fun ResultRow.toUser(): User {
+  val uuid = UserUuid(this[UsersTable.uuid])
+  val username = Username(this[UsersTable.username])
+  val mojangUuid = this[UsersTable.mojangUuid]
+  val credentialsRequired = this[UsersTable.credentialsRequired]
 
-fun UserRecord.toDomain(): User =
-  if (mojangUuid != null) {
+  return if (mojangUuid != null) {
     User.premium(
-      id = UserUuid(uuid),
-      username = Username(username),
+      id = uuid,
+      username = username,
       mojangUuid = MojangId(mojangUuid),
       requiresCredentials = credentialsRequired,
     )
   } else {
-    User.nonPremium(id = UserUuid(uuid), username = Username(username))
+    User.nonPremium(id = uuid, username = username)
   }
+}

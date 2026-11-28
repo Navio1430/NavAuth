@@ -1,0 +1,31 @@
+/*
+ * NavAuth
+ * Copyright © 2026 Oliwier Fijas (Navio1430)
+ *
+ * NavAuth is free software; You can redistribute it and/or modify it under the terms of:
+ * the GNU Affero General Public License version 3 as published by the Free Software Foundation.
+ *
+ * NavAuth is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with NavAuth. If not, see <https://www.gnu.org/licenses/>
+ * and navigate to version 3 of the GNU Affero General Public License.
+ *
+ */
+
+package pl.spcode.navauth.common.infra.persistence.exposed
+
+import org.jetbrains.exposed.v1.core.Table
+
+object UsersTable : Table("navauth_users") {
+  val uuid = uuidVarchar("uuid")
+  val mojangUuid = uuidVarchar("mojang_uuid").nullable()
+  val username = varchar("username", 255)
+  val usernameLowercase = varchar("username_lowercase", 255)
+  val credentialsRequired = bool("credentials_required")
+
+  override val primaryKey = PrimaryKey(uuid)
+}

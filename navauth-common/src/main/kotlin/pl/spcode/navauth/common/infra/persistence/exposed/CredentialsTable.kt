@@ -1,6 +1,6 @@
 /*
  * NavAuth
- * Copyright © 2025 Oliwier Fijas (Navio1430)
+ * Copyright © 2026 Oliwier Fijas (Navio1430)
  *
  * NavAuth is free software; You can redistribute it and/or modify it under the terms of:
  * the GNU Affero General Public License version 3 as published by the Free Software Foundation.
@@ -16,31 +16,17 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.persistence.ormlite
+package pl.spcode.navauth.common.infra.persistence.exposed
 
-import com.j256.ormlite.dao.Dao
+import org.jetbrains.exposed.v1.core.Table
+import pl.spcode.navauth.common.domain.credentials.HashingAlgorithm
 
-interface OrmLiteCrudRepository<T : Any, ID> {
+object CredentialsTable : Table("navauth_credentials") {
+  val uuid = uuidVarchar("uuid")
+  // OrmLite used the field names verbatim, so these columns are camelCase in the captured DDL.
+  val passwordHash = varchar("passwordHash", 255).nullable()
+  val algo = enumerationByName<HashingAlgorithm>("algo", 100).nullable()
+  val twoFactorSecret = varchar("twoFactorSecret", 255).nullable()
 
-  fun save(entity: T): Dao.CreateOrUpdateStatus
-
-  fun saveAll(entities: Iterable<T>): List<Dao.CreateOrUpdateStatus>
-
-  fun findById(id: ID): T?
-
-  fun existsById(id: ID): Boolean
-
-  fun findAll(): List<T>
-
-  fun findAllById(ids: Iterable<ID>): List<T>
-
-  fun count(): Long
-
-  fun deleteById(id: ID): Int
-
-  fun delete(entity: T): Int
-
-  fun deleteAll(entities: Iterable<T>): Int
-
-  fun deleteAll(): Int
+  override val primaryKey = PrimaryKey(uuid)
 }

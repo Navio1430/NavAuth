@@ -19,62 +19,27 @@
 package pl.spcode.navauth.common.module
 
 import com.google.inject.AbstractModule
+import com.google.inject.Provides
 import com.google.inject.Singleton
-import java.util.UUID
-import kotlin.reflect.KClass
+import org.jetbrains.exposed.v1.jdbc.Database
 import pl.spcode.navauth.common.domain.credentials.UserCredentialsRepository
-import pl.spcode.navauth.common.domain.user.UserActivitySessionRepository
 import pl.spcode.navauth.common.domain.user.UserRepository
 import pl.spcode.navauth.common.infra.database.DatabaseManager
-import pl.spcode.navauth.common.infra.database.EntitiesRegistrar
-import pl.spcode.navauth.common.infra.persistence.ormlite.credentials.UserCredentialsRecord
-import pl.spcode.navauth.common.infra.persistence.ormlite.credentials.UserCredentialsRepositoryImpl
-import pl.spcode.navauth.common.infra.persistence.ormlite.user.UserActivitySessionRecord
-import pl.spcode.navauth.common.infra.persistence.ormlite.user.UserActivitySessionRepositoryImpl
-import pl.spcode.navauth.common.infra.persistence.ormlite.user.UserRecord
-import pl.spcode.navauth.common.infra.persistence.ormlite.user.UserRepositoryImpl
+import pl.spcode.navauth.common.infra.persistence.impl.credentials.UserCredentialsRepositoryImpl
+import pl.spcode.navauth.common.infra.persistence.impl.user.UserRepositoryImpl
 
 class DataPersistenceModule : AbstractModule() {
 
-  private data class Binding(
-    val entity: KClass<*>,
-    val idClass: KClass<*>,
-    val repo: Class<*>,
-    val impl: Class<*>,
-  )
-
-  private val bindings =
-    listOf(
-      Binding(
-        UserRecord::class,
-        UUID::class,
-        UserRepository::class.java,
-        UserRepositoryImpl::class.java,
-      ),
-      Binding(
-        UserCredentialsRecord::class,
-        UUID::class,
-        UserCredentialsRepository::class.java,
-        UserCredentialsRepositoryImpl::class.java,
-      ),
-      Binding(
-        UserActivitySessionRecord::class,
-        UUID::class,
-        UserActivitySessionRepository::class.java,
-        UserActivitySessionRepositoryImpl::class.java,
-      ),
-    )
-
   override fun configure() {
-    val entitiesRegistrar = EntitiesRegistrar()
+    bind(UserRepository::class.java).to(UserRepositoryImpl::class.java).`in`(Singleton::class.java)
+    bind(UserCredentialsRepository::class.java)
+      .to(UserCredentialsRepositoryImpl::class.java)
+      .`in`(Singleton::class.java)
 
-    for ((entity, idClass, repo, impl) in bindings) {
-      @Suppress("UNCHECKED_CAST") bind(repo as Class<Any>).to(impl).`in`(Singleton::class.java)
-
-      entitiesRegistrar.registerEntity(entity, idClass)
-    }
-
-    bind(EntitiesRegistrar::class.java).toInstance(entitiesRegistrar)
     bind(DatabaseManager::class.java).`in`(Singleton::class.java)
   }
+
+  @Provides
+  @Singleton
+  fun provideDatabase(databaseManager: DatabaseManager): Database = databaseManager.database
 }

@@ -18,31 +18,21 @@
 
 package pl.spcode.navauth.common.infra.persistence.mapper
 
+import org.jetbrains.exposed.v1.core.ResultRow
 import pl.spcode.navauth.common.domain.credentials.TOTPSecret
 import pl.spcode.navauth.common.domain.credentials.UserCredentials
 import pl.spcode.navauth.common.domain.user.UserUuid
 import pl.spcode.navauth.common.infra.crypto.HashedPassword
 import pl.spcode.navauth.common.infra.crypto.PasswordHash
-import pl.spcode.navauth.common.infra.persistence.ormlite.credentials.UserCredentialsRecord
+import pl.spcode.navauth.common.infra.persistence.exposed.CredentialsTable
 
-fun UserCredentialsRecord.toDomain(): UserCredentials {
+fun ResultRow.toUserCredentials(): UserCredentials {
+  val passwordHash = this[CredentialsTable.passwordHash]
+  val algo = this[CredentialsTable.algo]
+
   return UserCredentials.create(
-    userUuid = UserUuid(uuid),
-    hashedPassword =
-      passwordHash?.let {
-        return@let HashedPassword(PasswordHash(it), algo!!)
-      },
-    totpSecret =
-      twoFactorSecret?.let {
-        return@let TOTPSecret(it)
-      },
+    userUuid = UserUuid(this[CredentialsTable.uuid]),
+    hashedPassword = passwordHash?.let { HashedPassword(PasswordHash(it), algo!!) },
+    totpSecret = this[CredentialsTable.twoFactorSecret]?.let { TOTPSecret(it) },
   )
 }
-
-fun UserCredentials.toRecord(): UserCredentialsRecord =
-  UserCredentialsRecord(
-    uuid = userUuid.value,
-    passwordHash = hashedPassword?.passwordHash?.value,
-    algo = hashedPassword?.algo,
-    twoFactorSecret = totpSecret?.value,
-  )

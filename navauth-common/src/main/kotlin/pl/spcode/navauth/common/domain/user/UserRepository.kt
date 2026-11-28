@@ -18,10 +18,8 @@
 
 package pl.spcode.navauth.common.domain.user
 
-import com.j256.ormlite.dao.Dao
-
 interface UserRepository {
-  fun save(user: User): Dao.CreateOrUpdateStatus
+  fun save(user: User)
 
   fun findByExactUsername(username: String): User?
 

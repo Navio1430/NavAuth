@@ -1,6 +1,6 @@
 /*
  * NavAuth
- * Copyright © 2025 Oliwier Fijas (Navio1430)
+ * Copyright © 2026 Oliwier Fijas (Navio1430)
  *
  * NavAuth is free software; You can redistribute it and/or modify it under the terms of:
  * the GNU Affero General Public License version 3 as published by the Free Software Foundation.
@@ -16,24 +16,18 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.database
+package pl.spcode.navauth.common.infra.persistence.exposed
 
-import kotlin.reflect.KClass
+import org.jetbrains.exposed.v1.core.vendors.MariaDBDialect
+import org.jetbrains.exposed.v1.core.vendors.MysqlDialect
+import org.jetbrains.exposed.v1.jdbc.Database
 
-class EntitiesRegistrar {
-
-  private val entityTypes = mutableListOf<Pair<KClass<*>, KClass<*>>>()
-
-  fun registerEntity(clazz: KClass<*>, idClass: KClass<*>): EntitiesRegistrar {
-    entityTypes.add(Pair(clazz, idClass))
-    return this
-  }
-
-  fun getTypes(): List<KClass<*>> {
-    return entityTypes.map { it.first }
-  }
-
-  fun getTypesWithIds(): List<Pair<KClass<*>, KClass<*>>> {
-    return entityTypes
-  }
+/**
+ * MySQL/MariaDB do not support an explicit conflict target in `UPSERT`; Exposed maps them to `ON
+ * DUPLICATE KEY UPDATE`, which requires the key columns to be omitted. Other dialects need the key
+ * columns for the `ON CONFLICT (...)` clause.
+ */
+fun Database.isMysqlFamily(): Boolean {
+  val current = dialect
+  return current is MysqlDialect || current is MariaDBDialect
 }

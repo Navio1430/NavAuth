@@ -16,25 +16,16 @@
  *
  */
 
-package pl.spcode.navauth.common.infra.persistence.ormlite
+package pl.spcode.navauth.common.infra.persistence.impl.common
 
 import com.google.inject.Inject
-import com.j256.ormlite.misc.TransactionManager
-import java.sql.SQLException
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import pl.spcode.navauth.common.domain.common.TransactionService
 import pl.spcode.navauth.common.infra.database.DatabaseManager
 
-class TransactionServiceImpl @Inject constructor(val databaseManager: DatabaseManager) :
+class TransactionServiceImpl @Inject constructor(private val databaseManager: DatabaseManager) :
   TransactionService {
 
-  @Suppress("OVERRIDE_BY_INLINE")
-  override inline fun <R> inTransaction(crossinline block: () -> R): R {
-    return TransactionManager.callInTransaction(databaseManager.connectionSource) {
-      try {
-        block()
-      } catch (e: Exception) {
-        throw SQLException("OrmLite SQL transaction failed", e)
-      }
-    }
-  }
+  override fun <R> inTransaction(block: () -> R): R =
+    transaction(databaseManager.database) { block() }
 }

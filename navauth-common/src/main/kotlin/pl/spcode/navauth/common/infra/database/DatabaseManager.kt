@@ -20,35 +20,21 @@ package pl.spcode.navauth.common.infra.database
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
-import com.j256.ormlite.dao.Dao
-import com.j256.ormlite.dao.DaoManager
-import com.j256.ormlite.jdbc.DataSourceConnectionSource
-import com.j256.ormlite.support.ConnectionSource
-import com.j256.ormlite.table.TableUtils
 import com.zaxxer.hikari.HikariDataSource
-import java.sql.SQLException
-import java.sql.SQLSyntaxErrorException
-import java.util.concurrent.ConcurrentHashMap
-import kotlin.reflect.KClass
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import javax.sql.DataSource
+import org.jetbrains.exposed.v1.core.DatabaseConfig as ExposedDatabaseConfig
+import org.jetbrains.exposed.v1.jdbc.Database
 import pl.spcode.navauth.common.shared.PluginDirectory
 
 @Singleton
 class DatabaseManager
 @Inject
-constructor(
-  val config: DatabaseConfig,
-  val entitiesRegistrar: EntitiesRegistrar,
-  val pluginDirectory: PluginDirectory,
-) {
+constructor(val config: DatabaseConfig, val pluginDirectory: PluginDirectory) {
 
-  private val logger: Logger = LoggerFactory.getLogger(DatabaseManager::class.java)
+  val dataSource: HikariDataSource = HikariDataSource()
 
-  private val dataSource: HikariDataSource = HikariDataSource()
-  lateinit var connectionSource: ConnectionSource
-
-  private val daoMap = ConcurrentHashMap<Class<*>, Dao<*, *>>()
+  lateinit var database: Database
+    private set
 
   fun connect(poolName: String = "NavAuth-pool") {
     dataSource.poolName = poolName
@@ -57,6 +43,10 @@ constructor(
     dataSource.addDataSourceProperty("prepStmtCacheSize", "250")
     dataSource.addDataSourceProperty("prepStmtCacheSqlLimit", "2048")
     dataSource.addDataSourceProperty("useServerPrepStmts", "true")
+    // MySQL Connector/J's information_schema keyword lookup is incompatible with MariaDB 11.4+,
+    // and the connection uses the MySQL driver for MariaDB. Fall back to the driver's SHOW-based
+    // metadata so identifier handling does not fail.
+    dataSource.addDataSourceProperty("useInformationSchema", "false")
 
     dataSource.maximumPoolSize = config.poolSize
     dataSource.connectionTimeout = config.connectionTimeout
@@ -110,55 +100,39 @@ constructor(
       }
 
     dataSource.jdbcUrl = jdbcUrl
+  }
 
-    connectionSource = DataSourceConnectionSource(dataSource, jdbcUrl)
+  /** Runs Flyway migrations for the active driver. Flyway owns the schema. */
+  fun migrate() {
+    SchemaMigrations.migrate(dataSource, config.driverType)
   }
 
   fun connectAndInit(poolName: String = "NavAuth-pool") {
     connect(poolName)
-    initDatabase(entitiesRegistrar)
+    migrate()
+    database = connectExposed(dataSource)
   }
 
   fun closeConnections() {
     dataSource.close()
-    connectionSource.close()
   }
 
-  @Suppress("UNCHECKED_CAST")
-  fun <T : Any, ID> getDao(clazz: KClass<T>): Dao<T, ID> {
-    return daoMap.computeIfAbsent(clazz.java) {
-      return@computeIfAbsent DaoManager.createDao(connectionSource, clazz.java)
-    } as Dao<T, ID>
-  }
-
-  @Suppress("UNCHECKED_CAST")
-  fun <T : Any, ID : Any> getDao(entityClass: KClass<T>, idClass: KClass<ID>): Dao<T, ID> {
-
-    // idClass is intentionally unused – JVM cannot enforce it
-    return daoMap.computeIfAbsent(entityClass.java) {
-      DaoManager.createDao(connectionSource, entityClass.java)
-    } as Dao<T, ID>
-  }
-
-  private fun initDatabase(entitiesRegistrar: EntitiesRegistrar) {
-    entitiesRegistrar.getTypes().forEach {
-      try {
-        TableUtils.createTableIfNotExists(connectionSource, it.java)
-      } catch (e: SQLException) {
-        // we catch the duplicate key name exception, because OrmLite doesn't handle it properly,
-        // the issue persists only while using MySQL or MariaDB
-        val cause = e.cause
-        if (
-          cause is SQLSyntaxErrorException &&
-            cause.errorCode == 1061 &&
-            e.message?.contains("CREATE INDEX") == true
-        ) {
-          logger.info("Tried to create index which already exists, skipping")
-          return@forEach
-        } else {
-          throw e
-        }
-      }
+  companion object {
+    /**
+     * Exposed settings of every database NavAuth opens: the plugin's own, migration sources and
+     * tests.
+     * - `preserveIdentifierCasing`: the OrmLite-created columns are camelCase (`passwordHash`) and
+     *   must be quoted as written.
+     * - `defaultMaxAttempts = 1`: Exposed retries a failed `transaction {}` block 3 times by
+     *   default. A failure must surface once, and a block must never run twice.
+     */
+    fun exposedDatabaseConfig(): ExposedDatabaseConfig = ExposedDatabaseConfig {
+      preserveIdentifierCasing = true
+      defaultMaxAttempts = 1
     }
+
+    /** Connects Exposed to [dataSource] with [exposedDatabaseConfig]. */
+    fun connectExposed(dataSource: DataSource): Database =
+      Database.connect(dataSource, databaseConfig = exposedDatabaseConfig())
   }
 }
