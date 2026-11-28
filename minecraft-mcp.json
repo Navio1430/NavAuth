@@ -1,0 +1,10 @@
+{
+  "targets": [
+    {
+      "name": "proxy",
+      "type": "velocity",
+      "directory": ".run/mcp/velocity"
+    }
+  ],
+  "defaultTarget": "proxy"
+}
