@@ -69,11 +69,11 @@ class LoginAuthSessionTests :
       val verifications = AtomicInteger()
       val service =
         mockk<UserCredentialsService> {
-          every { verifyCode(credentials, any()) } answers
+          every { findUnusedCodeStep(credentials, any()) } answers
             {
               verifications.incrementAndGet()
               Thread.sleep(2)
-              false
+              null
             }
         }
       val session = CountingLoginSession(credentials, service)
@@ -116,11 +116,11 @@ class LoginAuthSessionTests :
       val release = CountDownLatch(1)
       val service =
         mockk<UserCredentialsService> {
-          every { verifyCode(credentials, any()) } answers
+          every { findUnusedCodeStep(credentials, any()) } answers
             {
               entered.countDown()
               release.await(5, TimeUnit.SECONDS)
-              false
+              null
             }
         }
       val session = CountingLoginSession(credentials, service)
@@ -144,10 +144,10 @@ class LoginAuthSessionTests :
       val verifications = AtomicInteger()
       val service =
         mockk<UserCredentialsService> {
-          every { verifyCode(credentials, any()) } answers
+          every { findUnusedCodeStep(credentials, any()) } answers
             {
               verifications.incrementAndGet()
-              false
+              null
             }
         }
       val session = CountingLoginSession(credentials, service)
@@ -163,11 +163,12 @@ class LoginAuthSessionTests :
       val verifications = AtomicInteger()
       val service =
         mockk<UserCredentialsService> {
-          every { verifyCode(credentials, any()) } answers
+          every { findUnusedCodeStep(credentials, any()) } answers
             {
               verifications.incrementAndGet()
-              true
+              1L
             }
+          every { useCodeStep(credentials, any()) } returns true
         }
       val session = CountingLoginSession(credentials, service)
       session.markInvalidated()

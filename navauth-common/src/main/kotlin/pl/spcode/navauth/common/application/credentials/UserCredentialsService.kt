@@ -77,8 +77,9 @@ constructor(
   }
 
   /**
-   * Stores the first credentials of a new user; fails when credentials with the same uuid exist,
-   * which stay unchanged.
+   * Stores the first credentials of a user that was just inserted in the same transaction. A
+   * credentials row already under that uuid belongs to no account (the user insert would have
+   * failed otherwise), e.g. after a user row was deleted by hand, so it is replaced.
    *
    * @throws IllegalArgumentException if the provided credentials do not match the user or if the
    *   user does not require credentials
@@ -91,6 +92,7 @@ constructor(
       "cannot store credentials for a user without credentials required property"
     }
 
+    credentialsRepository.deleteByUser(user)
     credentialsRepository.insert(userCredentials)
   }
 
@@ -181,13 +183,21 @@ constructor(
   }
 
   /**
-   * Verifies a TOTP [code] of [credentials]. A time step is accepted at most once per account: a
-   * code of the last accepted step or an older one is refused. Kept in memory of this proxy.
+   * The time step of [code] when it is a valid 2FA code that this account has not used yet, else
+   * null. Does not use the code up: call [useCodeStep] once the whole login succeeded.
    */
-  fun verifyCode(credentials: UserCredentials, code: String): Boolean {
+  fun findUnusedCodeStep(credentials: UserCredentials, code: String): Long? {
     require(credentials.totpSecret != null) { "credentials do not have a TOTP secret" }
-    val step = TOTP2FA().findMatchingStep(credentials.totpSecret, code) ?: return false
+    val step = TOTP2FA().findMatchingStep(credentials.totpSecret, code) ?: return null
+    val lastStep = lastAcceptedTotpSteps[credentials.userUuid]
+    return if (lastStep == null || step > lastStep) step else null
+  }
 
+  /**
+   * Marks the code of [step] as used for this account. False when that step or a later one was used
+   * in the meantime; the code must then be refused.
+   */
+  fun useCodeStep(credentials: UserCredentials, step: Long): Boolean {
     var accepted = false
     lastAcceptedTotpSteps.compute(credentials.userUuid) { _, lastStep ->
       if (lastStep == null || step > lastStep) {
@@ -198,6 +208,12 @@ constructor(
       }
     }
     return accepted
+  }
+
+  /** Checks a 2FA code and uses it up: each code is accepted once per account. */
+  fun verifyCode(credentials: UserCredentials, code: String): Boolean {
+    val step = findUnusedCodeStep(credentials, code) ?: return false
+    return useCodeStep(credentials, step)
   }
 
   /**

@@ -38,7 +38,8 @@ open class LoginAuthSession<T : PlayerAdapter>(
   eventBus: NavAuthEventBus,
 ) : AuthSession<T>(playerAdapter, eventBus) {
 
-  private val attemptsLeft = AtomicInteger(maxLoginAttempts)
+  // a configured value below 1 still allows one attempt
+  private val attemptsLeft = AtomicInteger(maxLoginAttempts.coerceAtLeast(1))
 
   /** Set while one authentication attempt of this session is being verified. */
   private val attemptInProgress = AtomicBoolean(false)
@@ -140,12 +141,15 @@ open class LoginAuthSession<T : PlayerAdapter>(
     password: String?,
     twoFactorCode: String?,
   ): CompletableFuture<AuthTaskResult> {
-    if (userCredentials.isTwoFactorEnabled) {
-      require(twoFactorCode != null) { "twoFactorCode parameter is required by user credentials" }
-      if (!userCredentialsService.verifyCode(userCredentials, twoFactorCode)) {
-        return CompletableFuture.completedFuture(AuthTaskResult.WrongCredentials)
+    // the code is used up only when the whole login succeeds, so a wrong password does not burn it
+    val codeStep: Long? =
+      if (userCredentials.isTwoFactorEnabled) {
+        require(twoFactorCode != null) { "twoFactorCode parameter is required by user credentials" }
+        userCredentialsService.findUnusedCodeStep(userCredentials, twoFactorCode)
+          ?: return CompletableFuture.completedFuture(AuthTaskResult.WrongCredentials)
+      } else {
+        null
       }
-    }
 
     if (userCredentials.isPasswordRequired) {
       val future = CompletableFuture<AuthTaskResult>()
@@ -157,19 +161,22 @@ open class LoginAuthSession<T : PlayerAdapter>(
             future.completeExceptionally(throwable)
             return@whenComplete
           }
-          if (isCorrect) {
-            future.complete(AuthTaskResult.Success)
-          } else {
-            future.complete(AuthTaskResult.WrongCredentials)
-          }
+          future.complete(if (isCorrect) useCode(codeStep) else AuthTaskResult.WrongCredentials)
         }
 
       return future
     }
 
-    // 2fa was the only one required and it passed successfully
-    return CompletableFuture.completedFuture(AuthTaskResult.Success)
+    // 2fa was the only one required and it passed
+    return CompletableFuture.completedFuture(useCode(codeStep))
   }
+
+  private fun useCode(codeStep: Long?): AuthTaskResult =
+    if (codeStep == null || userCredentialsService.useCodeStep(userCredentials, codeStep)) {
+      AuthTaskResult.Success
+    } else {
+      AuthTaskResult.WrongCredentials
+    }
 
   sealed class AuthTaskResult {
     object WrongCredentials : AuthTaskResult()

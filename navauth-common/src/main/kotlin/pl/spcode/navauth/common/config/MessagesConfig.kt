@@ -67,10 +67,7 @@ open class MessagesConfig : OkaeriConfig() {
         "or an administrator must resolve the conflict."
     )
 
-  @Comment(
-    "Shown when a new player's username cannot be used on this server because it belonged to an",
-    "account that was renamed.",
-  )
+  @Comment("Shown when a new player's username cannot be used on this server.")
   var usernameUnavailableKickMessage =
     TextComponent(
       "<red>The username '%USERNAME%' cannot be used on this server.</red>" +

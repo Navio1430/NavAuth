@@ -19,6 +19,8 @@
 package unit.credentials
 
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import java.util.UUID
@@ -50,6 +52,20 @@ class UserCredentialsServiceTests :
 
       service.verifyCode(credentials, code) shouldBe true
       service.verifyCode(credentials, code) shouldBe false
+    }
+
+    test("a checked code stays usable until it is used") {
+      val service = service()
+      val credentials = credentials()
+      val code = totp2fa.generateTOTP(credentials.totpSecret!!)
+
+      val step = service.findUnusedCodeStep(credentials, code)
+      step.shouldNotBeNull()
+      service.findUnusedCodeStep(credentials, code) shouldBe step
+
+      service.useCodeStep(credentials, step) shouldBe true
+      service.findUnusedCodeStep(credentials, code).shouldBeNull()
+      service.useCodeStep(credentials, step) shouldBe false
     }
 
     test("a code of an older step is refused after a newer one was accepted") {

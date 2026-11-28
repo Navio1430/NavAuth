@@ -28,6 +28,7 @@ import com.velocitypowered.api.event.connection.PreLoginEvent
 import com.velocitypowered.api.event.player.GameProfileRequestEvent
 import com.velocitypowered.api.proxy.Player
 import com.velocitypowered.api.util.GameProfile
+import java.util.UUID
 import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -276,8 +277,7 @@ constructor(
     } else {
       val owner = userService.findUserByUuid(UserUuid(event.originalProfile.id))
       if (owner != null) {
-        // the UUID the proxy assigned to this new player already belongs to an account (renamed
-        // since): LoginEvent denies the connection, it never acts as that account
+        // an account's UUID is never given to another player: LoginEvent denies the connection
         logger.warn(
           "Denied login of {}: its UUID {} already belongs to user {}",
           event.username,
@@ -285,8 +285,11 @@ constructor(
           owner.username.value,
         )
         session.markUuidInUseByAnotherAccount()
+        // until LoginEvent denies it, other plugins see a throwaway identity, not the account's
+        profile = GameProfile(UUID.randomUUID(), event.username, event.originalProfile.properties)
+      } else {
+        profile = event.originalProfile
       }
-      profile = event.originalProfile
     }
 
     // todo apply nickname prefix/suffix if set

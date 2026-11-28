@@ -47,9 +47,10 @@ import pl.spcode.navauth.velocity.multification.VelocityMultification
 /** 2FA commands for accounts without a password. */
 class TwoFactorCommandsTests :
   FunSpec({
-    fun player(uuid: UUID): Player {
+    fun player(uuid: UUID, onlineMode: Boolean = true): Player {
       val player = mockk<Player>(relaxed = true)
       every { player.username } returns "Player"
+      every { player.isOnlineMode } returns onlineMode
       every { player.uniqueId } returns uuid
       every { player.getPermissionValue(any()) } returns Tristate.UNDEFINED
       return player
@@ -82,6 +83,34 @@ class TwoFactorCommandsTests :
       sessions.findSession(UserUuid(uuid)).shouldNotBeNull()
       verify(exactly = 0) { credentialsService.enqueueVerifyPassword(any(), any(), any()) }
       verify { multification.create() }
+    }
+
+    test("a connection not authenticated by Mojang cannot start 2FA setup without a password") {
+      val uuid = UUID.randomUUID()
+      val user = User.premium(UserUuid(uuid), Username("Player"), MojangId(uuid))
+      val userService = mockk<UserService>()
+      every { userService.findUserByUuid(UserUuid(uuid)) } returns user
+      val credentialsService = mockk<UserCredentialsService>()
+      every { credentialsService.findCredentials(user) } returns null
+      val sessions = TotpSetupSessionService()
+      val multification = mockk<VelocityMultification>(relaxed = true)
+
+      val command =
+        TwoFactorSetupCommand(
+          userService,
+          credentialsService,
+          TotpSetupSessionFactory(),
+          sessions,
+          TwoFactorAuthConfig(),
+          MessagesConfig(),
+          multification,
+        )
+      sessions.findSession(UserUuid(uuid)).shouldBeNull()
+
+      command.setupTwoFactor(player(uuid, onlineMode = false), Optional.empty())
+
+      sessions.findSession(UserUuid(uuid)).shouldBeNull()
+      verify(exactly = 0) { credentialsService.enqueueVerifyPassword(any(), any(), any()) }
     }
 
     test("cracked account with only 2FA cannot disable it and keeps its credentials") {

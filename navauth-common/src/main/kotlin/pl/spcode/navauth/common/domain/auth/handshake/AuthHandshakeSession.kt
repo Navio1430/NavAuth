@@ -48,8 +48,7 @@ class AuthHandshakeSession(
 
   /**
    * True when this connection has no account but the UUID the proxy assigned to it already belongs
-   * to an account (that account was renamed). The connection must be refused: it would otherwise
-   * act as, and create an account over, the other account.
+   * to an account. The connection is refused: an account's UUID is never given to another player.
    */
   var uuidInUseByAnotherAccount: Boolean = false
     private set

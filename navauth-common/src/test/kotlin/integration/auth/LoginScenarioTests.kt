@@ -210,11 +210,11 @@ class LoginScenarioTests {
     Outcome.Denied(UsernameResFailureReason.PremiumUsernameOwnedByAnotherAccount(storedName))
 
   // ---------------------------------------------------------------------------------------------
-  // names of renamed accounts
+  // account uuids are never given to another player
   // ---------------------------------------------------------------------------------------------
 
   @Test
-  fun `the former name of a renamed account cannot join or register and the account is unchanged`() {
+  fun `a new cracked player never gets the uuid of an existing account`() {
     val oldName = newName()
     val renamedTo = newName()
     val original = User.nonPremium(UserUuid(offlineUuid(oldName)), Username(oldName))
@@ -244,7 +244,7 @@ class LoginScenarioTests {
   }
 
   @Test
-  fun `a new premium account is not stored over an account that has its uuid`() {
+  fun `a new premium player never gets the uuid of an existing account`() {
     val name = newName()
     val id = mojangAccount(newName())
     val existing = User.nonPremium(UserUuid(id.value), Username(name))
@@ -274,6 +274,25 @@ class LoginScenarioTests {
 
     assertEquals(existing, stored(name))
     assertNull(userService.findUserByUuid(UserUuid(offlineUuid(invertCase(name)))))
+  }
+
+  @Test
+  fun `registering replaces a credentials row that belongs to no account`() {
+    val name = newName()
+    val uuid = UserUuid(offlineUuid(name))
+    credentialsRepository.save(
+      UserCredentials.create(
+        uuid,
+        HashedPassword(PasswordHash("left-behind"), HashingAlgorithm.BCRYPT),
+        null,
+      )
+    )
+
+    val user = User.nonPremium(uuid, Username(name))
+    userService.createAndStoreUserWithNewCredentials(user, password())
+
+    assertEquals(user, stored(name))
+    assertEquals(password(), credentialsRepository.findByUser(user)?.hashedPassword)
   }
 
   // ---------------------------------------------------------------------------------------------

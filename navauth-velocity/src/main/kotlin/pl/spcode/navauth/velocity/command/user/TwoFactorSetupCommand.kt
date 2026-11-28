@@ -108,8 +108,12 @@ constructor(
       return
     }
 
-    // no password (premium account, or no credentials row yet): the player is already
-    // authenticated, so the setup starts without a password step
+    // No password: only a connection Mojang authenticated in this session proves the owner, so
+    // the setup starts without a password step only then.
+    if (!sender.isOnlineMode) {
+      multification.send(sender) { it.multification.cantUseThisCommandNowError }
+      return
+    }
     startSetupSession(sender)
   }
 
