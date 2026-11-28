@@ -71,6 +71,16 @@ constructor(
       return
     }
 
+    // a Mojang account may be attached to one NavAuth account only
+    val linkedUser = userService.findUserByMojangUuid(profile.uuid)
+    if (linkedUser != null && linkedUser.uuid != user.uuid) {
+      multification
+        .create(sender) { it.multification.adminCmdMojangAccountAlreadyLinkedError }
+        .placeholder("%USERNAME%", user.username.value)
+        .send()
+      return
+    }
+
     userService.migrateToPremium(user, profile.uuid)
     multification
       .create(sender) { it.multification.adminCmdUserPremiumMigrationSuccess }

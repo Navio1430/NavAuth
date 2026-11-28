@@ -145,6 +145,10 @@ open class MessagesConfig : OkaeriConfig() {
       )
     var accountAlreadyPremiumError: Notice =
       Notice.chat("<red>Account is already set as a premium one.")
+    var mojangAccountAlreadyLinkedError: Notice =
+      Notice.chat(
+        "<red>Can't set this account as premium because this Mojang account is already linked to another account."
+      )
     var accountNotNonPremiumError: Notice =
       Notice.chat(
         "<red>Can't execute this command right now: your account is not a non-premium one."
@@ -235,6 +239,10 @@ open class MessagesConfig : OkaeriConfig() {
     var adminCmdUsernameNotPremiumError: Notice =
       Notice.chat(
         "<red>Can't find '%USERNAME%' user in Mojang database. This player can't be migrated to premium mode."
+      )
+    var adminCmdMojangAccountAlreadyLinkedError: Notice =
+      Notice.chat(
+        "<red>The Mojang account for '%USERNAME%' is already linked to another NavAuth account. This player can't be migrated to premium mode."
       )
 
     var adminCmdPasswordSetUpdating: Notice =
