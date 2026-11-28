@@ -20,6 +20,7 @@ package pl.spcode.navauth.common.infra.database
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import javax.sql.DataSource
 import org.jetbrains.exposed.v1.core.DatabaseConfig as ExposedDatabaseConfig
@@ -105,9 +106,24 @@ constructor(val config: DatabaseConfig, val pluginDirectory: PluginDirectory) {
     dataSource.jdbcUrl = jdbcUrl
   }
 
-  /** Runs Flyway migrations for the active driver. Flyway owns the schema. */
+  /**
+   * Runs Flyway migrations for the active driver. Flyway owns the schema. Flyway holds two
+   * connections at once on some databases (H2, PostgreSQL), so with a smaller configured pool it
+   * runs on its own short-lived pool of two; the plugin's pool keeps the configured size.
+   */
   fun migrate() {
-    SchemaMigrations.migrate(dataSource, config.driverType)
+    if (dataSource.maximumPoolSize >= MIGRATION_CONNECTIONS) {
+      SchemaMigrations.migrate(dataSource, config.driverType)
+      return
+    }
+    // start the plugin's pool first: its idle connection keeps an in-memory database alive after
+    // the migration pool is closed
+    dataSource.connection.close()
+    val migrationConfig = HikariConfig()
+    dataSource.copyStateTo(migrationConfig)
+    migrationConfig.poolName = "${dataSource.poolName}-migration"
+    migrationConfig.maximumPoolSize = MIGRATION_CONNECTIONS
+    HikariDataSource(migrationConfig).use { SchemaMigrations.migrate(it, config.driverType) }
   }
 
   fun connectAndInit(poolName: String = "NavAuth-pool") {
@@ -121,6 +137,9 @@ constructor(val config: DatabaseConfig, val pluginDirectory: PluginDirectory) {
   }
 
   companion object {
+    /** Connections Flyway may hold at the same time while migrating. */
+    private const val MIGRATION_CONNECTIONS = 2
+
     /**
      * Exposed settings of every database NavAuth opens: the plugin's own, migration sources and
      * tests.
