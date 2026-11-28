@@ -27,6 +27,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import io.mockk.verify
 import java.util.UUID
 import pl.spcode.navauth.common.application.mojang.ProfileApiFetchException
 import pl.spcode.navauth.common.config.MojangAPIConfig
@@ -131,17 +132,27 @@ class CompositeProfileServiceTest :
       exception.causes.map { it.message }.shouldContainExactlyInAnyOrder("mojang timeout")
     }
 
-    test("throws when minetools throws and mojang returns null") {
+    test("returns null when minetools throws and mojang answers not found") {
       every { cache.get(username) } returns null
       every { mineTools.fetchProfileInfo(username) } throws RuntimeException("minetools error")
       every { mojang.fetchProfileInfo(username) } returns null
 
-      val exception = shouldThrow<ProfileApiFetchException> { service.fetchProfileInfo(username) }
+      val result = service.fetchProfileInfo(username)
 
-      exception.causes.map { it.message }.shouldContainExactlyInAnyOrder("minetools error")
+      result.shouldBeNull()
     }
 
-    test("throws when first API throws and second returns null") {
+    test("caches NotFound when minetools throws and mojang answers not found") {
+      every { cache.get(username) } returns null
+      every { mineTools.fetchProfileInfo(username) } throws RuntimeException("minetools error")
+      every { mojang.fetchProfileInfo(username) } returns null
+
+      service.fetchProfileInfo(username, useNotFoundCache = true).shouldBeNull()
+
+      verify(exactly = 1) { cache.putNotFound(username) }
+    }
+
+    test("throws when mojang throws and minetools answers not found") {
       config.apiOrder = listOf(MojangProfileApi.MOJANG, MojangProfileApi.MINETOOLS)
       every { cache.get(username) } returns null
       every { mojang.fetchProfileInfo(username) } throws RuntimeException("mojang error")
@@ -150,6 +161,14 @@ class CompositeProfileServiceTest :
       val exception = shouldThrow<ProfileApiFetchException> { service.fetchProfileInfo(username) }
 
       exception.causes.map { it.message }.shouldContainExactlyInAnyOrder("mojang error")
+    }
+
+    test("throws when minetools is the only API and throws") {
+      config.apiOrder = listOf(MojangProfileApi.MINETOOLS)
+      every { cache.get(username) } returns null
+      every { mineTools.fetchProfileInfo(username) } throws RuntimeException("minetools error")
+
+      shouldThrow<ProfileApiFetchException> { service.fetchProfileInfo(username) }
     }
 
     test("returns minetools result and caches it") {

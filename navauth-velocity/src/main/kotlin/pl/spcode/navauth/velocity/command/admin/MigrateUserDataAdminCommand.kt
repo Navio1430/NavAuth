@@ -28,6 +28,7 @@ import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import dev.rollczi.litecommands.annotations.permission.Permission
 import pl.spcode.navauth.common.annotation.Description
+import pl.spcode.navauth.common.application.mojang.ProfileApiFetchException
 import pl.spcode.navauth.common.application.mojang.ProfileService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.application.user.UsernameAlreadyTakenException
@@ -83,7 +84,13 @@ constructor(
       return
     }
 
-    val premiumMojangProfile = profileService.fetchProfileInfo(Username(newUsername))
+    val premiumMojangProfile =
+      try {
+        profileService.fetchProfileInfo(Username(newUsername))
+      } catch (_: ProfileApiFetchException) {
+        multification.send(sender) { it.multification.unexpectedErrorOccurred }
+        return
+      }
     if (premiumMojangProfile != null) {
       multification
         .create(sender) { it.multification.adminCmdCantMigrateToExistingPremiumAccount }
@@ -94,6 +101,9 @@ constructor(
 
     try {
       userService.migrateData(user, Username(newUsername))
+    } catch (_: ProfileApiFetchException) {
+      multification.send(sender) { it.multification.unexpectedErrorOccurred }
+      return
     } catch (e: UsernameAlreadyTakenException) {
       multification
         .create(sender) { it.multification.adminCmdUsernameAlreadyTakenError }

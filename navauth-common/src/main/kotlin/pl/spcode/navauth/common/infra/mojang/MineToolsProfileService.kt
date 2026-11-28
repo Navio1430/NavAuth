@@ -66,8 +66,8 @@ constructor(val httpClient: HttpClient, val gson: Gson, val config: MojangAPICon
       return MojangProfile(MojangId(UuidUtils.from32(dto.id)), Username(dto.name))
     }
 
-    // MineTools' explicit "unknown name" answer.
-    if (dto.status == "ERR" && dto.id == null && dto.name == null) {
+    // MineTools' "unknown name" answer: HTTP 200, status ERR, no id; `name` echoes the query.
+    if (dto.status == "ERR" && dto.id == null) {
       return null
     }
 

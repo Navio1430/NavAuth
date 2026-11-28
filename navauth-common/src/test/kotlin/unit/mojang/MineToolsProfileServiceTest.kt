@@ -71,6 +71,17 @@ class MineToolsProfileServiceTest :
       profile.shouldBeNull()
     }
 
+    test("returns null on the not-found answer, which echoes the queried name") {
+      every { response.statusCode() } returns 200
+      every { response.body() } returns
+        """{"cache":{"HIT":false,"cache_time":86400},"id":null,"name":"nonexistent","status":"ERR"}"""
+      every { httpClient.send(any<HttpRequest>(), any<BodyHandler<String>>()) } returns response
+
+      val profile = service.fetchProfileInfo(Username("nonexistent"))
+
+      profile.shouldBeNull()
+    }
+
     test("returns null on the explicit not-found answer with null id and name") {
       every { response.statusCode() } returns 200
       every { response.body() } returns """{"id":null,"name":null,"status":"ERR"}"""

@@ -26,6 +26,7 @@ import dev.rollczi.litecommands.annotations.command.Command
 import dev.rollczi.litecommands.annotations.context.Context
 import dev.rollczi.litecommands.annotations.execute.Execute
 import pl.spcode.navauth.common.annotation.Description
+import pl.spcode.navauth.common.application.mojang.ProfileApiFetchException
 import pl.spcode.navauth.common.application.mojang.ProfileService
 import pl.spcode.navauth.common.application.user.UserService
 import pl.spcode.navauth.common.command.exception.MissingPermissionException
@@ -63,7 +64,13 @@ constructor(
       return
     }
 
-    val mojangProfile = mojangProfileService.fetchProfileInfo(Username(sender.username))
+    val mojangProfile =
+      try {
+        mojangProfileService.fetchProfileInfo(Username(sender.username))
+      } catch (_: ProfileApiFetchException) {
+        multification.send(sender) { it.multification.unexpectedErrorOccurred }
+        return
+      }
     if (mojangProfile == null) {
       multification
         .create(sender) { it.multification.commandNoPremiumAccountWithUsername }
