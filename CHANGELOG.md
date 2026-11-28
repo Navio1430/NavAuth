@@ -24,8 +24,20 @@
 ```
 
 ### Fixes
-- **Security:** fixed several issues in the login flow that could let a player into another
-  player's account. Every server should update.
+- **Security:** fixed several issues in the login flow and in account handling that could let a
+  player into another player's account or past the login checks. Every server should update.
+- `/setup2fa` did nothing for players without a password (premium players); it starts the 2FA
+  setup now
+- `/disable2fa` could lock out a non-premium account whose only credential was 2FA; it now asks for
+  a password to be set first, and `/forcesetpassword` can set a password for a non-premium account
+  that has no credentials (repairs accounts locked out this way)
+- `/premium`, `/forcepremium` and `/migrateuser` showed nothing when the Mojang profile lookup
+  failed; they show an error now
+- Error answers of the profile APIs (rate limits, server errors) no longer count as "player not
+  found"; when MineTools fails, Mojang's own answer decides
+- API: event listeners are called in their `@Subscribe(priority)` order, listeners with the same
+  priority in registration order
+- Database statements are no longer written to the debug log
 - Players connecting over IPv6 could be kicked during login
 - LibreLogin migration: premium players who had a password stored in LibreLogin are no longer asked
   to `/login`; like after `/premium`, they keep only their 2FA secret (#46)
@@ -43,6 +55,10 @@
 ```diff
 + premiumUsernameOwnedByAnotherAccountError
 + unexpectedLoginErrorKickMessage
++ usernameUnavailableKickMessage
++ mojangAccountAlreadyLinkedError
++ adminCmdMojangAccountAlreadyLinkedError
++ twoFactorDisablePasswordRequiredError
 ```
 
 **General** config:
@@ -53,6 +69,11 @@
 ### Permissions
 ```diff
 - navauth.admin.playerlookup.sessions
+```
+
+### API
+```diff
++ EventPriority constants (LOWEST, LOW, NORMAL, HIGH, HIGHEST) are public; values are unchanged
 ```
 
 ### Database
@@ -74,6 +95,10 @@
   account.
 - If you imported from LibreLogin with an earlier version, premium players asked for a password are
   fixed automatically the next time they join with their premium account.
+- Some names that could register before are refused now with `usernameUnavailableKickMessage`; the
+  player joins with another name.
+- `/premium` and `/forcepremium` refuse a Mojang account that is already linked to another NavAuth
+  account (`mojangAccountAlreadyLinkedError`, `adminCmdMojangAccountAlreadyLinkedError`).
 - Remove `sessionsConfig` from `general.yml` and the `navauth.admin.playerlookup.sessions`
   permission from your permission plugin when convenient; leftovers do no harm.
 
