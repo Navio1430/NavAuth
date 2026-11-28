@@ -19,7 +19,6 @@
 package pl.spcode.navauth.velocity.listener.velocity
 
 import com.google.inject.Inject
-import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.command.CommandExecuteEvent
 import com.velocitypowered.api.event.command.PlayerAvailableCommandsEvent
@@ -62,28 +61,35 @@ constructor(
 
   private fun isWhitelisted(command: String) = whitelist.contains(command.lowercase(Locale.ROOT))
 
-  @Subscribe(order = PostOrder.FIRST)
+  /**
+   * Priority is Short.MIN_VALUE to always have the final say. Deny-only: a result that is already
+   * denied stays denied, and the decision is made on the command Velocity will actually run or
+   * forward (the result's command when an earlier listener replaced it, else the typed command).
+   */
+  @Subscribe(priority = Short.MIN_VALUE)
   fun onCommand(event: CommandExecuteEvent) {
-    if (event.commandSource !is Player) {
+    val player = event.commandSource as? Player ?: return
+
+    val result = event.result
+    if (!result.isAllowed && !result.isForwardToServer) {
       return
     }
 
-    val command = event.command.split(" ", ignoreCase = true, limit = 2).first()
-    if (isWhitelisted(command)) {
-      event.result = CommandExecuteEvent.CommandResult.allowed()
-      return
-    }
-
-    val player = event.commandSource as Player
     val sessionId = VelocityUniqueSessionId(player)
     val session = authSessionService.findSession(sessionId)
-    if (session == null || !session.isAuthenticated) {
-      event.result = CommandExecuteEvent.CommandResult.denied()
+    if (session != null && session.isAuthenticated) {
       return
+    }
+
+    val effectiveCommand = result.command.orElse(event.command)
+    val commandName = effectiveCommand.split(" ", ignoreCase = true, limit = 2).first()
+    if (!isWhitelisted(commandName)) {
+      event.result = CommandExecuteEvent.CommandResult.denied()
     }
   }
 
-  @Subscribe(order = PostOrder.FIRST)
+  /** Priority is Short.MIN_VALUE to always have the final say */
+  @Subscribe(priority = Short.MIN_VALUE)
   fun onPlayerAvailableCommands(event: PlayerAvailableCommandsEvent) {
     val sessionId = VelocityUniqueSessionId(event.player)
     val session = authSessionService.findSession(sessionId)

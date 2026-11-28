@@ -58,6 +58,10 @@ constructor(
   /** Priority is Short.MIN_VALUE to always have the final say */
   @Subscribe(priority = Short.MIN_VALUE)
   fun onServerPreConnect(event: ServerPreConnectEvent) {
+    // deny-only: a connection an earlier listener denied stays denied
+    if (!event.result.isAllowed) {
+      return
+    }
     val player = event.player
     disconnectOnUnexpectedError(
       player,
@@ -95,7 +99,9 @@ constructor(
           return@disconnectOnUnexpectedError
         }
 
-        if (!generalConfig.limboServers.contains(event.originalServer.serverInfo.name)) {
+        // Velocity connects to the result's server, which an earlier listener may have changed
+        val targetServer = event.result.server.orElse(event.originalServer)
+        if (!generalConfig.limboServers.contains(targetServer.serverInfo.name)) {
           player.disconnectIfActive(
             Component.text(
               "NavAuth: Tried to connect into different server than limbo, while waiting for limbo handler.",

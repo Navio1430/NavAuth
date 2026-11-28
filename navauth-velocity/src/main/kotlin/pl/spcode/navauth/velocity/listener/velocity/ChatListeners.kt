@@ -19,7 +19,6 @@
 package pl.spcode.navauth.velocity.listener.velocity
 
 import com.google.inject.Inject
-import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.player.PlayerChatEvent
 import pl.spcode.navauth.common.application.auth.session.AuthSessionService
@@ -30,7 +29,8 @@ class ChatListeners
 @Inject
 constructor(val authSessionService: AuthSessionService<VelocityPlayerAdapter>) {
 
-  @Subscribe(order = PostOrder.FIRST)
+  /** Priority is Short.MIN_VALUE to always have the final say. Deny-only. */
+  @Subscribe(priority = Short.MIN_VALUE)
   fun onChat(event: PlayerChatEvent) {
     val player = event.player
 

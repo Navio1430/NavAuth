@@ -130,6 +130,97 @@ class CommandsListenersTests :
       listeners.allows("zaloguj secret").shouldBeTrue()
     }
 
+    fun CommandsListeners.resultOf(
+      command: String,
+      earlierResult: CommandExecuteEvent.CommandResult,
+    ): CommandExecuteEvent.CommandResult {
+      val event = CommandExecuteEvent(player(), command)
+      event.result = earlierResult
+      onCommand(event)
+      return event.result
+    }
+
+    fun CommandExecuteEvent.CommandResult.isDenied() = !isAllowed && !isForwardToServer
+
+    test("a command another plugin allowed again is denied before login") {
+      val listeners = listeners(CommandsConfig())
+
+      listeners
+        .resultOf("spawn", CommandExecuteEvent.CommandResult.allowed())
+        .isDenied()
+        .shouldBeTrue()
+    }
+
+    test("a login command another plugin replaced with a different command is denied") {
+      val listeners = listeners(CommandsConfig())
+
+      listeners
+        .resultOf("login secret", CommandExecuteEvent.CommandResult.command("spawn"))
+        .isDenied()
+        .shouldBeTrue()
+    }
+
+    test("a command another plugin forwards to the server is denied before login") {
+      val listeners = listeners(CommandsConfig())
+
+      listeners
+        .resultOf("spawn", CommandExecuteEvent.CommandResult.forwardToServer())
+        .isDenied()
+        .shouldBeTrue()
+      listeners
+        .resultOf("login secret", CommandExecuteEvent.CommandResult.forwardToServer("spawn"))
+        .isDenied()
+        .shouldBeTrue()
+    }
+
+    test("a login command forwarded to the server is kept before login") {
+      val listeners = listeners(CommandsConfig())
+
+      listeners
+        .resultOf("login secret", CommandExecuteEvent.CommandResult.forwardToServer())
+        .isForwardToServer
+        .shouldBeTrue()
+    }
+
+    test("a command another plugin denied stays denied") {
+      val listeners = listeners(CommandsConfig())
+
+      listeners
+        .resultOf("login secret", CommandExecuteEvent.CommandResult.denied())
+        .isDenied()
+        .shouldBeTrue()
+    }
+
+    test("a renamed or aliased login command stays allowed when another plugin replaces it") {
+      val listeners =
+        listeners(
+          config("login" to CommandConfig(name = "zaloguj", aliases = mutableListOf("zal")))
+        )
+
+      listeners
+        .resultOf("spawn", CommandExecuteEvent.CommandResult.command("zaloguj secret"))
+        .isAllowed
+        .shouldBeTrue()
+      listeners
+        .resultOf("zal secret", CommandExecuteEvent.CommandResult.allowed())
+        .isAllowed
+        .shouldBeTrue()
+    }
+
+    test("a logged in player may run any command") {
+      val session = mockk<AuthSession<VelocityPlayerAdapter>>()
+      every { session.isAuthenticated } returns true
+      val authSessionService = mockk<AuthSessionService<VelocityPlayerAdapter>>()
+      every { authSessionService.findSession(any()) } returns session
+      val listeners = CommandsListeners(authSessionService, CommandsConfig())
+
+      listeners.allows("spawn").shouldBeTrue()
+      listeners
+        .resultOf("spawn", CommandExecuteEvent.CommandResult.forwardToServer())
+        .isForwardToServer
+        .shouldBeTrue()
+    }
+
     test("the command list of a player who is not logged in shows only the auth commands") {
       val session = mockk<AuthSession<VelocityPlayerAdapter>>()
       every { session.isAuthenticated } returns false
